@@ -1,6 +1,4 @@
-from demoAccount import Account
-from Analysis import *
-
+from demoAccount import *
 from stream import AsWebSocketClient
 
 
@@ -10,31 +8,12 @@ if __name__ == '__main__':
     client = Account(balance=1000 , name='kourosh' ,api_key=api_key ,api_secret=api_secret)
     # input timeframes {day  , 1hour , 1month  , 1week  , 1min  , 4hour ,  5min  ,  15min}
     data = client.get_data('BTCUSDT' , '1min')
-
-    # indi = Indicators(data)
-    # indicators = indi.get_indicators_col()
-    # stochrsi = indi.get_indicators_col()['stochrsi']
-    # ichimoku = indi.get_indicators_col()['ichimoku']
-    # data =  pd.concat([data,indicators], axis=1)
-    data = data.fillna(value=0)
-    # actions = indi.get_indicators_col()
-    # ichi = indi.set_actions(data)
-    # data =  pd.concat([data, ichi ], axis=1)
-    # to_csv(data)
-    # to_csv(data=actions , name='actions.csv')
+    print(client.get_detect())
+    # data = data.fillna(value=0)
     websocket = AsWebSocketClient('BTCUSDT', data)
+    # '1min''3min''5min''15min''30min''1hour''2hour''4hour''6hour''8hour''12hour''1day''3day''1week' '1month'
     websocket.live_realtime_price(time_frame='1min')
     # tr = TradingView(symbol="BTCUSDT" , time_frame="day" ,screener="crypto" , exchange="binance")
-    # websocket = AsWebSocketClient('BTCUSDT' ,data)
-    # '1min''3min''5min''15min''30min''1hour''2hour''4hour''6hour''8hour''12hour''1day''3day''1week' '1month'
-    # websocket.live_realtime_price(time_frame='1min')
-    # print(websocket.get_data())
-    # for i in range(400):
-    #     rand = random.randrange(-1000 , 1000 , 1)
-    #     test.transaction(rand)
-
-    # test.export_to_excel('transaton')
-
     # initializing the neuron class
     # neural_network = NeuralNetwork()
     # print("Beginning Randomly Generated Weights: ")

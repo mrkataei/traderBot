@@ -9,16 +9,9 @@ def sigmoid_derivative(x):
 
 
 class NeuralNetwork:
-    def __init__(self):
+    def __init__(self , element_number:int=1):
         np.random.seed(1)
-        self.synaptic_weights = 2 * np.random.random((4, 1)) - 1
-        # self.synaptic_weights = np.array([[0],
-        #                 [0.1],
-        #                 [0],
-        #                 [0]])
-
-        # print(self.synaptic_weights)
-
+        self.synaptic_weights = 2 * np.random.random((element_number, 1)) - 1
 
     def train(self, training_inputs, training_outputs, training_iterations):
         for iteration in range(training_iterations):

@@ -1,6 +1,23 @@
 from client import ClientBinance , Agent
 import datetime
 from xlwt import Workbook
+import pandas as pd
+import numpy as np
+def output_prices(data:pd.DataFrame):
+    close_price = data['close']
+    detect = []
+    for i in range(0, len(close_price)-1):
+        if close_price[i] < close_price[i+1]:
+            detect.append(1)
+        else:
+            detect.append(0)
+
+    # print(len(detect))
+    # print(np.array(detect).T)
+    data['detect'] = pd.DataFrame(detect)
+
+    data = data.iloc[2:]
+    return data
 class Account(ClientBinance):
     __balance = 0
     __name = ""
