@@ -52,9 +52,21 @@ class ClientBinance(Client):
         self.__data['detect'] = pd.DataFrame(detect)
         self.__data = self.__data.fillna(value=0)
         self.__data = self.__data.iloc[1:]
+        self.__data['detect'] = self.__data['detect'].astype(int)
         return self.__data
-    def get_detect(self ):
-        detect = np.array(self.__data['detect']).astype(int)
-        np.delete(detect , -1)
-        detect = detect.T #transpose dor ml
-        return detect
+    # def get_detect(self ):
+    #     detect = np.array(self.__data['detect']).astype(int)
+    #     np.delete(detect , -1)
+    #     detect = detect.T #transpose dor ml
+    #     return detect
+
+    def get_detect(self, start_date, end_date):
+
+
+        correct_data = pd.DataFrame(columns=['date', 'detect'])
+        correct_data['date'] = self.__data['date']
+        correct_data['detect'] = self.__data['detect']
+        start_index = correct_data['data'] == start_date
+        end_index = correct_data['data'] == end_date
+        correct_data = correct_data.iloc[start_index:end_index]
+        print(correct_data)

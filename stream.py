@@ -39,6 +39,8 @@ def handle_message(msg):
                                                                        msg['s'],
                                                                        msg['p'],
                                                                        msg['q'],bitcoins_exchanged))
+
+
 class AsWebSocketClient:
     __symbol = None
     __data_live = None
