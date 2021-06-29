@@ -21,16 +21,17 @@ class Account(ClientBinance):
             print("not enough money")
         else:
             self.__balance = value + self.__balance
-            temp = {'timeStamp':datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S") ,'value':value , 'operation': op ,'balance':self.__balance}
+            temp = {'timeStamp':datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S") ,'value':value , 'operation': op ,
+                    'balance':self.__balance , 'coin':self.__coins['btc']}
             self.__transaction.append(temp)
     def coin_exchange(self , symbol:str='btc' , amount:float=0 ,price:float=0, buy:bool=True ):
         if not buy and self.__coins[symbol]>=amount:
-            self.transaction(value=amount*price)
             self.__coins[symbol] = self.__coins[symbol] - amount
+            self.transaction(value=amount*price)
             print(self.__coins[symbol])
         elif buy and self.get_balance() >= amount*price:
-            self.transaction(value=-amount*price)
             self.__coins[symbol] = self.__coins[symbol] + amount
+            self.transaction(value=-amount*price)
             print(self.__coins[symbol])
 
     def get_transaction(self):
@@ -44,11 +45,13 @@ class Account(ClientBinance):
         sheet1.write(0, 1, 'Balance')
         sheet1.write(0, 2, 'Value')
         sheet1.write(0, 3, 'Operation')
+        sheet1.write(0, 4, 'Coin Amount')
 
         for index , item in enumerate(self.__transaction , start=1):
             sheet1.write(index, 0, item['timeStamp'] )
             sheet1.write(index, 1, item['balance'])
             sheet1.write(index, 2, abs(item['value']))
             sheet1.write(index, 3, 'Deposit' if item['operation']== '+' else 'Withdraw')
+            sheet1.write(index, 4, item['coin'])
 
         wb.save(filename+'.xls')

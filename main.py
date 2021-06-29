@@ -1,6 +1,7 @@
 from demoAccount import *
 from stream import AsWebSocketClient
 from Analysis import *
+from test import Test
 if __name__ == '__main__':
     api_key = 'Kjps274EHTI0f1Y2tY9F7TchaB8nbRZwbz5h5xvmQpD5HGrEJPN5loqjE32EQ9UP'
     api_secret = 'nC0TpFDobMjjstYjVVSdBccLLsm3ElKl35wk3zo4G9AGOpsqgxq67V5gDoNmtRnt'
@@ -8,20 +9,8 @@ if __name__ == '__main__':
     # input timeframes {day  , 1hour , 1month  , 1week  , 1min  , 4hour ,  5min  ,  15min}
     data = client.get_data('BTCUSDT' , '1min')
     to_csv(data=data , name='new.csv')
-    last_detect = 0 if client.get_coins_amount('btc') == 0 else 1
-    for price , detect in zip(data.close , data.detect):
-        if last_detect != detect:
-            if detect == 1  :
-                client.coin_exchange(symbol='btc' , amount=0.001 ,buy=True , price=float(price)  )
-            else:
-                client.coin_exchange(symbol='btc', amount=0.001, buy=False, price=float(price))
-            last_detect = detect
-        else:
-            continue
-
-    client.export_to_excel('transaction')
-    print(client.get_coins_amount('btc'))
-    # print(client.get_detect())
+    test = Test(account=client )
+    test.bankAccount_with_coin_ideal(data=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
     # data = data.fillna(value=0)
     # websocket = AsWebSocketClient('BTCUSDT', data)
     # '1min''3min''5min''15min''30min''1hour''2hour''4hour''6hour''8hour''12hour''1day''3day''1week' '1month'
