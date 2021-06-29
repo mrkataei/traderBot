@@ -10,7 +10,13 @@ if __name__ == '__main__':
     data = client.get_data('BTCUSDT' , '1min')
     to_csv(data=data , name='new.csv')
     test = Test(account=client )
-    test.bankAccount_with_coin_ideal(data=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
+    # test.bankAccount_with_coin_ideal(data=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
+    data = cast_to_float(data).fillna(value=-1)
+
+    ichi = get_indicators_col(data).fillna(value=-1)
+    recom = ichimoku_recommend(price_data=data, ichimoku=ichi)
+    test.bankAccount_with_coin_ichiCross(ichi_recomm=recom , prices=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
+    to_csv(data=recom, name='recomlchi.csv')
     # data = data.fillna(value=0)
     # websocket = AsWebSocketClient('BTCUSDT', data)
     # '1min''3min''5min''15min''30min''1hour''2hour''4hour''6hour''8hour''12hour''1day''3day''1week' '1month'
