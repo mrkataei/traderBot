@@ -1,41 +1,26 @@
 from demoAccount import *
 from stream import AsWebSocketClient
-import pandas as pd
-def ideal_transaction(data_in:pd.DataFrame):
-    last_detect = 0
-    for price, detect in zip(data_in.close, data_in.detect):
+from Analysis import *
+if __name__ == '__main__':
+    api_key = 'Kjps274EHTI0f1Y2tY9F7TchaB8nbRZwbz5h5xvmQpD5HGrEJPN5loqjE32EQ9UP'
+    api_secret = 'nC0TpFDobMjjstYjVVSdBccLLsm3ElKl35wk3zo4G9AGOpsqgxq67V5gDoNmtRnt'
+    client = Account(balance=400 , name='mohamad' ,api_key=api_key ,api_secret=api_secret)
+    # input timeframes {day  , 1hour , 1month  , 1week  , 1min  , 4hour ,  5min  ,  15min}
+    data = client.get_data('BTCUSDT' , '1min')
+    to_csv(data=data , name='new.csv')
+    last_detect = 0 if client.get_coins_amount('btc') == 0 else 1
+    for price , detect in zip(data.close , data.detect):
         if last_detect != detect:
-            if detect == 1:
-                client.coin_exchange(symbol='btc', amount=1, buy=True, price=float(price))
+            if detect == 1  :
+                client.coin_exchange(symbol='btc' , amount=0.001 ,buy=True , price=float(price)  )
             else:
-                client.coin_exchange(symbol='btc', amount=1, buy=False, price=float(price))
+                client.coin_exchange(symbol='btc', amount=0.001, buy=False, price=float(price))
             last_detect = detect
         else:
             continue
 
     client.export_to_excel('transaction')
     print(client.get_coins_amount('btc'))
-if __name__ == '__main__':
-    api_key = 'Kjps274EHTI0f1Y2tY9F7TchaB8nbRZwbz5h5xvmQpD5HGrEJPN5loqjE32EQ9UP'
-    api_secret = 'nC0TpFDobMjjstYjVVSdBccLLsm3ElKl35wk3zo4G9AGOpsqgxq67V5gDoNmtRnt'
-    client = Account(balance=10000 , name='mohamad' ,api_key=api_key ,api_secret=api_secret)
-    # input timeframes {day  , 1hour , 1month  , 1week  , 1min  , 4hour ,  5min  ,  15min}
-    data = client.get_data('BTCUSDT' , '1min')
-    print(data.dtypes)
-    ideal_transaction(data)
-    # last_detect = 0
-    # for price , detect in zip(data.close , data.detect):
-    #     if last_detect != detect:
-    #         if detect == 1  :
-    #             client.coin_exchange(symbol='btc' , amount=1 ,buy=True , price=float(price)  )
-    #         else:
-    #             client.coin_exchange(symbol='btc', amount=1, buy=False, price=float(price))
-    #         last_detect = detect
-    #     else:
-    #         continue
-    #
-    # client.export_to_excel('transaction')
-    # print(client.get_coins_amount('btc'))
     # print(client.get_detect())
     # data = data.fillna(value=0)
     # websocket = AsWebSocketClient('BTCUSDT', data)

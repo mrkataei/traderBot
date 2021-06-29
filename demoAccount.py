@@ -19,7 +19,6 @@ class Account(ClientBinance):
         op = '+' if  value > 0 else '-'
         if op=='-' and abs(value) > self.__balance :
             print("not enough money")
-            return False
         else:
             self.__balance = value + self.__balance
             temp = {'timeStamp':datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S") ,'value':value , 'operation': op ,'balance':self.__balance}
@@ -29,12 +28,10 @@ class Account(ClientBinance):
             self.transaction(value=amount*price)
             self.__coins[symbol] = self.__coins[symbol] - amount
             print(self.__coins[symbol])
-        elif buy :
-            if not self.transaction(value=-amount*price):
-                return
-            else:
-                self.__coins[symbol] = self.__coins[symbol] + amount
-                print(self.__coins[symbol])
+        elif buy and self.get_balance() >= amount*price:
+            self.transaction(value=-amount*price)
+            self.__coins[symbol] = self.__coins[symbol] + amount
+            print(self.__coins[symbol])
 
     def get_transaction(self):
         return self.__transaction
