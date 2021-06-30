@@ -56,6 +56,8 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     recommend['priceAndABSpan'] = np.where(ichimoku['ISB_26'] == -1 , -1 ,np.where(recommend['ISA_9_spanA'] ==0 ,0 , np.where(recommend['ISB_26_spanB']==1 ,1 ,0 )))
     recommend['tenkensenAndPriceWithKijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1 , np.where(recommend['ITS_9_tenkensen'] ==0 ,0 ,np.where(ichimoku['ITS_9'] >ichimoku['IKS_26'] , 1 , 0)))
     recommend['sAAndB'] = np.where(ichimoku['ISB_26'] == -1 , -1  , np.where(ichimoku['ISA_9'] >= ichimoku['ISB_26'] , 1 , 0))
+    recommend.chiku = recommend.chiku.shift(26) #shif 26 rows for chiku
+    recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
     return recommend
 
 
