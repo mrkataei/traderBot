@@ -40,8 +40,9 @@ def cast_to_float(data:pd.DataFrame):
 
 
 def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
-    col = ['date' , 'ITS_9_tenkensen', 'IKS_26_kijunsen', 'ISA_9_spanA', 'ISB_26_spanB', 'IKS_26_chiku',
-           'kijunAndSpanBCross']
+    col = ['date' , 'ITS_9_tenkensen', 'IKS_26_kijunsen', 'ISA_9_spanA', 'ISB_26_spanB', 'chiku' ,
+           'kijunAndSpanBCross' , 'tenkensenAndkijunsen' , 'priceAndABSpan' ,
+           'tenkensenAndPriceWithKijunsen' ,'sAAndB']
     #-1 no idea , 0 sell ,  1 buy
     recommend = pd.DataFrame(columns=col)
     recommend['date'] = price_data ['date']
@@ -49,9 +50,12 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     recommend['IKS_26_kijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1, np.where(ichimoku['IKS_26'] < price_data['close'], 1, 0))
     recommend['ISA_9_spanA'] = np.where(ichimoku['ISA_9'] == -1, -1, np.where(ichimoku['ISA_9'] < price_data['close'], 1, 0))
     recommend['ISB_26_spanB'] = np.where(ichimoku['ISB_26'] == -1, -1, np.where(ichimoku['ISB_26'] < price_data['close'], 1, 0))
-    recommend['IKS_26_chiku'] = np.where(ichimoku['IKS_26'] == -1, -1, np.where(ichimoku['IKS_26'] > price_data['close'], 1, 0))
+    recommend['chiku'] = np.where(ichimoku['ICS_26'] ==-1 , -1 , np.where(ichimoku['ICS_26'] > price_data['close'], 1, 0) )
     recommend['kijunAndSpanBCross'] = np.where(ichimoku['ISB_26'] == -1 , -1 ,np.where(ichimoku['IKS_26'] == ichimoku['ISB_26'] ,-1 , np.where(ichimoku['IKS_26'] > ichimoku['ISB_26'] ,1 , 0)))
-    # recommend.dr
+    recommend['tenkensenAndkijunsen'] = np.where(ichimoku['IKS_26'] == -1 ,-1 ,  np.where(ichimoku['ITS_9'] == ichimoku['IKS_26'],-1 ,np.where(ichimoku['ITS_9'] >ichimoku['IKS_26'] , 1 , 0)))
+    recommend['priceAndABSpan'] = np.where(ichimoku['ISB_26'] == -1 , -1 ,np.where(recommend['ISA_9_spanA'] ==0 ,0 , np.where(recommend['ISB_26_spanB']==1 ,1 ,0 )))
+    recommend['tenkensenAndPriceWithKijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1 , np.where(recommend['ITS_9_tenkensen'] ==0 ,0 ,np.where(ichimoku['ITS_9'] >ichimoku['IKS_26'] , 1 , 0)))
+    recommend['sAAndB'] = np.where(ichimoku['ISB_26'] == -1 , -1  , np.where(ichimoku['ISA_9'] >= ichimoku['ISB_26'] , 1 , 0))
     return recommend
 
 

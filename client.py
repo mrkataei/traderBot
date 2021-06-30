@@ -41,7 +41,7 @@ class ClientBinance(Client):
 
         #optional
         del self.__data['time2']
-        self.__data['date'] = pd.to_datetime(self.__data['date'],unit='ms' , yearfirst=True)
+        self.__data['date'] = pd.DatetimeIndex(pd.to_datetime(self.__data['date'],unit='ms' , yearfirst=True)).tz_localize('UTC').tz_convert('Asia/Tehran')
         close = self.__data['close']
         detect = []
         for i in range(0, len(self.__data['close']) - 1):

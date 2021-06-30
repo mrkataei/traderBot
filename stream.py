@@ -47,6 +47,7 @@ class AsWebSocketClient:
     def __init__(self , symbol:str , data:pd.DataFrame):
         self.__symbol=symbol
         self.__data_live = data
+        self.__data_live.drop(self.__data_live.tail(1).index , inplace=True) #remove duplicated row first
     async def real_time(self , time_frame:str):
         client = await AsyncClient.create()
         bm = BinanceSocketManager(client)
@@ -56,7 +57,7 @@ class AsWebSocketClient:
             while True:
                 res = await tscm.recv()
                 if time_frame == '1min' and res['k']['x'] :
-                    self.__data_live = self.__data_live.append({'date':pd.to_datetime(res['k']['t'] ,unit='ms') ,
+                    self.__data_live = self.__data_live.append({'date':pd.to_datetime(res['k']['t'] ,unit='ms' ,yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran') ,
                                                                 'open':res['k']['o'] ,
                                                                 'high':res['k']['h'] , 'low':res['k']['l'] ,
                                                                 'close':res['k']['c'] ,'volume':res['k']['v'],
