@@ -64,7 +64,6 @@ class AsWebSocketClient:
                                                                 'QAV':res['k']['q'] ,'trades':res['k']['n'],
                                                                 'TBAV':res['k']['V'] ,'TQAV':res['k']['Q'],
                                                                 'Ignore':res['k']['B']} , ignore_index=True)
-                    self.__data_live = cast_to_float(self.__data_live).fillna(value=-1)
                     print(self.__data_live.dtypes)
                     ichi = get_indicators_col(self.__data_live).fillna(value=-1)
                     recom = ichimoku_recommend(price_data=self.__data_live , ichimoku=ichi)

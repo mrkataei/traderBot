@@ -56,7 +56,6 @@ class ClientBinance(Client):
         return self.__data
 
     def get_detect(self , start_time:str):
-        correct_data = self.__data.loc[(self.__data['date'] > start_time)]
-        correct_data = np.array(correct_data['detect']).astype(int)
-        correct_data = correct_data.T  # transpose dor ml
+        correct_data = pd.DataFrame( self.__data.loc[(self.__data['date'] > start_time)].detect )
+        correct_data = np.array(correct_data) # array for ml
         return correct_data

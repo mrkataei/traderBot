@@ -41,12 +41,12 @@ def cast_to_float(data:pd.DataFrame):
 
 
 def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
-    col = [ 'ITS_9_tenkensen', 'IKS_26_kijunsen', 'ISA_9_spanA', 'ISB_26_spanB', 'chiku' ,
+    col = [ 'date','ITS_9_tenkensen', 'IKS_26_kijunsen', 'ISA_9_spanA', 'ISB_26_spanB', 'chiku' ,
            'kijunAndSpanBCross' , 'tenkensenAndkijunsen' , 'priceAndABSpan' ,
            'tenkensenAndPriceWithKijunsen' ,'sAAndB']
     #-1 no idea , 0 sell ,  1 buy
     recommend = pd.DataFrame(columns=col)
-    # recommend['date'] = price_data ['date']
+    recommend['date'] = price_data ['date']
     recommend['ITS_9_tenkensen'] = np.where(ichimoku['ITS_9'] == -1, -1, np.where(ichimoku['ITS_9'] < price_data['close'], 1, 0))
     recommend['IKS_26_kijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1, np.where(ichimoku['IKS_26'] < price_data['close'], 1, 0))
     recommend['ISA_9_spanA'] = np.where(ichimoku['ISA_9'] == -1, -1, np.where(ichimoku['ISA_9'] < price_data['close'], 1, 0))
@@ -60,8 +60,11 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     recommend.chiku = recommend.chiku.shift(26) #shif 26 rows for chiku
     recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
     return recommend
-# def recom_without_noidea(recom_ichi:pd.DataFrame):
-
+def recom_without_noidea(recom_ichi:pd.DataFrame ,start_time:str ):
+    correct_data = recom_ichi.loc[(recom_ichi['date'] > start_time)]
+    del correct_data['date']
+    correct_data = np.array(correct_data).astype(int)
+    return correct_data
 
 # class Indicators:
 #     __data = None
