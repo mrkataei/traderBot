@@ -61,7 +61,7 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
     return recommend
 def recom_without_noidea(recom_ichi:pd.DataFrame ,start_time:str ):
-    correct_data = recom_ichi.loc[(recom_ichi['date'] > start_time)]
+    correct_data = recom_ichi.loc[(recom_ichi['date'] >= start_time)]
     del correct_data['date']
     correct_data = np.array(correct_data).astype(int)
     return correct_data
