@@ -3,6 +3,9 @@ import pyttsx3
 from tradingview import *
 import pandas as pd
 import numpy as np
+
+
+
 class Agent:
     engine = None
     def __init__(self , rate:int=125 , volume:float=0.1 , sex:str='male'):
@@ -55,7 +58,3 @@ class ClientBinance(Client):
         self.__data['detect'] = self.__data['detect'].astype(int)
         return self.__data
 
-    def get_detect(self , start_time:str):
-        correct_data = pd.DataFrame( self.__data.loc[(self.__data['date'] >= start_time)].detect )
-        correct_data = np.array(correct_data) # array for ml
-        return correct_data

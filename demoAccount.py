@@ -1,6 +1,13 @@
 from client import ClientBinance , Agent
 import datetime
 from xlwt import Workbook
+import pandas as pd
+import numpy as np
+def get_detect(data: pd.DataFrame, start_time: str):
+    correct_data = pd.DataFrame(data.loc[(data['date'] >= start_time)].detect)
+    correct_data = np.array(correct_data)  # array for ml
+    return correct_data
+
 
 class Account(ClientBinance):
     __balance = 0

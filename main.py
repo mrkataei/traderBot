@@ -14,8 +14,9 @@ if __name__ == '__main__':
     # test.bankAccount_with_coin_ideal(data=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
     # test.bankAccount_with_coin_ichiCross(ichi_recomm=recom , prices=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
 
-    time = '07:00'
-    training_outputs = client.get_detect(time)
+    time = '{hour}:{minute}'.format(hour=5 , minute=45)
+
+    training_outputs = get_detect(data=data , start_time=time)
     ichi = get_indicators_col(data).fillna(value=-1)
     recom = ichimoku_recommend(price_data=data, ichimoku=ichi)
     to_csv(data=recom, name='recomIchi.csv')
@@ -29,6 +30,6 @@ if __name__ == '__main__':
     print("Ending Weights After Training: ")
     print(neural_network.synaptic_weights)
     # '1min''3min''5min''15min''30min''1hour''2hour''4hour''6hour''8hour''12hour''1day''3day''1week' '1month'
-    websocket = AsWebSocketClient(client=client ,nn=neural_network, symbol='BTCUSDT' , time_frame='1min')
+    websocket = AsWebSocketClient(client=client ,nn=neural_network, symbol='BTCUSDT' , time_frame='1min', time=time)
     websocket.live_realtime_price()
 

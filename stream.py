@@ -3,7 +3,7 @@ from binance import AsyncClient, BinanceSocketManager
 from datetime import datetime
 from Analysis import *
 import pandas as pd
-from demoAccount import Account
+from demoAccount import Account, get_detect
 from ML import NeuralNetwork
 
 def get_time_interval(time_frame):
@@ -48,21 +48,27 @@ class AsWebSocketClient:
     __time_frame= None
     __network=None
     __data_analysis = pd.DataFrame(columns=[ 'date' ,'recommend' ])
-    def __init__(self ,client:Account, nn:NeuralNetwork , symbol:str  , time_frame:str='1min'):
+    __candle_counter = 0
+    __noidea_time = None
+    def __init__(self ,client:Account, nn:NeuralNetwork , symbol:str  , time_frame:str='1min' , time:str='00:00'):
         self.__symbol=symbol
         self.__time_frame =time_frame
         self.__network=nn
+        self.__noidea_time = time
         self.__data_live = client.get_data(symbol=symbol , timeframe=time_frame)
+        self.__client = client
         self.__data_live.drop(self.__data_live.tail(1).index , inplace=True) #remove duplicated row first
+        self.__noidea_time = [int(word) for word in self.__noidea_time.split(':') if word.isdigit()]
     async def __real_time(self):
         client = await AsyncClient.create()
         bm = BinanceSocketManager(client)
         ts = bm.kline_socket(symbol=self.__symbol , interval=get_time_interval(self.__time_frame )) if self.__time_frame  == '1min' else bm.trade_socket(str(self.__symbol))
-
         async with ts as tscm:
             while True:
                 res = await tscm.recv()
                 if self.__time_frame  == '1min' and res['k']['x'] :
+                    last_close_price = float(self.__data_live.tail(1).close) #save last price before new data append for compare new price and insert detect
+
                     time = pd.to_datetime(res['k']['t'] ,unit='ms' ,yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
                     self.__data_live = self.__data_live.append({'date':time ,
                                                                 'open':res['k']['o'] ,
@@ -70,8 +76,8 @@ class AsWebSocketClient:
                                                                 'close':res['k']['c'] ,'volume':res['k']['v'],
                                                                 'QAV':res['k']['q'] ,'trades':res['k']['n'],
                                                                 'TBAV':res['k']['V'] ,'TQAV':res['k']['Q'],
-                                                                'Ignore':res['k']['B']} , ignore_index=True)
-                    print(self.__data_live.dtypes)
+                                                                'Ignore':res['k']['B'] } , ignore_index=True)
+                    self.__data_live.iloc[-2, self.__data_live.columns.get_loc('detect')] = 1 if last_close_price <= float(res['k']['c']) else 0
                     ichi = get_indicators_col(self.__data_live).fillna(value=-1)
                     recom = ichimoku_recommend(price_data=self.__data_live , ichimoku=ichi)
                     train_input= recom.tail(1).astype(int)
@@ -86,13 +92,27 @@ class AsWebSocketClient:
                     to_csv(data=ichi , name='ichimuko.csv')
                     to_csv(data=recom , name='recomIchi.csv')
                     to_csv(data=self.__data_analysis , name='ml_Recom.csv')
+                    self.__candle_counter = self.__candle_counter + 1
+
+                    if self.__candle_counter == 2 :
+
+                        new_time = '{hour}:{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1]+2)
+                        print(new_time)
+                        data_live_temp = self.__data_live[:-1]
+                        recom_trmp = recom[:-1]
+                        training_inputs = recom_without_noidea(recom_trmp, new_time)
+                        training_outputs = get_detect(data=data_live_temp  ,start_time=new_time)
+                        print(len(training_inputs))
+                        print(len(training_outputs))
+                        self.__network.train(training_inputs, training_outputs, 10000)
+                        self.__candle_counter = 0
                 elif self.__time_frame != '1min':
                     handle_message(res)
 
 
-        # await client.close_connection()
+                    # await client.close_connection()
 
-    def live_realtime_price(self ):
+    def live_realtime_price(self):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.__real_time())
 
