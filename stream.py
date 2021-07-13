@@ -95,19 +95,25 @@ class AsWebSocketClient:
                     self.__candle_counter = self.__candle_counter + 1
 
                     if self.__candle_counter == 2 :
-
-                        new_time = '{hour}:{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1]+2)
-                        print(new_time)
+                        #add 60 min mund badan bezan
+                        new_time = self.__get_new_time(1)
+                        #drop Nan value in tail
                         data_live_temp = self.__data_live[:-1]
-                        recom_trmp = recom[:-1]
-                        training_inputs = recom_without_noidea(recom_trmp, new_time)
+                        recom_temp = recom[:-1]
+                        training_inputs = recom_without_noidea(recom_temp, new_time)
                         training_outputs = get_detect(data=data_live_temp  ,start_time=new_time)
-                        print(len(training_inputs))
-                        print(len(training_outputs))
                         self.__network.train(training_inputs, training_outputs, 10000)
                         self.__candle_counter = 0
                 elif self.__time_frame != '1min':
-                    handle_message(res)
+                    # handle_message(res)
+                    print(res)
+    def __get_new_time(self , minute:int):
+        hour = int (minute / 60 )
+        minute = minute % 60
+        self.__noidea_time[0] = self.__noidea_time[0] + hour
+        self.__noidea_time[1] = self.__noidea_time[1] + minute
+        new_time = '{hour}:{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1])
+        return new_time
 
 
                     # await client.close_connection()

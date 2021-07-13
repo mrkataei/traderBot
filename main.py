@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # test.bankAccount_with_coin_ideal(data=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
     # test.bankAccount_with_coin_ichiCross(ichi_recomm=recom , prices=data , symbol='btc' , sell_amount=0.01 , buy_amount=0.01 )
 
-    time = '{hour}:{minute}'.format(hour=5 , minute=45)
+    time = '{hour}:{minute}'.format(hour=2 , minute=30)
 
     training_outputs = get_detect(data=data , start_time=time)
     ichi = get_indicators_col(data).fillna(value=-1)
