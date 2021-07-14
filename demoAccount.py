@@ -3,6 +3,7 @@ import datetime
 from xlwt import Workbook
 import pandas as pd
 import numpy as np
+
 def get_detect(data: pd.DataFrame, start_time: str):
     correct_data = pd.DataFrame(data.loc[(data['date'] >= start_time)].detect)
     correct_data = np.array(correct_data)  # array for ml
@@ -15,7 +16,7 @@ class Account(ClientBinance):
     __transaction = []
     __coins = {'btc' : 0.0}
     def __init__(self , balance:float , name:str , api_key:str , api_secret:str):
-        super(Account, self).__init__(api_key , api_secret )
+        super(Account, self).__init__(api_key=api_key , api_secret=api_secret )
         self.__balance = balance
         self.__name = name
     def get_balance(self):

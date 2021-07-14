@@ -1,4 +1,7 @@
 import numpy as np
+import tensorflow as tf
+from tensorflow.python.ops import rnn, rnn_cell
+from tensorflow import keras
 
 #statics methods
 
@@ -8,7 +11,7 @@ def sigmoid_derivative(x):
     return x * (1 - x)
 
 
-class NeuralNetwork:
+class BasicNeuralNetwork:
     def __init__(self , element_number:int=1  ):
         np.random.seed(1)
         self.synaptic_weights = 2 * np.random.random((element_number, 1)) - 1
@@ -25,3 +28,8 @@ class NeuralNetwork:
         inputs = inputs.astype(float)
         output = sigmoid(np.dot(inputs, self.synaptic_weights))
         return output
+
+class RecurrentNeuralNetwork:
+    def __init__(self):
+        rnn_cell.BasicRNNCell()
+        print("hello")

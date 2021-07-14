@@ -4,7 +4,7 @@ from datetime import datetime
 from Analysis import *
 import pandas as pd
 from demoAccount import Account, get_detect
-from ML import NeuralNetwork
+from ML import BasicNeuralNetwork
 
 def get_time_interval(time_frame):
     return {
@@ -50,7 +50,7 @@ class AsWebSocketClient:
     __data_analysis = pd.DataFrame(columns=[ 'date' ,'recommend' ])
     __candle_counter = 0
     __noidea_time = None
-    def __init__(self ,client:Account, nn:NeuralNetwork , symbol:str  , time_frame:str='1min' , time:str='00:00'):
+    def __init__(self, client:Account, nn:BasicNeuralNetwork, symbol:str, time_frame:str= '1min', time:str= '00:00'):
         self.__symbol=symbol
         self.__time_frame =time_frame
         self.__network=nn
@@ -62,11 +62,11 @@ class AsWebSocketClient:
     async def __real_time(self):
         client = await AsyncClient.create()
         bm = BinanceSocketManager(client)
-        ts = bm.kline_socket(symbol=self.__symbol , interval=get_time_interval(self.__time_frame )) if self.__time_frame  == '1min' else bm.trade_socket(str(self.__symbol))
+        ts = bm.kline_socket(symbol=self.__symbol , interval=get_time_interval(self.__time_frame )) if self.__time_frame  == '15min' else bm.trade_socket(str(self.__symbol))
         async with ts as tscm:
             while True:
                 res = await tscm.recv()
-                if self.__time_frame  == '1min' and res['k']['x'] :
+                if self.__time_frame  == '15min' and res['k']['x'] :
                     last_close_price = float(self.__data_live.tail(1).close) #save last price before new data append for compare new price and insert detect
 
                     time = pd.to_datetime(res['k']['t'] ,unit='ms' ,yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
@@ -77,7 +77,7 @@ class AsWebSocketClient:
                                                                 'QAV':res['k']['q'] ,'trades':res['k']['n'],
                                                                 'TBAV':res['k']['V'] ,'TQAV':res['k']['Q'],
                                                                 'Ignore':res['k']['B'] } , ignore_index=True)
-                    self.__data_live.iloc[-2, self.__data_live.columns.get_loc('detect')] = 1 if last_close_price <= float(res['k']['c']) else 0
+                    self.__data_live.iloc[-2, self.__data_live.columns.get_loc('detect')] = int(1) if last_close_price <= float(res['k']['c']) else int(0)
                     ichi = get_indicators_col(self.__data_live).fillna(value=-1)
                     recom = ichimoku_recommend(price_data=self.__data_live , ichimoku=ichi)
                     train_input= recom.tail(1).astype(int)
@@ -92,27 +92,37 @@ class AsWebSocketClient:
                     to_csv(data=ichi , name='ichimuko.csv')
                     to_csv(data=recom , name='recomIchi.csv')
                     to_csv(data=self.__data_analysis , name='ml_Recom.csv')
-                    self.__candle_counter = self.__candle_counter + 1
-
-                    if self.__candle_counter == 2 :
-                        #add 60 min mund badan bezan
-                        new_time = self.__get_new_time(1)
-                        #drop Nan value in tail
-                        data_live_temp = self.__data_live[:-1]
-                        recom_temp = recom[:-1]
-                        training_inputs = recom_without_noidea(recom_temp, new_time)
-                        training_outputs = get_detect(data=data_live_temp  ,start_time=new_time)
-                        self.__network.train(training_inputs, training_outputs, 10000)
-                        self.__candle_counter = 0
-                elif self.__time_frame != '1min':
+                    # self.__candle_counter = self.__candle_counter + 1
+                    # if self.__candle_counter == 5 :
+                    #     # add new weights with new input and shift 1 others
+                    #     new_time = self.__get_new_time(5)
+                    #     #drop Nan value in tail
+                    #     data_live_temp = self.__data_live[:-1]
+                    #     recom_temp = recom[:-1]
+                    #     training_inputs = recom_without_noidea(recom_temp, new_time)
+                    #     training_outputs = get_detect(data=data_live_temp  ,start_time=new_time)
+                    #     self.__network.train(training_inputs, training_outputs, 10000)
+                    #     self.__candle_counter = 0
+                elif self.__time_frame != '15min':
                     # handle_message(res)
                     print(res)
     def __get_new_time(self , minute:int):
-        hour = int (minute / 60 )
-        minute = minute % 60
-        self.__noidea_time[0] = self.__noidea_time[0] + hour
+        # hour = int (minute / 60 )
+        # minute = minute % 60
+        # self.__noidea_time[0] = self.__noidea_time[0] + hour
         self.__noidea_time[1] = self.__noidea_time[1] + minute
-        new_time = '{hour}:{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1])
+        if self.__noidea_time[1] > 55 :
+            self.__noidea_time[1] = 0
+            self.__noidea_time[0] = self.__noidea_time[0] + 1
+
+        if self.__noidea_time[1] < 10 :
+            new_time = '{hour}:0{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1])
+        if self.__noidea_time[0] < 10 :
+            new_time = '0{hour}:{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1])
+        if self.__noidea_time[0] >=10 and self.__noidea_time[1] >= 10 :
+            new_time = '{hour}:{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1])
+        else:
+            new_time = '0{hour}:0{minute}'.format(hour=self.__noidea_time[0], minute=self.__noidea_time[1])
         return new_time
 
 

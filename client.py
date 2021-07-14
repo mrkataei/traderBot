@@ -28,13 +28,22 @@ class ClientBinance(Client):
     __client = None
     __agentCon = None
     __data = None
-    def __init__(self ,api_key:str , api_secret:str , agent:bool=True , rate:int=180 , volume:float=1 ,sex:str='male'):
+    __proxies = {
+        'http': 'http://52.157.88.150:80',
+        'https': 'https://178.62.200.61:8080'
+    }
+    #requests_params={'proxies': proxies} use
+    def __init__(self ,api_key:str , api_secret:str , agent:bool=True , rate:int=180 , volume:float=1 ,sex:str='male' ,http:str=None , https:str=None ):
+        self.__proxies['http'] = http
+        self.__proxies['https'] = https
         self.__agentCon = Agent(rate=rate, volume=volume, sex=sex) if agent else None
-        super(ClientBinance, self).__init__(api_key=api_key , api_secret=api_secret)
+        if https or http :
+            super(ClientBinance, self).__init__(api_key=api_key , api_secret=api_secret , requests_params={'proxies': self.__proxies} )
+        else:
+            super(ClientBinance, self).__init__(api_key=api_key , api_secret=api_secret )
         if self.__agentCon :
             self.__agentCon.say_string("client has been connected")
         print("client has been connected")
-
     # input timeframes {day  , 1hour , 1month  , 1week  , 1min  , 4hour ,  5min  ,  15min}
     def get_data(self, symbol:str , timeframe:str):
         candles = self.get_klines(symbol=symbol , interval=get_time_interval(timeframe))

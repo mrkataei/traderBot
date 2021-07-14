@@ -59,6 +59,7 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     recommend['sAAndB'] = np.where(ichimoku['ISB_26'] == -1 , -1  , np.where(ichimoku['ISA_9'] >= ichimoku['ISB_26'] , 1 , 0))
     recommend.chiku = recommend.chiku.shift(26) #shif 26 rows for chiku
     recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
+    recommend.astype(int)
     return recommend
 def recom_without_noidea(recom_ichi:pd.DataFrame ,start_time:str ):
     correct_data = recom_ichi.loc[(recom_ichi['date'] >= start_time)]
