@@ -47,19 +47,19 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     #-1 no idea , 0 sell ,  1 buy
     recommend = pd.DataFrame(columns=col)
     recommend['date'] = price_data ['date']
-    recommend['ITS_9_tenkensen'] = np.where(ichimoku['ITS_9'] == -1, -1, np.where(ichimoku['ITS_9'] < price_data['close'], 1, 0))
-    recommend['IKS_26_kijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1, np.where(ichimoku['IKS_26'] < price_data['close'], 1, 0))
-    recommend['ISA_9_spanA'] = np.where(ichimoku['ISA_9'] == -1, -1, np.where(ichimoku['ISA_9'] < price_data['close'], 1, 0))
-    recommend['ISB_26_spanB'] = np.where(ichimoku['ISB_26'] == -1, -1, np.where(ichimoku['ISB_26'] < price_data['close'], 1, 0))
-    recommend['chiku'] = np.where(ichimoku['ICS_26'] ==-1 , -1 , np.where(ichimoku['ICS_26'] > price_data['close'], 1, 0) )
-    recommend['kijunAndSpanBCross'] = np.where(ichimoku['ISB_26'] == -1 , -1 ,np.where(ichimoku['IKS_26'] == ichimoku['ISB_26'] ,-1 , np.where(ichimoku['IKS_26'] > ichimoku['ISB_26'] ,1 , 0)))
-    recommend['tenkensenAndkijunsen'] = np.where(ichimoku['IKS_26'] == -1 ,-1 ,  np.where(ichimoku['ITS_9'] == ichimoku['IKS_26'],-1 ,np.where(ichimoku['ITS_9'] >ichimoku['IKS_26'] , 1 , 0)))
-    recommend['priceAndABSpan'] = np.where(ichimoku['ISB_26'] == -1 , -1 ,np.where(recommend['ISA_9_spanA'] ==0 ,0 , np.where(recommend['ISB_26_spanB']==1 ,1 ,0 )))
-    recommend['tenkensenAndPriceWithKijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1 , np.where(recommend['ITS_9_tenkensen'] ==0 ,0 ,np.where(ichimoku['ITS_9'] >ichimoku['IKS_26'] , 1 , 0)))
-    recommend['sAAndB'] = np.where(ichimoku['ISB_26'] == -1 , -1  , np.where(ichimoku['ISA_9'] >= ichimoku['ISB_26'] , 1 , 0))
+    recommend['ITS_9_tenkensen'] = np.where(ichimoku['ITS_9'] == -1, -1, np.where(ichimoku['ITS_9'] < price_data['close'], 1, 0)).astype(int)
+    recommend['IKS_26_kijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1, np.where(ichimoku['IKS_26'] < price_data['close'], 1, 0)).astype(int)
+    recommend['ISA_9_spanA'] = np.where(ichimoku['ISA_9'] == -1, -1, np.where(ichimoku['ISA_9'] < price_data['close'], 1, 0)).astype(int)
+    recommend['ISB_26_spanB'] = np.where(ichimoku['ISB_26'] == -1, -1, np.where(ichimoku['ISB_26'] < price_data['close'], 1, 0)).astype(int)
+    recommend['chiku'] = np.where(ichimoku['ICS_26'] ==-1 , -1 , np.where(ichimoku['ICS_26'] > price_data['close'], 1, 0) ).astype(int)
+    recommend['kijunAndSpanBCross'] = np.where(ichimoku['ISB_26'] == -1 , -1 ,np.where(ichimoku['IKS_26'] == ichimoku['ISB_26'] ,-1 , np.where(ichimoku['IKS_26'] > ichimoku['ISB_26'] ,1 , 0))).astype(int)
+    recommend['tenkensenAndkijunsen'] = np.where(ichimoku['IKS_26'] == -1 ,-1 ,  np.where(ichimoku['ITS_9'] == ichimoku['IKS_26'],0 ,np.where(ichimoku['ITS_9'] >ichimoku['IKS_26'] , 1 , 0))).astype(int)
+    recommend['priceAndABSpan'] = np.where(ichimoku['ISB_26'] == -1 , -1 ,np.where(recommend['ISA_9_spanA'] ==0 ,0 , np.where(recommend['ISB_26_spanB']==1 ,1 ,0 ))).astype(int)
+    recommend['tenkensenAndPriceWithKijunsen'] = np.where(ichimoku['IKS_26'] == -1, -1 , np.where(recommend['ITS_9_tenkensen'] ==0 ,0 ,np.where(ichimoku['ITS_9'] >ichimoku['IKS_26'] , 1 , 0))).astype(int)
+    recommend['sAAndB'] = np.where(ichimoku['ISB_26'] == -1 , -1  , np.where(ichimoku['ISA_9'] >= ichimoku['ISB_26'] , 1 , 0)).astype(int)
     recommend.chiku = recommend.chiku.shift(26) #shif 26 rows for chiku
     recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
-    recommend.astype(int)
+    # recommend.astype(int)
     return recommend
 def recom_without_noidea(recom_ichi:pd.DataFrame ,start_time:str ):
     correct_data = recom_ichi.loc[(recom_ichi['date'] >= start_time)]

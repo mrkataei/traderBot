@@ -1,9 +1,7 @@
 from binance.client import Client
 import pyttsx3
-from tradingview import *
-import pandas as pd
-import numpy as np
-
+from Analysis.tradingview import *
+from Analysis.Analysis import *
 
 
 class Agent:
@@ -44,6 +42,9 @@ class ClientBinance(Client):
         if self.__agentCon :
             self.__agentCon.say_string("client has been connected")
         print("client has been connected")
+    def set_csv_data(self , path:str ):
+        self.__data = pd.read_csv(path)
+
     # input timeframes {day  , 1hour , 1month  , 1week  , 1min  , 4hour ,  5min  ,  15min}
     def get_data(self, symbol:str , timeframe:str):
         candles = self.get_klines(symbol=symbol , interval=get_time_interval(timeframe))

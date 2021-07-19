@@ -1,7 +1,7 @@
 import numpy as np
-import tensorflow as tf
-from tensorflow.python.ops import rnn, rnn_cell
-from tensorflow import keras
+# import tensorflow as tf
+# from tensorflow.python.ops import rnn, rnn_cell
+# from tensorflow import keras
 
 #statics methods
 
@@ -28,8 +28,8 @@ class BasicNeuralNetwork:
         inputs = inputs.astype(float)
         output = sigmoid(np.dot(inputs, self.synaptic_weights))
         return output
-
-class RecurrentNeuralNetwork:
-    def __init__(self):
-        rnn_cell.BasicRNNCell()
-        print("hello")
+#
+# class RecurrentNeuralNetwork:
+#     def __init__(self):
+#         rnn_cell.BasicRNNCell()
+#         print("hello")

@@ -1,4 +1,4 @@
-from demoAccount import Account
+from Account.demoAccount import Account
 import pandas as pd
 class Test:
     __account = None

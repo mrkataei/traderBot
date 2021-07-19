@@ -1,10 +1,10 @@
 import asyncio
 from binance import AsyncClient, BinanceSocketManager
 from datetime import datetime
-from Analysis import *
+from Analysis.Analysis import *
 import pandas as pd
-from demoAccount import Account, get_detect
-from ML import BasicNeuralNetwork
+from Account.demoAccount import Account
+from ML.ML import BasicNeuralNetwork
 
 def get_time_interval(time_frame):
     return {
@@ -62,11 +62,12 @@ class AsWebSocketClient:
     async def __real_time(self):
         client = await AsyncClient.create()
         bm = BinanceSocketManager(client)
-        ts = bm.kline_socket(symbol=self.__symbol , interval=get_time_interval(self.__time_frame )) if self.__time_frame  == '15min' else bm.trade_socket(str(self.__symbol))
+        ts = bm.kline_socket(symbol=self.__symbol , interval=get_time_interval(self.__time_frame )) if self.__time_frame  == '1min' else bm.trade_socket(str(self.__symbol))
         async with ts as tscm:
+
             while True:
                 res = await tscm.recv()
-                if self.__time_frame  == '15min' and res['k']['x'] :
+                if self.__time_frame  == '1min' and res['k']['x'] :
                     last_close_price = float(self.__data_live.tail(1).close) #save last price before new data append for compare new price and insert detect
 
                     time = pd.to_datetime(res['k']['t'] ,unit='ms' ,yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
@@ -88,10 +89,12 @@ class AsWebSocketClient:
                     self.__data_analysis = self.__data_analysis.append({'date':time,'recommend':re} ,ignore_index=True)
                     print(self.__data_analysis)
                     print(self.__data_live)
-                    to_csv(data=self.__data_live , name='new.csv')
-                    to_csv(data=ichi , name='ichimuko.csv')
-                    to_csv(data=recom , name='recomIchi.csv')
-                    to_csv(data=self.__data_analysis , name='ml_Recom.csv')
+                    to_csv(data=self.__data_live , name='Static/data.csv')
+                    to_csv(data=ichi , name='Static/ichimoku.csv')
+                    to_csv(data=recom , name='Static/recommendation_ichimoku.csv')
+                    to_csv(data=self.__data_analysis , name='Static/ml_recommendation.csv')
+
+                    #update weights after n candles (for test)
                     # self.__candle_counter = self.__candle_counter + 1
                     # if self.__candle_counter == 5 :
                     #     # add new weights with new input and shift 1 others
@@ -103,9 +106,10 @@ class AsWebSocketClient:
                     #     training_outputs = get_detect(data=data_live_temp  ,start_time=new_time)
                     #     self.__network.train(training_inputs, training_outputs, 10000)
                     #     self.__candle_counter = 0
-                elif self.__time_frame != '15min':
+                elif self.__time_frame != '1min':
                     # handle_message(res)
                     print(res)
+    #for update weights we need knows new time
     def __get_new_time(self , minute:int):
         # hour = int (minute / 60 )
         # minute = minute % 60

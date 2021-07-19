@@ -1,4 +1,4 @@
-from client import ClientBinance , Agent
+from Account.client import ClientBinance
 import datetime
 from xlwt import Workbook
 import pandas as pd
@@ -62,4 +62,4 @@ class Account(ClientBinance):
             sheet1.write(index, 3, 'Deposit' if item['operation']== '+' else 'Withdraw')
             sheet1.write(index, 4, item['coin'])
 
-        wb.save(filename+'.xls')
+        wb.save('Static/'+filename+'.xls')
