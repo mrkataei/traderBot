@@ -33,3 +33,6 @@ class BasicNeuralNetwork:
 #     def __init__(self):
 #         rnn_cell.BasicRNNCell()
 #         print("hello")
+class LinearRegression:
+    def __init__(self):
+        print("")

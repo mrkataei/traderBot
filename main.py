@@ -1,15 +1,20 @@
 # from Account.demoAccount import *
-# from Analysis.Analysis import *
+from Analysis.Analysis import *
 # from ML.ML import BasicNeuralNetwork
 # from stream import AsWebSocketClient
 import pandas as pd
-from ML.HistoricalPrice import BidirectionalLSTM
+# from ML.HistoricalPrice import BidirectionalLSTM
 
 if __name__ == '__main__':
 
+
     data = pd.read_csv('Static/IBM.csv')
-    test = BidirectionalLSTM(data=data)
-    test.plot_historical()
+    data.columns = ['date' , 'open' , 'high' , 'low' , 'close' , 'Adj close' , 'volume']
+    ichim = get_indicators_col(data)
+    recom = ichimoku_recommend(data , ichim)
+    to_csv(recom , name="recom.csv")
+    # test = BidirectionalLSTM(data=data)
+    sum_sell_buy(data , recom)
     # api_key = 'Kjps274EHTI0f1Y2tY9F7TchaB8nbRZwbz5h5xvmQpD5HGrEJPN5loqjE32EQ9UP'
     # api_secret = 'nC0TpFDobMjjstYjVVSdBccLLsm3ElKl35wk3zo4G9AGOpsqgxq67V5gDoNmtRnt'
     # client = Account(balance=400 , name='mohamad' ,api_key=api_key ,api_secret=api_secret)
