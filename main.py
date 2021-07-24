@@ -14,7 +14,8 @@ if __name__ == '__main__':
     recom = ichimoku_recommend(data , ichim)
     to_csv(recom , name="recom.csv")
     # test = BidirectionalLSTM(data=data)
-    sum_sell_buy(data , recom)
+    reg = sum_sell_buy(data , recom)
+    print(reg)
     # api_key = 'Kjps274EHTI0f1Y2tY9F7TchaB8nbRZwbz5h5xvmQpD5HGrEJPN5loqjE32EQ9UP'
     # api_secret = 'nC0TpFDobMjjstYjVVSdBccLLsm3ElKl35wk3zo4G9AGOpsqgxq67V5gDoNmtRnt'
     # client = Account(balance=400 , name='mohamad' ,api_key=api_key ,api_secret=api_secret)

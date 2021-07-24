@@ -75,9 +75,25 @@ def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFra
     element_numbers = len(indicator_recommendations.columns) - 1
     regression =  pd.DataFrame(columns=col)
     regression['buy'] = indicator_recommendations.sum(axis=1)
+    #
     regression['recommendation'] = symbol_data['close'].pct_change()
     regression['sell'] =  element_numbers - regression['buy']
+    def draw_plot():
+        x = regression['buy']
+        y = regression['sell']
+        z = regression['recommendation']
+        fig = plt.figure()
+        fig.add_subplot()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlabel("buy")
+        ax.set_ylabel("sell")
+        ax.set_zlabel("recommendation")
+        ax.scatter(x, y, z)
+        plt.show()
+    draw_plot()
     return  regression
+import matplotlib.pyplot as plt
+
 
 
 def recom_without_noidea(recom_ichi:pd.DataFrame ,start_time:str ):
