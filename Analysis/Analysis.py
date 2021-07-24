@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 import pandas_ta as ta
 import numpy as np
 
@@ -77,6 +78,7 @@ def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFra
     regression['buy'] = indicator_recommendations.sum(axis=1)
     #
     regression['recommendation'] = symbol_data['close'].pct_change()
+    regression.recommendation = regression.recommendation.shift(-1)
     regression['sell'] =  element_numbers - regression['buy']
     def draw_plot():
         x = regression['buy']
@@ -92,7 +94,6 @@ def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFra
         plt.show()
     draw_plot()
     return  regression
-import matplotlib.pyplot as plt
 
 
 
