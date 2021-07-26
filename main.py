@@ -12,7 +12,7 @@ if __name__ == '__main__':
     data.columns = ['date' , 'open' , 'high' , 'low' , 'close' , 'Adj close' , 'volume']
     ichim = get_indicators_col(data)
     recom = ichimoku_recommend(data , ichim)
-    to_csv(recom , name="recom.csv")
+    # to_csv(recom , name="test.csv")
     # test = BidirectionalLSTM(data=data)
     reg = sum_sell_buy(data , recom)
     print(reg)
