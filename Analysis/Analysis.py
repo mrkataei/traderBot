@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import pandas_ta as ta
 import numpy as np
 import plotly.graph_objects as go
@@ -31,6 +30,7 @@ def get_indicators_col(data:pd.DataFrame, name:str= 'ichimoku'):
     return {
         #tenkan=10, kijun=30 , senkou=60
         'ichimoku' : data.ta.ichimoku()[0],
+        #fast=12, slow=26, signal=9
         'macd'     : data.ta.macd(),
         'stochrsi' : data.ta.stochrsi()
     }.get(name ,data.ta.ichimoku()[0])
@@ -45,12 +45,7 @@ def cast_to_float(data:pd.DataFrame):
 
 
 def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
-    # col = [ 'date','tenkensen', 'kijunsen', 'spanA', 'spanB', 'chiku' ,
-    #        'kijunAndSpanBCross' , 'tenkensenAndkijunsen' , 'priceAndABSpan' ,
-    #        'tenkensenAndPriceWithKijunsen' ,'sAAndB']
-    # col = [ 'spanA' , 'spanB' , 'priceAndABSpan']
     #ISA->SpanA->col0 , ISB-> SpanB -> col1 , ITS->tenkensen->col2 , IKS->kijunsen->col3 , ICS_26->chiku->col4
-
     SpanA = ichimoku.columns[0]
     SpanB = ichimoku.columns[1]
     tenkensen = ichimoku.columns[2]
@@ -61,17 +56,17 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     recommend = pd.DataFrame()
     recommend['date'] = price_data ['date']
     recommend['tenkensen'] = np.where(ichimoku[tenkensen] == -1, -1, np.where(ichimoku[tenkensen] < price_data['close'], 1, 0)).astype(int)
-    # recommend['kijunsen'] = np.where(ichimoku[kijunsen] == -1, -1, np.where(ichimoku[kijunsen] < price_data['close'], 1, 0)).astype(int)
-    # recommend['spanA'] = np.where(ichimoku[SpanA] == -1, -1, np.where(ichimoku[SpanA] < price_data['close'], 1, 0)).astype(int)
-    # recommend['spanB'] = np.where(ichimoku[SpanB] == -1, -1, np.where(ichimoku[SpanB] < price_data['close'], 1, 0)).astype(int)
-    # recommend['chiku'] = np.where(ichimoku[chiku] ==-1 , -1 , np.where(ichimoku[chiku] > price_data['close'], 1, 0) ).astype(int)
-    # recommend['kijunAndSpanBCross'] = np.where(ichimoku[SpanB] == -1 , -1 ,np.where(ichimoku[kijunsen] == ichimoku[SpanB] ,-1 , np.where(ichimoku[kijunsen] > ichimoku[SpanB] ,1 , 0))).astype(int)
-    # recommend['tenkensenAndkijunsen'] = np.where(ichimoku[kijunsen] == -1 ,-1 ,  np.where(ichimoku[tenkensen] == ichimoku[kijunsen],0 ,np.where(ichimoku[tenkensen] >ichimoku[kijunsen] , 1 , 0))).astype(int)
-    # recommend['priceAndABSpan'] = np.where(ichimoku[SpanB] == -1 , -1 ,np.where(recommend['spanA'] ==0 ,0 , np.where(recommend['spanB']==1 ,1 ,0 ))).astype(int)
-    # recommend['tenkensenAndPriceWithKijunsen'] = np.where(ichimoku[kijunsen] == -1, -1 , np.where(recommend['tenkensen'] ==0 ,0 ,np.where(ichimoku[tenkensen] >ichimoku[kijunsen] , 1 , 0))).astype(int)
-    # recommend['sAAndB'] = np.where(ichimoku[SpanB] == -1 , -1  , np.where(ichimoku[SpanA] >= ichimoku[SpanB] , 1 , 0)).astype(int)
-    # recommend.chiku = recommend.chiku.shift(26) #shif 26 rows for chiku
-    # recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
+    recommend['kijunsen'] = np.where(ichimoku[kijunsen] == -1, -1, np.where(ichimoku[kijunsen] < price_data['close'], 1, 0)).astype(int)
+    recommend['spanA'] = np.where(ichimoku[SpanA] == -1, -1, np.where(ichimoku[SpanA] < price_data['close'], 1, 0)).astype(int)
+    recommend['spanB'] = np.where(ichimoku[SpanB] == -1, -1, np.where(ichimoku[SpanB] < price_data['close'], 1, 0)).astype(int)
+    recommend['chiku'] = np.where(ichimoku[chiku] ==-1 , -1 , np.where(ichimoku[chiku] > price_data['close'], 1, 0) ).astype(int)
+    recommend['kijunAndSpanBCross'] = np.where(ichimoku[SpanB] == -1 , -1 ,np.where(ichimoku[kijunsen] == ichimoku[SpanB] ,-1 , np.where(ichimoku[kijunsen] > ichimoku[SpanB] ,1 , 0))).astype(int)
+    recommend['tenkensenAndkijunsen'] = np.where(ichimoku[kijunsen] == -1 ,-1 ,  np.where(ichimoku[tenkensen] == ichimoku[kijunsen],0 ,np.where(ichimoku[tenkensen] >ichimoku[kijunsen] , 1 , 0))).astype(int)
+    recommend['priceAndABSpan'] = np.where(ichimoku[SpanB] == -1 , -1 ,np.where(recommend['spanA'] ==0 ,0 , np.where(recommend['spanB']==1 ,1 ,0 ))).astype(int)
+    recommend['tenkensenAndPriceWithKijunsen'] = np.where(ichimoku[kijunsen] == -1, -1 , np.where(recommend['tenkensen'] ==0 ,0 ,np.where(ichimoku[tenkensen] >ichimoku[kijunsen] , 1 , 0))).astype(int)
+    recommend['sAAndB'] = np.where(ichimoku[SpanB] == -1 , -1  , np.where(ichimoku[SpanA] >= ichimoku[SpanB] , 1 , 0)).astype(int)
+    recommend.chiku = recommend.chiku.shift(26) #shif 26 rows for chiku
+    recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
     # recommend.astype(int)
     return recommend
 def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFrame):
@@ -86,22 +81,21 @@ def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFra
     regression.change = regression.change.shift(-1)
 
     def draw_plot(point:True=True , x:str='date' , y:str='sum' ):
-        reg = regression.tail(400)
+        reg = regression.tail(300)
         if not point:
             fig = make_subplots(specs=[[{"secondary_y": True}]])
             fig.add_trace(go.Scatter(x=reg[x], y=reg[y]),
-                          row=1, col=1)
+                          row=1, col=1 )
         else:
-            n=1000
             fig = go.Figure(data=[go.Scatter(x=reg[x], y=reg[y] ,
                                              mode='markers',
                                              marker=dict(
-                                                 color=np.random.randn(n),
+                                                 color=regression['change'],
                                                  colorscale='Viridis',
                                                  showscale=True
                                              ))])
         fig.show()
-    draw_plot(point=False , y='buy')
+    draw_plot(point=True )
     return  regression
 
 
@@ -111,17 +105,4 @@ def recom_without_noidea(recom_ichi:pd.DataFrame ,start_time:str ):
     del correct_data['date']
     correct_data = np.array(correct_data).astype(int)
     return correct_data
-
-# class Indicators:
-#     __data = None
-#     __first_time = True
-#     col = ['ITS_9_tenkensen' ,'IKS_26_kijunsen' ,'ISA_9_spanA' , 'ISB_26_spanB' , 'IKS_26_chiku' ,'kijunAndSpanBCross']
-#     __ichirecom = pd.DataFrame(columns= col)
-#     def __init__(self ,data:pd.DataFrame ):
-#         self.__data = cast_to_float(data)
-#
-#     def get_indicators_names(self):
-#         return self.__data.ta.indicators()
-#     def set_data(self ,data:pd.DataFrame):
-#         self.__data = cast_to_float(data)
 
