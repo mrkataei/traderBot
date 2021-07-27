@@ -69,7 +69,7 @@ def ichimoku_recommend(price_data:pd.DataFrame, ichimoku:pd.DataFrame):
     recommend.chiku = recommend.chiku.fillna(value=-1) #fill 26 first data that shifted with -1
     # recommend.astype(int)
     return recommend
-def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFrame):
+def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFrame , point:bool=True):
     element_numbers = len(indicator_recommendations.columns) - 1
     regression =  pd.DataFrame()
     regression[regression==1].sum(axis=1)
@@ -79,10 +79,10 @@ def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFra
     regression['sum'] = regression['buy'] + regression['sell']
     regression['change'] = symbol_data['close'].pct_change()
     regression.change = regression.change.shift(-1)
-
-    def draw_plot(point:True=True , x:str='date' , y:str='sum' ):
-        reg = regression.tail(300)
-        if not point:
+    def draw_plot(porl:bool=True, x:str= 'date', y:str= 'sum'):
+        # reg = regression.tail(100)
+        reg = regression
+        if not porl:
             fig = make_subplots(specs=[[{"secondary_y": True}]])
             fig.add_trace(go.Scatter(x=reg[x], y=reg[y]),
                           row=1, col=1 )
@@ -95,7 +95,7 @@ def sum_sell_buy(symbol_data:pd.DataFrame , indicator_recommendations:pd.DataFra
                                                  showscale=True
                                              ))])
         fig.show()
-    draw_plot(point=True )
+    draw_plot(porl=point)
     return  regression
 
 

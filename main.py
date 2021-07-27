@@ -8,13 +8,14 @@ import pandas as pd
 if __name__ == '__main__':
 
 
-    data = pd.read_csv('Static/IBM.csv')
+    data = pd.read_csv('Static/BTC-USD.csv')
     data.columns = ['date' , 'open' , 'high' , 'low' , 'close' , 'Adj close' , 'volume']
     ichim = get_indicators_col(data)
     recom = ichimoku_recommend(data , ichim)
     # to_csv(recom , name="test.csv")
     # test = BidirectionalLSTM(data=data)
     reg = sum_sell_buy(data , recom)
+    to_csv(data=reg , name='reg.csv')
     print(reg)
     # api_key = 'Kjps274EHTI0f1Y2tY9F7TchaB8nbRZwbz5h5xvmQpD5HGrEJPN5loqjE32EQ9UP'
     # api_secret = 'nC0TpFDobMjjstYjVVSdBccLLsm3ElKl35wk3zo4G9AGOpsqgxq67V5gDoNmtRnt'
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     # print("Beginning Randomly Generated Weights: ")
     # print(neural_network.synaptic_weights)
     # # training taking place
-    # neural_network.train(training_inputs, training_outputs, 10000)
+    # neural_network.train(training_inputs,training_outputs, 1000000)
     # print("Ending Weights After Training: ")
     # print(neural_network.synaptic_weights)
     # # '1min''3min''5min''15min''30min''1hour''2hour''4hour''6hour''8hour''12hour''1day''3day''1week' '1month'
