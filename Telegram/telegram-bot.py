@@ -55,8 +55,8 @@ def start(message):
 def help_me(message):
     bot.send_chat_action(chat_id=message.chat.id, action="typing")
     sleep(1)
-    bot.reply_to(message, "price <symbol> show last price of symbol\n"
-                          "candle <symbol> show last 1min candle of symbol")
+    bot.reply_to(message, "price <symbol> show last \n"
+                          "candle <symbol> show last candle")
 
 
 @bot.message_handler(commands=['frame'])
@@ -124,7 +124,7 @@ def send_candle(message):
         if data[0, 1] <= data[0, 4]:
             percent = (float(data[0, 4]) - float(data[0, 1])) * 100 / float(data[0, 1])
             percent = round(percent, 3)
-            text = "🤑" + request + "    "+ timeframe + "\n🟢" + str(percent) + "%\n" + "Open time : " + str(
+            text = "🤑" + request + "\n🟢" + str(percent) + "%\n" + "⏱Timeframe: "+timeframe +"\n"+ "Open time : " + str(
                 time) + "\n" + "Open : " + str(data[0, 1]) + \
                    "\n" + "High : " + str(data[0, 2]) + "\n" + "Low : " + str(data[0, 3]) + "\n" + "Close : " + str(
                 data[0, 4]) + \
@@ -132,7 +132,7 @@ def send_candle(message):
         else:
             percent = (float(data[0, 4]) - float(data[0, 1])) * 100 / float(data[0, 1])
             percent = round(percent, 3)
-            text = "😰" + request + "    "+ timeframe  + "\n🔴" + str(percent) + "%\n" "Open time : " + str(
+            text = "😰" + request + "\n🔴" + str(percent) + "%\n" + "⏱Timeframe: "+timeframe +"Open time : " + str(
                 time) + "\n" + "Open : " + str(data[0, 1]) + \
                    "\n" + "High : " + str(data[0, 2]) + "\n" + "Low : " + str(data[0, 3]) + "\n" + "Close : " + str(
                 data[0, 4]) + \
