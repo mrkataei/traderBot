@@ -1,5 +1,5 @@
 import mysql.connector
-from Auth import login , register
+from Auth import login , register ,reset_password
 
 #mrkataei.mysql.pythonanywhere-services.com -> hostname
 #username -> mrkataei
@@ -20,7 +20,7 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     print("Something went wrong: {}".format(err))
-
+db = con_db()
 # for row in records:
 #   print(row)
 #

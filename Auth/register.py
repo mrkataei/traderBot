@@ -19,8 +19,8 @@ def register(db_connection:MySQLConnection , username:str , password:str , quest
     print(chek_pass[1])
   else:
     password = hash_pass(password=password)
-    sql = "INSERT INTO users (username, password , role , question_id , question_answer ) VALUES (%s, %s , %s , %s , %s)"
-    val = (username, password[0], password[1], question_id, answer)
+    sql = "INSERT INTO users (username, password , salt, role , question_id , question_answer ) VALUES (%s, %s , %s , %s , %s , %s)"
+    val = (username, password[0], password[1], 'user' ,  question_id, answer)
     cursor.execute(sql, val)
     db_connection.commit()
 
