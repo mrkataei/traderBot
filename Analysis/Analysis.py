@@ -105,4 +105,5 @@ def recom_without_noidea(recom_ichi:pd.DataFrame ,start_time:str ):
     del correct_data['date']
     correct_data = np.array(correct_data).astype(int)
     return correct_data
+#mojtaba
 
