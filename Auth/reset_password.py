@@ -38,7 +38,7 @@ def reset_password(db_connection:MySQLConnection , username:str ,  answer:str , 
     elif set_password():
         print("success")
     else:
-        print("try agin")
+        print("try again")
 
 
 
