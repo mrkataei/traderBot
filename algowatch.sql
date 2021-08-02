@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 02, 2021 at 09:52 AM
+-- Generation Time: Aug 02, 2021 at 11:40 AM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 8.0.1
 
@@ -199,6 +199,26 @@ INSERT INTO `user_indicators` (`id`, `user`, `indicator_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `user_timeframe`
+--
+
+CREATE TABLE `user_timeframe` (
+  `id` int(12) NOT NULL,
+  `user` char(30) CHARACTER SET utf8mb4 NOT NULL,
+  `timeframe_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `user_timeframe`
+--
+
+INSERT INTO `user_timeframe` (`id`, `user`, `timeframe_id`) VALUES
+(1, 'kouroshataei', 15),
+(2, 'kouroshataei', 9);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `watchlist`
 --
 
@@ -280,6 +300,14 @@ ALTER TABLE `user_indicators`
   ADD KEY `username_indi` (`user`);
 
 --
+-- Indexes for table `user_timeframe`
+--
+ALTER TABLE `user_timeframe`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_timeframe_username` (`user`),
+  ADD KEY `user_timeframe_timeframe_id` (`timeframe_id`);
+
+--
 -- Indexes for table `watchlist`
 --
 ALTER TABLE `watchlist`
@@ -328,6 +356,12 @@ ALTER TABLE `user_indicators`
   MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `user_timeframe`
+--
+ALTER TABLE `user_timeframe`
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `watchlist`
 --
 ALTER TABLE `watchlist`
@@ -362,6 +396,13 @@ ALTER TABLE `users`
 ALTER TABLE `user_indicators`
   ADD CONSTRAINT `indicator_id` FOREIGN KEY (`indicator_id`) REFERENCES `indicators` (`id`),
   ADD CONSTRAINT `username_indi` FOREIGN KEY (`user`) REFERENCES `users` (`username`);
+
+--
+-- Constraints for table `user_timeframe`
+--
+ALTER TABLE `user_timeframe`
+  ADD CONSTRAINT `user_timeframe_timeframe_id` FOREIGN KEY (`timeframe_id`) REFERENCES `timeframes` (`id`),
+  ADD CONSTRAINT `user_timeframe_username` FOREIGN KEY (`user`) REFERENCES `users` (`username`);
 
 --
 -- Constraints for table `watchlist`
