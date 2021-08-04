@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 02, 2021 at 11:40 AM
+-- Generation Time: Aug 04, 2021 at 12:48 PM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 8.0.1
 
@@ -149,9 +149,8 @@ CREATE TABLE `transactions` (
   `user` char(30) CHARACTER SET utf8mb4 NOT NULL,
   `id` int(12) NOT NULL,
   `operation` int(12) NOT NULL,
-  `timestamp` timestamp(6) NOT NULL DEFAULT current_timestamp(6),
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
   `amount` double NOT NULL,
-  `remain` double NOT NULL,
   `detail` text COLLATE utf8_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -163,19 +162,21 @@ CREATE TABLE `transactions` (
 
 CREATE TABLE `users` (
   `username` char(30) NOT NULL,
+  `chat_id` char(12) DEFAULT NULL,
   `password` char(255) NOT NULL,
   `salt` int(20) DEFAULT NULL,
   `role` varchar(20) DEFAULT NULL,
   `question_id` int(11) NOT NULL,
-  `question_answer` varchar(254) NOT NULL
+  `question_answer` varchar(254) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`username`, `password`, `salt`, `role`, `question_id`, `question_answer`) VALUES
-('kouroshataei', '54c6715b023c63a3cfc4b4cca0634aefa08240936dfc855c62fec941b101bc222081b7c10b6aecf6f01194b81d22b4d450bb71937035d91be800e1d76ca20515', 89860, 'admin', 1, 'qoli');
+INSERT INTO `users` (`username`, `chat_id`, `password`, `salt`, `role`, `question_id`, `question_answer`, `timestamp`) VALUES
+('kouroshataei', '1210507821', '23a4c6b99fe5eb158062de39946c048ba768bdd20e11503f14a2c03e848a49d09f0a0b900d600e57170eb8f13f48a3ed6090e4549acfa8bf5a865b251d026663', 15920, 'admin', 1, 'qoli', '2021-08-02 18:31:33');
 
 -- --------------------------------------------------------
 
