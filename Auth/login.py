@@ -7,7 +7,7 @@ and compare to database row
 """
 import mysql.connector
 from mysql.connector import MySQLConnection
-from Auth.register import hash_pass
+from Inc.functions import hash_pass
 
 
 def login(db_connection:MySQLConnection , username:str , password:str):
