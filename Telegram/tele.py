@@ -13,7 +13,7 @@ avoid memory leak ,
 import telebot
 from time import sleep
 from Auth import login , register , reset_password
-from Inc import db
+from Inc import db , functions
 
 #statics
 # API_KEY = os.getenv('API_KEY')
@@ -156,7 +156,7 @@ def process_reg_password_again(message):
     try:
         user = reg_dict[message.chat.id]
         user.password2 = message.text
-        question_dict = register.get_security_questions(connection)
+        question_dict = functions.get_security_questions(connection)
         bot.delete_message(message.chat.id, message.message_id)
         #select question
         questions = telebot.types.InlineKeyboardMarkup()
@@ -188,10 +188,10 @@ def process_forget_username(message):
         user = reg_dict[message.chat.id]
         user.username = message.text
         #check user exists if dont handle this next step crashed ->get_user_security_id handled this
-        q_id = register.get_user_security_id(connection, user.username)
+        q_id = functions.get_user_security_id(connection, user.username)
         if q_id :
             user.security_question_id = q_id
-            user.security_question = register.get_security_questions(connection , q_id)
+            user.security_question = functions.get_security_questions(connection , q_id)
             msg = bot.reply_to(message, 'Enter your Answer')
             bot.register_next_step_handler(msg, process_forget_answer)
         else:
@@ -235,6 +235,21 @@ def process_forget_new_pass_again(message):
     except Exception as e:
         bot.reply_to(message, 'Please /start bot again')
         del reg_dict[message.chat.id]
+
+
+@bot.message_handler(commands=['new'])
+def new_watchlist(message):
+    if not message.chat.id in user_dict :
+        bot.reply_to(message, 'Please /start bot again')
+    elif not user_dict[message.chat.id].session:
+        bot.reply_to(message, 'Please login /start')
+    else:
+        bot.register_next_step_handler(message, callback=process_new_watch_name)
+
+
+# def process_new_watch_name(message):
+
+
 
 """
     logout command handler

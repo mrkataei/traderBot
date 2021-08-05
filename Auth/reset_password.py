@@ -6,7 +6,7 @@ is private and inner def in reset password for security
 """
 import mysql.connector
 from mysql.connector import MySQLConnection
-from Auth.register import check_username , hash_pass ,chek_password
+from Inc.functions import chek_password ,check_username ,hash_pass
 
 def reset_password(db_connection:MySQLConnection , username:str ,  answer:str , new_password:str , new_password2:str):
     cursor = db_connection.cursor()

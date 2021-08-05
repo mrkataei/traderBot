@@ -6,7 +6,7 @@ in future use .env
 for test your queries use here or import file like login,.. from Auth directory
 """
 import mysql.connector
-
+from Inc import functions
 #DB_HOST = os.getenv('DB_HOST')
 
 DB_HOST = "localhost"
@@ -24,3 +24,6 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+db = con_db()
+functions.create_watchlist(db , "kouroshataei" , "new" )
+print(len(functions.get_user_watchlist(db , "kouroshataei" , "my_watchlist")))

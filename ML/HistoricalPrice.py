@@ -8,11 +8,16 @@ from tensorflow.keras import *
 from tensorflow.keras.layers import *
 import matplotlib.pyplot as plt
 import os
+import pandas_ta as ta
+import statsmodels.api as sm
+from sklearn.ensemble import RandomForestRegressor
+from statsmodels.tsa.stattools import grangercausalitytests
 
 plt.style.use('seaborn')
-PAth = "Static/BTC-USD.csv"
-
+PAth = "Static/IBM.csv"
 df = pd.read_csv(PAth, delimiter=',', usecols=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+df['MACD_12_26_9']=df.ta.macd()[['MACD_12_26_9']]
+df['MACDh_12_26_9']=df.ta.macd()[['MACDh_12_26_9']]
 
 
 # based on https://towardsdatascience.com/the-beginning-of-a-deep-learning-trading-bot-part1-95-accuracy-is-not-enough-c338abc98fc2
@@ -210,63 +215,39 @@ class ML:
         print('Validation data shape: {}'.format(self.__valid.shape))
         print('Test data shape: {}'.format(self.__test.shape))
         # Training data
-        self.X_train, self.y_train, self.X_train2, self.X_train3 = [], [], [], []
+        self.X_train, self.y_train= [], []
         for i in range(self.seq_len, len(self.__train) - (self.timefram - 1)):
             self.X_train.append(
                 self.__train[i - self.seq_len:i])  # Chunks of training data with a length of 128 df-rows
-            self.X_train2.append(self.__train[i - int(self.seq_len / 2):i])
-            self.X_train3.append(self.__train[i - int(self.seq_len / 4):i])
             self.y_train.append(
                 self.__train[:, 3][i + (self.timefram - 1)])  # Value of 4th column (Close Price) of df-row 128+1
-        self.X_train, self.y_train = np.concatenate(
-            (np.array(self.X_train), np.array(self.X_train2), np.array(self.X_train3)), axis=1), np.array(self.y_train)
-        print("sx", self.X_train.shape)
+        self.X_train, self.y_train =np.array(self.X_train), np.array(self.y_train)
         ###############################################################################
 
         # Validation data
-        self.X_val, self.y_val, self.X_val2, self.X_val3 = [], [], [], []
+        self.X_val, self.y_val = [], []
         for i in range(self.seq_len, len(self.__valid) - (self.timefram - 1)):
             self.X_val.append(self.__valid[i - self.seq_len:i])
-            self.X_val2.append(self.__valid[i - int(self.seq_len / 2):i])
-            self.X_val3.append(self.__valid[i - int(self.seq_len / 4):i])
             self.y_val.append(self.__valid[:, 3][i + (self.timefram - 1)])
-        self.X_val, self.y_val = np.concatenate((np.array(self.X_val), np.array(self.X_val2), np.array(self.X_val3)),
-                                                axis=1), np.array(self.y_val)
+        self.X_val, self.y_val = np.array(self.X_val), np.array(self.y_val)
 
         ###############################################################################
 
         # Test data
-        self.X_test, self.y_test, self.X_test2, self.X_test3 = [], [], [], []
+        self.X_test, self.y_test = [], []
         for i in range(self.seq_len, len(self.__test) - (self.timefram - 1)):
             self.X_test.append(self.__test[i - self.seq_len:i])
-            self.X_test2.append(self.__test[i - int(self.seq_len / 2):i])
-            self.X_test3.append(self.__test[i - int(self.seq_len / 4):i])
             self.y_test.append(self.__test[:, 3][i + (self.timefram - 1)])
-        self.X_test, self.y_test = np.concatenate(
-            (np.array(self.X_test), np.array(self.X_test2), np.array(self.X_test3)), axis=1), np.array(self.y_test)
+        self.X_test, self.y_test =np.array(self.X_test), np.array(self.y_test)
 
     def create_model(self):
         cnn = CNN()
-        in_seq = Input(shape=(self.seq_len + int(self.seq_len / 2) + int(self.seq_len / 4), 5))
-
-        x = in_seq[:, :self.seq_len, :]
-        x2 = in_seq[:, self.seq_len:self.seq_len + int(self.seq_len / 2), :]
-        x3 = in_seq[:, self.seq_len + int(self.seq_len / 2):, :]
-        x = cnn.A(x, 64)
+        in_seq = Input(shape=(self.seq_len , 7))
+        x = cnn.A(in_seq, 64)
         # x = Bidirectional(LSTM(64,return_sequences=True))(x)
-
-        x = LSTM(16)(x)
-        x2 = cnn.A(x2, 64)
-        # x2 = Bidirectional(LSTM(64,return_sequences=True))(x2)
-        x2 = LSTM(32)(x2)
-
-        x3 = cnn.A(x3, 64)
+        x = Bidirectional(LSTM(16))(x)
         # x3 = Bidirectional(LSTM(64,return_sequences=True))(x3)
-        x3 = LSTM(64)(x3)
-        # x = Bidirectional(LSTM(64, return_sequences=True))(in_seq)
-        # avg_pool = GlobalAveragePooling1D()(x)
-        # max_pool = GlobalMaxPooling1D()(x)
-        conc = concatenate([x, x2, x3], axis=1)
+        # x = Bidirectional(LSTM(64, return_sequences=True))(in_seq)# avg_pool = GlobalAveragePooling1D()(x)# max_pool = GlobalMaxPooling1D()(x)
         conc = Dense(64, activation="relu")(x)
         out = Dense(1, activation="linear")(conc)
         model = Model(inputs=in_seq, outputs=out)
@@ -313,7 +294,7 @@ class ML:
 
         # Plot training data results
         ax11 = fig.add_subplot(311)
-        ax11.plot(self.__train[128 + self.timefram - 1:, 3], label='IBM Closing Returns')
+        ax11.plot(self.__train[self.seq_len + self.timefram - 1:, 3], label='IBM Closing Returns')
         ax11.plot(train_pred[:], color='yellow', linewidth=3, label='Predicted IBM Closing Returns')
         ax11.set_title("Training Data", fontsize=18)
         ax11.set_xlabel('Date')
