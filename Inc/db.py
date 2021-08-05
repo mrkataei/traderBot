@@ -24,6 +24,9 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
-db = con_db()
-functions.create_watchlist(db , "kouroshataei" , "new" )
-print(len(functions.get_user_watchlist(db , "kouroshataei" , "my_watchlist")))
+# db = con_db()
+# print(functions.get_coins(db))
+# functions.insert_coin(db , "kouroshataei" , 2 , "new")
+# print(functions.get_empty_coins_remain(db , "kouroshataei" , "my list"))
+# functions.create_watchlist(db , "kouroshataei" , "test" )
+# print(len(functions.get_user_watchlist(db , "kouroshataei" , "my_watchlist")))

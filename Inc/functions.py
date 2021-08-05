@@ -114,3 +114,43 @@ def create_watchlist(db_connection:MySQLConnection , username:str , name:str):
       return False
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+
+def insert_coin(db_connection:MySQLConnection , username:str , coin_id:int , watchlist_name:str ):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    if not check_username(db_connection, username):
+      sql = 'UPDATE watchlist SET coin_id ="{coin_id}" WHERE user="{username}" AND name="{name}" ' \
+            'AND  coin_id IS NULL LIMIT 1'.format(coin_id=coin_id ,username=username , name=watchlist_name)
+      cursor.execute(sql)
+      db_connection.commit()
+    else:
+      return False
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_empty_coins_remain(db_connection:MySQLConnection , username:str , watchlist_name:str):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    if not check_username(db_connection, username):
+      sql = 'SELECT coin_id FROM watchlist WHERE user="{username}" ' \
+            'AND name="{name}"  AND coin_id IS NULL '.format(username=username , name=watchlist_name)
+      cursor.execute(sql)
+      record = cursor.fetchall()
+      return len(record)
+    else:
+      return False
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_coins(db_connection:MySQLConnection):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    query = 'SELECT * from coins'
+    cursor.execute(query)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)

@@ -25,9 +25,11 @@ reg_dict = {}
 
 #need more develop on classes
 class User:
-    def __init__(self, name):
-        self.username = name
+    def __init__(self):
+        self.username = None
         self.session = None
+        self.watchlist = []
+        self.coin = None
 
 class Register:
     def __init__(self ,chat_id):
@@ -62,7 +64,7 @@ def welcome(message):
 def query_handler(call):
     if call.data == "login":
         #create object from user and store in our dictionary with chat_id key value
-        user = User(call.message.chat.first_name)
+        user = User()
         user_dict[call.message.chat.id] = user
         bot.reply_to(call.message , "🔑Enter your username")
         #handle next step message user enter after login
@@ -89,6 +91,23 @@ def query_handler(call):
         bot.reply_to(call.message, "🔑Enter your username")
         #handle next step message user enter after forget password
         bot.register_next_step_handler(call.message, callback=process_forget_username)
+    if call.data == "watchlist":
+        coins = functions.get_coins(connection)
+        coin_keyboard = telebot.types.InlineKeyboardMarkup()
+        for coin in coins:
+            coin_keyboard.add(telebot.types.InlineKeyboardButton(coin[1], callback_data=coin[1]))
+        bot.send_message(chat_id=call.message.chat.id, text='Select your coin', reply_markup=coin_keyboard)
+
+    #need more develop
+    if call.data == "BTCUSDT" :
+        user = user_dict[call.message.chat.id]
+        functions.insert_coin(connection , user.username , 1 ,user.watchlist[0][2] )
+        bot.reply_to(call.message, "Done! /show to show your watchlist")
+    if call.data == "ETHUSDT" :
+        user = user_dict[call.message.chat.id]
+        functions.insert_coin(connection , user.username , 2 ,user.watchlist[0][2] )
+        bot.reply_to(call.message, "Done! /show to show your watchlist")
+
     #after call back done keyboard delete
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
@@ -236,19 +255,52 @@ def process_forget_new_pass_again(message):
         bot.reply_to(message, 'Please /start bot again')
         del reg_dict[message.chat.id]
 
-
+"""
+    new command handler / for new watchlist
+"""
 @bot.message_handler(commands=['new'])
 def new_watchlist(message):
     if not message.chat.id in user_dict :
-        bot.reply_to(message, 'Please /start bot again')
+        bot.reply_to(message, 'Please login /start')
     elif not user_dict[message.chat.id].session:
         bot.reply_to(message, 'Please login /start')
     else:
-        bot.register_next_step_handler(message, callback=process_new_watch_name)
+        user = user_dict[message.chat.id]
+        if len(functions.get_user_watchlist(connection , user.username)) < 2:
+            bot.reply_to(message, "Enter your watchlist name")
+            bot.register_next_step_handler(message, process_new_watch)
+        else:
+            bot.reply_to(message, "😅 You have already one watchlist /show")
 
+def process_new_watch(message):
+    try:
+        #fetch object
+        user = user_dict[message.chat.id]
+        for create in range(0,2):
+            functions.create_watchlist(connection , user.username , message.text)
+        user.watchlist = message.text
+        bot.reply_to(message, "Good!👀\n/add to add coin in your watchlist")
+    except Exception as e:
+        bot.reply_to(message, 'Please /start bot again')
 
-# def process_new_watch_name(message):
-
+@bot.message_handler(commands=['add'])
+def add_coin(message):
+    if not message.chat.id in user_dict :
+        bot.reply_to(message, 'Please login /start')
+    elif not user_dict[message.chat.id].session:
+        bot.reply_to(message, 'Please login /start')
+    else:
+        user = user_dict[message.chat.id]
+        user.watchlist = functions.get_user_watchlist(connection, user.username)
+        if user.watchlist:
+            if functions.get_empty_coins_remain(connection ,user.username , user.watchlist[0][2])!=0:
+                watchlist = telebot.types.InlineKeyboardMarkup()
+                watchlist.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2], callback_data='watchlist'))
+                bot.send_message(chat_id=message.chat.id, text='Select your watchlist', reply_markup=watchlist)
+            else:
+                bot.reply_to(message, 'your watchlist is full!😓')
+        else:
+            bot.reply_to(message, 'Create watchlist first! /new')
 
 
 """
