@@ -130,9 +130,10 @@ def query_handler(call):
     if call.data in analysis_list[:,1]:
         user = user_dict[call.message.chat.id]
         analysis_id = analysis_list[np.where(analysis_list[:, 1] == call.data)][0][0]
-        functions.set_user_analysis(connection,user.username , analysis_id)
+        #analysis_id check beshe!
+        functions.set_user_analysis(connection, user.username , 1)
         bot.reply_to(call.message, f"Done!\n"
-                                   f"{user.analysis} now is work for you")
+                                   f"{call.data} now is work for you")
     #after call back done keyboard delete
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
@@ -388,11 +389,12 @@ def update_timeframe(message):
         #if user dont have an analysis
         user = user_dict[message.chat.id]
         analysis = functions.get_user_analysis(connection ,user.username)
+        print(analysis)
         if not analysis:
-            user.analysis = analysis
+            analysis =functions.get_analysis(connection , 1)
             #need loop for more analysis for now is one
             analysis_keyboard = telebot.types.InlineKeyboardMarkup()
-            analysis_keyboard.add(telebot.types.InlineKeyboardButton(analysis, callback_data=analysis))
+            analysis_keyboard.add(telebot.types.InlineKeyboardButton(analysis[0][0], callback_data=analysis[0][0]))
             bot.send_message(chat_id=message.chat.id, text='📊️Select your analysis', reply_markup=analysis_keyboard)
         else:
             bot.reply_to(message, f'😏You already have {analysis} analysis \n'

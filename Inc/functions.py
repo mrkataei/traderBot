@@ -135,8 +135,9 @@ def set_coin(db_connection:MySQLConnection, username:str, coin_id:int, watchlist
             'AND  coin_id IS NULL LIMIT 1'
       cursor.execute(sql)
       db_connection.commit()
+      return True , ""
     else:
-      return False
+      return False , ""
   except mysql.connector.Error as err:
     return False , "Something went wrong: {}".format(err)
 
@@ -228,14 +229,14 @@ def get_user_timeframe(db_connection:MySQLConnection , username:str ):
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
 
-def get_analysis(db_connection: MySQLConnection ,timeframe_id:int=-1):
+def get_analysis(db_connection: MySQLConnection ,analysis_id:int=-1):
   cursor = db_connection.cursor()
   try:
     # check user exist
-    if timeframe_id < 0:
+    if analysis_id < 0:
       query = 'SELECT * from analysis'
     else:
-      query = f'SELECT name from analysis WHERE id="{timeframe_id}"'
+      query = f'SELECT name from analysis WHERE id="{analysis_id}"'
 
     cursor.execute(query)
     record = cursor.fetchall()
@@ -250,8 +251,11 @@ def get_user_analysis(db_connection:MySQLConnection , username:str ):
       sql = f'SELECT analysis_id FROM user_analysis WHERE user="{username}"'
       cursor.execute(sql)
       record = cursor.fetchall()
-      record = get_analysis(db_connection, record[0][0])
-      return record[0][0]
+      if record:
+        record = get_analysis(db_connection, record[0][0])[0][0]
+      else:
+        record = False
+      return record
     else:
       return False
   except mysql.connector.Error as err:
@@ -259,7 +263,6 @@ def get_user_analysis(db_connection:MySQLConnection , username:str ):
 def set_user_analysis(db_connection:MySQLConnection , username:str , analysis_id:int ):
   cursor = db_connection.cursor()
   try:
-    # check user exist
     # check user exist
     if not check_username(db_connection, username):
       sql = "INSERT INTO user_analysis (user ,analysis_id ) VALUES (%s, %s )"
