@@ -14,6 +14,7 @@ import telebot
 from time import sleep
 from Auth import login , register , reset_password
 from Inc import db , functions
+import numpy as np
 
 #statics
 # API_KEY = os.getenv('API_KEY')
@@ -22,6 +23,9 @@ bot = telebot.TeleBot(API_KEY)
 connection = db.con_db()
 user_dict = {}
 reg_dict = {}
+
+coins_list = np.array(functions.get_coins(connection))
+timeframes_list = np.array(functions.get_timeframe(connection))
 
 #need more develop on classes
 class User:
@@ -70,12 +74,16 @@ def query_handler(call):
         #handle next step message user enter after login
         bot.register_next_step_handler(call.message, callback=process_login_username)
     if call.data == "reg":
-        #create object from user and store in our dictionary with chat_id key value
-        user = Register(call.message.chat.id)
-        reg_dict[call.message.chat.id] = user
-        bot.reply_to(call.message , "🔑Enter your username")
-        #handle next step message user enter after sign up
-        bot.register_next_step_handler(call.message, callback=process_reg_username)
+        if functions.check_chat_id(connection ,call.message.chat.id ):
+            #create object from user and store in our dictionary with chat_id key value
+            user = Register(call.message.chat.id)
+            reg_dict[call.message.chat.id] = user
+            bot.reply_to(call.message , "🔑Enter your username")
+            #handle next step message user enter after sign up
+            bot.register_next_step_handler(call.message, callback=process_reg_username)
+        else:
+            username = functions.get_user_with_chat_id(connection ,call.message.chat.id)
+            bot.reply_to(call.message, f"You already have an account : {username} \nPlease /start to login ")
     if call.data == "1" or call.data == "2":
         #in other keyboard we need calls back from user choose which one question
         user = reg_dict[call.message.chat.id]
@@ -92,20 +100,17 @@ def query_handler(call):
         #handle next step message user enter after forget password
         bot.register_next_step_handler(call.message, callback=process_forget_username)
     if call.data == "watchlist":
-        coins = functions.get_coins(connection)
         coin_keyboard = telebot.types.InlineKeyboardMarkup()
-        for coin in coins:
+        for coin in coins_list:
             coin_keyboard.add(telebot.types.InlineKeyboardButton(coin[1], callback_data=coin[1]))
         bot.send_message(chat_id=call.message.chat.id, text='Select your coin', reply_markup=coin_keyboard)
 
     #need more develop
-    if call.data == "BTCUSDT" :
+    if call.data in coins_list[:,1] :
+        coin = coins_list[np.where(coins_list[:, 1] == call.data)][0][0]
+        # for coins in coins[:1]:
         user = user_dict[call.message.chat.id]
-        functions.insert_coin(connection , user.username , 1 ,user.watchlist[0][2] )
-        bot.reply_to(call.message, "Done! /show to show your watchlist")
-    if call.data == "ETHUSDT" :
-        user = user_dict[call.message.chat.id]
-        functions.insert_coin(connection , user.username , 2 ,user.watchlist[0][2] )
+        functions.insert_coin(connection , user.username , coin ,user.watchlist[0][2] )
         bot.reply_to(call.message, "Done! /show to show your watchlist")
 
     #after call back done keyboard delete
@@ -208,10 +213,11 @@ def process_forget_username(message):
         user.username = message.text
         #check user exists if dont handle this next step crashed ->get_user_security_id handled this
         q_id = functions.get_user_security_id(connection, user.username)
+        question = functions.get_security_questions(connection , q_id)
         if q_id :
             user.security_question_id = q_id
             user.security_question = functions.get_security_questions(connection , q_id)
-            msg = bot.reply_to(message, 'Enter your Answer')
+            msg = bot.reply_to(message, question[0][1])
             bot.register_next_step_handler(msg, process_forget_answer)
         else:
             bot.send_message(chat_id=message.chat.id , text="😞Username not exists\nTry again /start")
@@ -236,6 +242,7 @@ def process_forget_new_pass(message):
         user = reg_dict[message.chat.id]
         user.password1 = message.text
         msg = bot.reply_to(message, '🔒Enter your new password again')
+        bot.delete_message(message.chat.id, message.message_id)
         bot.register_next_step_handler(msg, process_forget_new_pass_again)
     except Exception as e:
         bot.reply_to(message, 'Please /start bot again')
@@ -249,6 +256,7 @@ def process_forget_new_pass_again(message):
         res = reset_password.reset_password(db_connection=connection ,username=user.username , answer=user.answer ,
                                             new_password=user.password1 ,new_password2=user.password2)
         bot.reply_to(message, res)
+        bot.delete_message(message.chat.id, message.message_id)
         #after reset password and update database we dont need this object
         del reg_dict[message.chat.id]
     except Exception as e:
@@ -302,14 +310,16 @@ def add_coin(message):
         else:
             bot.reply_to(message, 'Create watchlist first! /new')
 
-
+"""
+    timeframe command handler update or set
+"""
 """
     logout command handler
 """
 @bot.message_handler(commands=['logout'])
 def logout(message):
     if not message.chat.id in user_dict:
-        bot.reply_to(message, 'Please /start bot again')
+        bot.reply_to(message, '😪Please /start to login')
     #check user login
     elif user_dict[message.chat.id] and not user_dict[message.chat.id].session :
         bot.reply_to(message, '😪You are logged out')

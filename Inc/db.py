@@ -7,6 +7,7 @@ for test your queries use here or import file like login,.. from Auth directory
 """
 import mysql.connector
 from Inc import functions
+import numpy as np
 #DB_HOST = os.getenv('DB_HOST')
 
 DB_HOST = "localhost"
@@ -24,9 +25,3 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
-# db = con_db()
-# print(functions.get_coins(db))
-# functions.insert_coin(db , "kouroshataei" , 2 , "new")
-# print(functions.get_empty_coins_remain(db , "kouroshataei" , "my list"))
-# functions.create_watchlist(db , "kouroshataei" , "test" )
-# print(len(functions.get_user_watchlist(db , "kouroshataei" , "my_watchlist")))

@@ -37,19 +37,30 @@ def check_username(db_connection:MySQLConnection , username:str):
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
 
-#this is for telebot no for register
-def get_security_questions(db_connection:MySQLConnection , question_id:int=-1):
+def check_chat_id(db_connection:MySQLConnection , chat_id:str):
   cursor = db_connection.cursor()
   try:
-    #question_id is optional by default is negative and return all questions
-    #else return specific question
-    if question_id>0:
-      query = 'SELECT * from secrity_question WHERE id="{id}" LIMIT 1'.format(id=question_id)
-    else:
-      query = 'SELECT * from secrity_question '
+    query = 'SELECT * from users WHERE chat_id="{chat_id}"'.format(chat_id=chat_id)
     cursor.execute(query)
     record = cursor.fetchall()
-    return record
+    if record:
+      return False
+    else:
+      return True
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_user_with_chat_id(db_connection:MySQLConnection , chat_id:str):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    if not check_chat_id(db_connection, chat_id):
+      query = 'SELECT username from users WHERE chat_id="{chat_id}" LIMIT 1'.format(chat_id=chat_id)
+      cursor.execute(query)
+      record = cursor.fetchall()
+      return record[0][0]
+    else:
+      return False
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
 
@@ -154,3 +165,15 @@ def get_coins(db_connection:MySQLConnection):
     return record
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+
+def get_timeframe(db_connection:MySQLConnection):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    query = 'SELECT * from timeframes'
+    cursor.execute(query)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
