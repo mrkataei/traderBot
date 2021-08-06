@@ -165,15 +165,68 @@ def get_coins(db_connection:MySQLConnection):
     return record
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
-
-def get_timeframe(db_connection:MySQLConnection):
+def get_coin_name(db_connection:MySQLConnection , coin_id:int):
   cursor = db_connection.cursor()
   try:
     # check user exist
-    query = 'SELECT * from timeframes'
+      sql = 'SELECT coin FROM coins WHERE id="{id}" '.format(id=coin_id)
+      cursor.execute(sql)
+      record = cursor.fetchall()
+      return record[0][0]
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+def get_timeframe(db_connection:MySQLConnection , timeframe_id:int=-1):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    if timeframe_id < 0 :
+      query = 'SELECT * from timeframes'
+    else:
+      query = f'SELECT timeframe from timeframes WHERE id="{timeframe_id}"'
+
     cursor.execute(query)
     record = cursor.fetchall()
     return record
+
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
 
+def update_timeframe(db_connection:MySQLConnection , username:str , timeframe_id:int):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    if not check_username(db_connection, username):
+      sql = 'UPDATE user_timeframe SET timeframe_id ="{timeframe_id}"' \
+            ' WHERE user="{username}" LIMIT 1'.format(timeframe_id=timeframe_id, username=username)
+      cursor.execute(sql)
+      db_connection.commit()
+    else:
+      return False
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def set_timeframe(db_connection:MySQLConnection , username:str , timeframe_id:int):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    if not check_username(db_connection, username):
+      sql = "INSERT INTO user_timeframe (user ,timeframe_id ) VALUES (%s, %s )"
+      val = (username, timeframe_id)
+      cursor.execute(sql, val)
+      db_connection.commit()
+    else:
+      return False
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_user_timeframe(db_connection:MySQLConnection , username:str ):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    sql = f'SELECT timeframe_id FROM user_timeframe WHERE user="{username}"'
+    cursor.execute(sql)
+    record = cursor.fetchall()
+    record = get_timeframe(db_connection,record[0][0])
+    return record[0][0]
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)

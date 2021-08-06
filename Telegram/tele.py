@@ -101,8 +101,8 @@ def query_handler(call):
         bot.register_next_step_handler(call.message, callback=process_forget_username)
     if call.data == "watchlist":
         coin_keyboard = telebot.types.InlineKeyboardMarkup()
-        for coin in coins_list:
-            coin_keyboard.add(telebot.types.InlineKeyboardButton(coin[1], callback_data=coin[1]))
+        for index , coin in coins_list:
+            coin_keyboard.add(telebot.types.InlineKeyboardButton(coin, callback_data=coin))
         bot.send_message(chat_id=call.message.chat.id, text='Select your coin', reply_markup=coin_keyboard)
 
     #need more develop
@@ -111,8 +111,17 @@ def query_handler(call):
         # for coins in coins[:1]:
         user = user_dict[call.message.chat.id]
         functions.insert_coin(connection , user.username , coin ,user.watchlist[0][2] )
-        bot.reply_to(call.message, "Done! /show to show your watchlist")
+        bot.reply_to(call.message, "Done! /show to show your watchlist \n"
+                                   "Default time frame is 1m!\n"
+                                   "For change /frame")
 
+    if call.data in timeframes_list[:,1] :
+        time_id = timeframes_list[np.where(timeframes_list[:, 1] == call.data)][0][0]
+        time= timeframes_list[np.where(timeframes_list[:, 1] == call.data)][0][1]
+        # for coins in coins[:1]:
+        user = user_dict[call.message.chat.id]
+        functions.update_timeframe(connection , user.username , time_id)
+        bot.reply_to(call.message, f"Done! timeframe change to {time}")
     #after call back done keyboard delete
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
@@ -198,6 +207,8 @@ def process_reg_answer(message):
         #insert to database
         res = register.register(db_connection=connection ,username=user.username ,chat_id=user.chat_id,
                                 password=user.password1 , password2=user.password1 ,question_id=user.security_question_id , answer=user.answer)
+        #initial default timeframe 1min
+        functions.set_timeframe(connection,user.username , 1)
         bot.reply_to(message, res+"\nplease /start to login")
         del reg_dict[message.chat.id]
     except Exception as e:
@@ -311,8 +322,45 @@ def add_coin(message):
             bot.reply_to(message, 'Create watchlist first! /new')
 
 """
-    timeframe command handler update or set
+    timeframe command handler update 
 """
+@bot.message_handler(commands=['frame'])
+def update_timeframe(message):
+    if not message.chat.id in user_dict:
+        bot.reply_to(message, '😪Please /start to login')
+    #check user login
+    elif user_dict[message.chat.id] and not user_dict[message.chat.id].session :
+        bot.reply_to(message, '😪You are logged out')
+    else:
+        time_keyboard = telebot.types.InlineKeyboardMarkup()
+        for index, time in timeframes_list:
+            time_keyboard.add(telebot.types.InlineKeyboardButton(time, callback_data=time))
+        bot.send_message(chat_id=message.chat.id, text='Select your timeframe', reply_markup=time_keyboard)
+
+
+"""
+    show command handler
+"""
+@bot.message_handler(commands=['show'])
+def update_timeframe(message):
+    if not message.chat.id in user_dict:
+        bot.reply_to(message, '😪Please /start to login')
+    #check user login
+    elif user_dict[message.chat.id] and not user_dict[message.chat.id].session :
+        bot.reply_to(message, '😪You are logged out')
+    else:
+        user = user_dict[message.chat.id]
+        user.watchlist = functions.get_user_watchlist(connection, user.username)
+        if user.watchlist:
+            coins = ""
+            for watchlist in user.watchlist:
+                if watchlist[1]:
+                    coins += str(functions.get_coin_name(connection , int(watchlist[1]))) + " - "
+            res = "👀 "+ user.watchlist[0][2] + "\n💎 " + coins + "\n⏱ " + functions.get_user_timeframe(connection , user.username)
+            bot.reply_to(message, res)
+        else:
+            bot.reply_to(message, 'Create watchlist first! /new')
+
 """
     logout command handler
 """
