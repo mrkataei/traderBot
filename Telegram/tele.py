@@ -26,6 +26,7 @@ reg_dict = {}
 
 coins_list = np.array(functions.get_coins(connection))
 timeframes_list = np.array(functions.get_timeframe(connection))
+analysis_list = np.array(functions.get_analysis(connection))
 
 #need more develop on classes
 class User:
@@ -34,6 +35,7 @@ class User:
         self.session = None
         self.watchlist = []
         self.coin = None
+        self.analysis =None
 
 class Register:
     def __init__(self ,chat_id):
@@ -110,7 +112,7 @@ def query_handler(call):
         coin = coins_list[np.where(coins_list[:, 1] == call.data)][0][0]
         # for coins in coins[:1]:
         user = user_dict[call.message.chat.id]
-        functions.insert_coin(connection , user.username , coin ,user.watchlist[0][2] )
+        functions.set_coin(connection, user.username, coin, user.watchlist[0][2])
         bot.reply_to(call.message, "Done! /show to show your watchlist \n"
                                    "Default time frame is 1m!\n"
                                    "For change /frame")
@@ -122,6 +124,13 @@ def query_handler(call):
         user = user_dict[call.message.chat.id]
         functions.update_timeframe(connection , user.username , time_id)
         bot.reply_to(call.message, f"Done! timeframe change to {time}")
+
+    if call.data in analysis_list[:,1]:
+        user = user_dict[call.message.chat.id]
+        analysis_id = analysis_list[np.where(analysis_list[:, 1] == call.data)][0][0]
+        functions.set_user_analysis(connection,user.username , analysis_id)
+        bot.reply_to(call.message, f"Done!\n"
+                                   f"{user.analysis} now is work for you")
     #after call back done keyboard delete
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
@@ -209,6 +218,8 @@ def process_reg_answer(message):
                                 password=user.password1 , password2=user.password1 ,question_id=user.security_question_id , answer=user.answer)
         #initial default timeframe 1min
         functions.set_timeframe(connection,user.username , 1)
+        #init first amount bank
+        functions.set_amount_bank_user(connection , user.username , 10)
         bot.reply_to(message, res+"\nplease /start to login")
         del reg_dict[message.chat.id]
     except Exception as e:
@@ -352,14 +363,39 @@ def update_timeframe(message):
         user = user_dict[message.chat.id]
         user.watchlist = functions.get_user_watchlist(connection, user.username)
         if user.watchlist:
+            amount = functions.get_amount_bank_user(connection, user.username)
             coins = ""
             for watchlist in user.watchlist:
                 if watchlist[1]:
                     coins += str(functions.get_coin_name(connection , int(watchlist[1]))) + " - "
-            res = "👀 "+ user.watchlist[0][2] + "\n💎 " + coins + "\n⏱ " + functions.get_user_timeframe(connection , user.username)
+            # amount = 0
+            res ="💰 " + str(amount) + "$\n"\
+                  "👀 "+ user.watchlist[0][2] + "\n💎 " + coins + "\n⏱ "\
+                  + functions.get_user_timeframe(connection , user.username)
             bot.reply_to(message, res)
         else:
             bot.reply_to(message, 'Create watchlist first! /new')
+@bot.message_handler(commands=['analysis'])
+def update_timeframe(message):
+    if not message.chat.id in user_dict:
+        bot.reply_to(message, '😪Please /start to login')
+    #check user login
+    elif user_dict[message.chat.id] and not user_dict[message.chat.id].session :
+        bot.reply_to(message, '😪You are logged out')
+    else:
+        #if user dont have an analysis
+        user = user_dict[message.chat.id]
+        analysis = functions.get_user_analysis(connection ,user.username)
+        if not analysis:
+            user.analysis = analysis
+            #need loop for more analysis for now is one
+            analysis_keyboard = telebot.types.InlineKeyboardMarkup()
+            analysis_keyboard.add(telebot.types.InlineKeyboardButton(analysis, callback_data=analysis))
+            bot.send_message(chat_id=message.chat.id, text='📊️Select your analysis', reply_markup=analysis_keyboard)
+        else:
+            bot.reply_to(message, f'😏You already have {analysis} analysis \n'
+                                  f'/show to remove or see details')
+
 
 """
     logout command handler
@@ -379,6 +415,7 @@ def logout(message):
             print(user_dict)
         except Exception as e:
             bot.reply_to(message, 'logout unsuccessful')
+
 
 #needs always run
 bot.polling()

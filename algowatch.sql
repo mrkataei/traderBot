@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.0.4
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 04, 2021 at 12:48 PM
--- Server version: 10.4.17-MariaDB
--- PHP Version: 8.0.1
+-- Generation Time: Aug 06, 2021 at 08:36 PM
+-- Server version: 10.4.20-MariaDB
+-- PHP Version: 8.0.9
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,6 +24,24 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `analysis`
+--
+
+CREATE TABLE `analysis` (
+  `id` int(11) NOT NULL,
+  `name` char(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `analysis`
+--
+
+INSERT INTO `analysis` (`id`, `name`) VALUES
+(1, 'ichimoku');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `bank`
 --
 
@@ -31,6 +49,14 @@ CREATE TABLE `bank` (
   `user` char(30) CHARACTER SET utf8mb4 NOT NULL,
   `amount` double NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `bank`
+--
+
+INSERT INTO `bank` (`user`, `amount`) VALUES
+('kourosh', 10),
+('kouroshataei', 1323545.6565);
 
 -- --------------------------------------------------------
 
@@ -50,24 +76,6 @@ CREATE TABLE `coins` (
 INSERT INTO `coins` (`id`, `coin`) VALUES
 (1, 'BTCUSDT'),
 (2, 'ETHUSDT');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `indicators`
---
-
-CREATE TABLE `indicators` (
-  `name` char(30) CHARACTER SET utf8 NOT NULL,
-  `id` int(12) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `indicators`
---
-
-INSERT INTO `indicators` (`name`, `id`) VALUES
-('ichimoku', 1);
 
 -- --------------------------------------------------------
 
@@ -162,7 +170,7 @@ CREATE TABLE `transactions` (
 
 CREATE TABLE `users` (
   `username` char(30) NOT NULL,
-  `chat_id` char(12) DEFAULT NULL,
+  `chat_id` char(12) NOT NULL,
   `password` char(255) NOT NULL,
   `salt` int(20) DEFAULT NULL,
   `role` varchar(20) DEFAULT NULL,
@@ -176,26 +184,20 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `password`, `salt`, `role`, `question_id`, `question_answer`, `timestamp`) VALUES
-('kouroshataei', '1210507821', '23a4c6b99fe5eb158062de39946c048ba768bdd20e11503f14a2c03e848a49d09f0a0b900d600e57170eb8f13f48a3ed6090e4549acfa8bf5a865b251d026663', 15920, 'admin', 1, 'qoli', '2021-08-02 18:31:33');
+('kourosh', '1079329555', '22fbf1e23a6e8ab42286d910f4af1dca1d87dee25afa704e140a2e50048d4bf57776d900be6b1c33b47dee2850e404f39155d5b8c26e90c9ae448fd5d572adbc', 78068, 'user', 2, 'ferdows', '2021-08-06 18:33:02'),
+('kouroshataei', '1210507821', '93a898fa890e0a1d6370ce6715f241d08d83ffda7a7e4150feb91cff607683538d9ee7a45047a39354a21c9e9b1daf56b552d1966650062f23efa3a58a018a86', 89640, 'admin', 1, 'qoli', '2021-08-02 18:31:33');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_indicators`
+-- Table structure for table `user_analysis`
 --
 
-CREATE TABLE `user_indicators` (
+CREATE TABLE `user_analysis` (
   `id` int(12) NOT NULL,
-  `user` char(30) CHARACTER SET utf8mb4 NOT NULL,
-  `indicator_id` int(12) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Dumping data for table `user_indicators`
---
-
-INSERT INTO `user_indicators` (`id`, `user`, `indicator_id`) VALUES
-(1, 'kouroshataei', 1);
+  `user` char(30) NOT NULL,
+  `analysis_id` int(12) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -214,8 +216,8 @@ CREATE TABLE `user_timeframe` (
 --
 
 INSERT INTO `user_timeframe` (`id`, `user`, `timeframe_id`) VALUES
-(1, 'kouroshataei', 15),
-(2, 'kouroshataei', 9);
+(31, 'kouroshataei', 10),
+(32, 'kourosh', 6);
 
 -- --------------------------------------------------------
 
@@ -235,11 +237,21 @@ CREATE TABLE `watchlist` (
 --
 
 INSERT INTO `watchlist` (`user`, `coin_id`, `name`, `id`) VALUES
-('kouroshataei', 1, 'my_watchlist', 1);
+('kouroshataei', 1, 'my', 10),
+('kouroshataei', NULL, 'my', 11),
+('kourosh', 1, 'new', 12),
+('kourosh', NULL, 'new', 13);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `analysis`
+--
+ALTER TABLE `analysis`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
 
 --
 -- Indexes for table `bank`
@@ -251,12 +263,6 @@ ALTER TABLE `bank`
 -- Indexes for table `coins`
 --
 ALTER TABLE `coins`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `indicators`
---
-ALTER TABLE `indicators`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -289,16 +295,17 @@ ALTER TABLE `transactions`
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`username`),
+  ADD PRIMARY KEY (`username`,`chat_id`),
+  ADD UNIQUE KEY `chat_id` (`chat_id`),
   ADD KEY `users_ibfk_1` (`question_id`);
 
 --
--- Indexes for table `user_indicators`
+-- Indexes for table `user_analysis`
 --
-ALTER TABLE `user_indicators`
+ALTER TABLE `user_analysis`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `indicator_id` (`indicator_id`),
-  ADD KEY `username_indi` (`user`);
+  ADD KEY `analysis_username` (`user`),
+  ADD KEY `analysis_id` (`analysis_id`);
 
 --
 -- Indexes for table `user_timeframe`
@@ -321,16 +328,16 @@ ALTER TABLE `watchlist`
 --
 
 --
+-- AUTO_INCREMENT for table `analysis`
+--
+ALTER TABLE `analysis`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `coins`
 --
 ALTER TABLE `coins`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `indicators`
---
-ALTER TABLE `indicators`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `operations`
@@ -351,22 +358,22 @@ ALTER TABLE `transactions`
   MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `user_indicators`
+-- AUTO_INCREMENT for table `user_analysis`
 --
-ALTER TABLE `user_indicators`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `user_analysis`
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `user_timeframe`
 --
 ALTER TABLE `user_timeframe`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `watchlist`
 --
 ALTER TABLE `watchlist`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
@@ -392,11 +399,11 @@ ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `secrity_question` (`id`);
 
 --
--- Constraints for table `user_indicators`
+-- Constraints for table `user_analysis`
 --
-ALTER TABLE `user_indicators`
-  ADD CONSTRAINT `indicator_id` FOREIGN KEY (`indicator_id`) REFERENCES `indicators` (`id`),
-  ADD CONSTRAINT `username_indi` FOREIGN KEY (`user`) REFERENCES `users` (`username`);
+ALTER TABLE `user_analysis`
+  ADD CONSTRAINT `analysis_id` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`),
+  ADD CONSTRAINT `analysis_username` FOREIGN KEY (`user`) REFERENCES `users` (`username`);
 
 --
 -- Constraints for table `user_timeframe`

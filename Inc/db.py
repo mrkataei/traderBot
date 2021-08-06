@@ -25,3 +25,9 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+
+# db = con_db()
+# functions.set_amount_bank_user(db , "kouroshataei" , 1323545.6565)
+# print(functions.get_amount_bank_user(db , "kouroshataei"))
+# functions.set_user_analysis(db , "kouroshataei" , 1)
+# print(functions.get_user_analysis(db , "kouroshataei"))
