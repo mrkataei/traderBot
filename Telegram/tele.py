@@ -112,10 +112,12 @@ def query_handler(call):
         coin = coins_list[np.where(coins_list[:, 1] == call.data)][0][0]
         # for coins in coins[:1]:
         user = user_dict[call.message.chat.id]
-        functions.set_coin(connection, user.username, coin, user.watchlist[0][2])
-        bot.reply_to(call.message, "Done! /show to show your watchlist \n"
-                                   "Default time frame is 1m!\n"
-                                   "For change /frame")
+        if not functions.set_coin(connection, user.username, coin, user.watchlist[0][2])[0]:
+            bot.reply_to(call.message, "Coin already in watchlist /add")
+        else:
+            bot.reply_to(call.message, "Done! /show to show your watchlist \n"
+                                       "Default time frame is 1m!\n"
+                                       "For change /frame")
 
     if call.data in timeframes_list[:,1] :
         time_id = timeframes_list[np.where(timeframes_list[:, 1] == call.data)][0][0]

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 06, 2021 at 08:36 PM
+-- Generation Time: Aug 06, 2021 at 09:13 PM
 -- Server version: 10.4.20-MariaDB
 -- PHP Version: 8.0.9
 
@@ -320,6 +320,7 @@ ALTER TABLE `user_timeframe`
 --
 ALTER TABLE `watchlist`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user` (`user`,`coin_id`),
   ADD KEY `username` (`user`),
   ADD KEY `coin_id` (`coin_id`);
 

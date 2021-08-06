@@ -138,7 +138,7 @@ def set_coin(db_connection:MySQLConnection, username:str, coin_id:int, watchlist
     else:
       return False
   except mysql.connector.Error as err:
-    return "Something went wrong: {}".format(err)
+    return False , "Something went wrong: {}".format(err)
 
 def get_empty_coins_remain(db_connection:MySQLConnection , username:str , watchlist_name:str):
   cursor = db_connection.cursor()
