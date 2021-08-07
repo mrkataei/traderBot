@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 07, 2021 at 10:53 AM
+-- Generation Time: Aug 07, 2021 at 11:34 AM
 -- Server version: 10.4.20-MariaDB
 -- PHP Version: 8.0.9
 
@@ -338,8 +338,8 @@ ALTER TABLE `recommendations`
 -- Indexes for table `score_analysis`
 --
 ALTER TABLE `score_analysis`
-  ADD KEY `user_score` (`user`),
-  ADD KEY `recom_id_score` (`recom_id`);
+  ADD UNIQUE KEY `recom_id` (`recom_id`,`user`),
+  ADD KEY `user_score` (`user`);
 
 --
 -- Indexes for table `secrity_question`
