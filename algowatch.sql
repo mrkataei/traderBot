@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 06, 2021 at 09:13 PM
+-- Generation Time: Aug 07, 2021 at 10:53 AM
 -- Server version: 10.4.20-MariaDB
 -- PHP Version: 8.0.9
 
@@ -99,6 +99,52 @@ INSERT INTO `operations` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `recommendations`
+--
+
+CREATE TABLE `recommendations` (
+  `coin_id` int(11) NOT NULL,
+  `analysis_id` int(11) NOT NULL,
+  `position` char(12) NOT NULL,
+  `target_price` double NOT NULL,
+  `current_price` double NOT NULL,
+  `timeframe_id` int(11) NOT NULL,
+  `cost_price` double NOT NULL,
+  `risk` char(12) NOT NULL,
+  `timestmp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id` int(12) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `recommendations`
+--
+
+INSERT INTO `recommendations` (`coin_id`, `analysis_id`, `position`, `target_price`, `current_price`, `timeframe_id`, `cost_price`, `risk`, `timestmp`, `id`) VALUES
+(1, 1, 'buy', 2250, 2200, 2, 1.5, 'high', '2021-08-07 08:46:22', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `score_analysis`
+--
+
+CREATE TABLE `score_analysis` (
+  `recom_id` int(12) NOT NULL,
+  `score` int(5) NOT NULL,
+  `user` char(30) NOT NULL,
+  `is_used` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `score_analysis`
+--
+
+INSERT INTO `score_analysis` (`recom_id`, `score`, `user`, `is_used`) VALUES
+(1, 4, 'kourosh', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `secrity_question`
 --
 
@@ -184,7 +230,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `password`, `salt`, `role`, `question_id`, `question_answer`, `timestamp`) VALUES
-('kourosh', '1079329555', '22fbf1e23a6e8ab42286d910f4af1dca1d87dee25afa704e140a2e50048d4bf57776d900be6b1c33b47dee2850e404f39155d5b8c26e90c9ae448fd5d572adbc', 78068, 'user', 2, 'ferdows', '2021-08-06 18:33:02'),
+('kourosh', '1079329555', 'a2c21f4bf5dd9245a0cda3addcc0df4d3a2bd3a63e93f1300250019a5b646fdd312e91514dc036bd2b1ae4aa4e9e96d3ed5e3e7de37ab0633b439e9c0d4aa5e4', 78066, 'user', 2, 'Ferdows', '2021-08-07 08:22:30'),
 ('kouroshataei', '1210507821', '93a898fa890e0a1d6370ce6715f241d08d83ffda7a7e4150feb91cff607683538d9ee7a45047a39354a21c9e9b1daf56b552d1966650062f23efa3a58a018a86', 89640, 'admin', 1, 'qoli', '2021-08-02 18:31:33');
 
 -- --------------------------------------------------------
@@ -198,6 +244,14 @@ CREATE TABLE `user_analysis` (
   `user` char(30) NOT NULL,
   `analysis_id` int(12) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `user_analysis`
+--
+
+INSERT INTO `user_analysis` (`id`, `user`, `analysis_id`) VALUES
+(9, 'kourosh', 1),
+(10, 'kouroshataei', 1);
 
 -- --------------------------------------------------------
 
@@ -216,8 +270,8 @@ CREATE TABLE `user_timeframe` (
 --
 
 INSERT INTO `user_timeframe` (`id`, `user`, `timeframe_id`) VALUES
-(31, 'kouroshataei', 10),
-(32, 'kourosh', 6);
+(31, 'kouroshataei', 8),
+(34, 'kourosh', 2);
 
 -- --------------------------------------------------------
 
@@ -238,9 +292,9 @@ CREATE TABLE `watchlist` (
 
 INSERT INTO `watchlist` (`user`, `coin_id`, `name`, `id`) VALUES
 ('kouroshataei', 1, 'my', 10),
-('kouroshataei', NULL, 'my', 11),
-('kourosh', 1, 'new', 12),
-('kourosh', NULL, 'new', 13);
+('kouroshataei', 2, 'my', 11),
+('kourosh', 2, 'crypto', 18),
+('kourosh', 1, 'crypto', 19);
 
 --
 -- Indexes for dumped tables
@@ -270,6 +324,22 @@ ALTER TABLE `coins`
 --
 ALTER TABLE `operations`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `recommendations`
+--
+ALTER TABLE `recommendations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `coin_id_recom` (`coin_id`),
+  ADD KEY `analysis_id_recom` (`analysis_id`),
+  ADD KEY `timeframe_id_recom` (`timeframe_id`);
+
+--
+-- Indexes for table `score_analysis`
+--
+ALTER TABLE `score_analysis`
+  ADD KEY `user_score` (`user`),
+  ADD KEY `recom_id_score` (`recom_id`);
 
 --
 -- Indexes for table `secrity_question`
@@ -347,6 +417,12 @@ ALTER TABLE `operations`
   MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `recommendations`
+--
+ALTER TABLE `recommendations`
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `timeframes`
 --
 ALTER TABLE `timeframes`
@@ -362,19 +438,19 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `user_analysis`
 --
 ALTER TABLE `user_analysis`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `user_timeframe`
 --
 ALTER TABLE `user_timeframe`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `watchlist`
 --
 ALTER TABLE `watchlist`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables
@@ -385,6 +461,21 @@ ALTER TABLE `watchlist`
 --
 ALTER TABLE `bank`
   ADD CONSTRAINT `username_bank` FOREIGN KEY (`user`) REFERENCES `users` (`username`);
+
+--
+-- Constraints for table `recommendations`
+--
+ALTER TABLE `recommendations`
+  ADD CONSTRAINT `analysis_id_recom` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`),
+  ADD CONSTRAINT `coin_id_recom` FOREIGN KEY (`coin_id`) REFERENCES `coins` (`id`),
+  ADD CONSTRAINT `timeframe_id_recom` FOREIGN KEY (`timeframe_id`) REFERENCES `timeframes` (`id`);
+
+--
+-- Constraints for table `score_analysis`
+--
+ALTER TABLE `score_analysis`
+  ADD CONSTRAINT `recom_id_score` FOREIGN KEY (`recom_id`) REFERENCES `recommendations` (`id`),
+  ADD CONSTRAINT `user_score` FOREIGN KEY (`user`) REFERENCES `users` (`username`);
 
 --
 -- Constraints for table `transactions`

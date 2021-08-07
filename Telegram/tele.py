@@ -133,7 +133,7 @@ def query_handler(call):
         analysis_id = analysis_list[np.where(analysis_list[:, 1] == call.data)][0][0]
         functions.set_user_analysis(connection, user.username , int(analysis_id))
         bot.reply_to(call.message, f"Done!\n"
-                                   f"{call.data} now is work for you")
+                                   f"Now {call.data} is working for you")
     #after call back done keyboard delete
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 

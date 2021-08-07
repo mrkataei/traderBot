@@ -1,3 +1,9 @@
+""""
+Mr.Kataei 8/7/2021
+all functions about queries from database define here, for now
+soon this file must be cluster and to be multiple files
+"""
+
 import mysql.connector
 from mysql.connector import MySQLConnection
 import re
