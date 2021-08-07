@@ -15,11 +15,13 @@ from time import sleep
 from Auth import login , register , reset_password
 from Inc import db , functions
 import numpy as np
-
+from binance.client import Client
+from Telegram import candle
 #statics
 # API_KEY = os.getenv('API_KEY')
 API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
 bot = telebot.TeleBot(API_KEY)
+client = Client()
 connection = db.con_db()
 user_dict = {}
 reg_dict = {}
@@ -27,7 +29,6 @@ reg_dict = {}
 coins_list = np.array(functions.get_coins(connection))
 timeframes_list = np.array(functions.get_timeframe(connection))
 analysis_list = np.array(functions.get_analysis(connection))
-
 #need more develop on classes
 class User:
     def __init__(self):
@@ -130,8 +131,7 @@ def query_handler(call):
     if call.data in analysis_list[:,1]:
         user = user_dict[call.message.chat.id]
         analysis_id = analysis_list[np.where(analysis_list[:, 1] == call.data)][0][0]
-        #analysis_id check beshe!
-        functions.set_user_analysis(connection, user.username , 1)
+        functions.set_user_analysis(connection, user.username , int(analysis_id))
         bot.reply_to(call.message, f"Done!\n"
                                    f"{call.data} now is work for you")
     #after call back done keyboard delete
@@ -299,7 +299,8 @@ def new_watchlist(message):
         bot.reply_to(message, 'Please login /start')
     else:
         user = user_dict[message.chat.id]
-        if len(functions.get_user_watchlist(connection , user.username)) < 2:
+        # if len(functions.get_user_watchlist(connection , user.username)) < 1:
+        if not functions.get_user_watchlist(connection , user.username):
             bot.reply_to(message, "Enter your watchlist name")
             bot.register_next_step_handler(message, process_new_watch)
         else:
@@ -367,14 +368,18 @@ def update_timeframe(message):
         user.watchlist = functions.get_user_watchlist(connection, user.username)
         if user.watchlist:
             amount = functions.get_amount_bank_user(connection, user.username)
+            timeframe = functions.get_user_timeframe(connection, user.username)
             coins = ""
             for watchlist in user.watchlist:
                 if watchlist[1]:
-                    coins += str(functions.get_coin_name(connection , int(watchlist[1]))) + " - "
+                    coin = str(functions.get_coin_name(connection , int(watchlist[1])))
+                    percent = candle.get_percent_candle(coin, timeframe)
+                    percent = str(percent) + " 🔴" if percent<0 else str(percent)+ " 🟢"
+                    coins += coin + " %"+ percent +"\n"
             # amount = 0
-            res ="💰 " + str(amount) + "$\n"\
-                  "👀 "+ user.watchlist[0][2] + "\n💎 " + coins + "\n⏱ "\
-                  + functions.get_user_timeframe(connection , user.username)
+            res ="💰 Assets\n" + str(amount) + "$\n\n"\
+                  "👀 Watchlists\n"+ user.watchlist[0][2] + "\n\n💎 Coins\n" + coins + "\n⏱ Timeframe\n"\
+                  + timeframe
             bot.reply_to(message, res)
         else:
             bot.reply_to(message, 'Create watchlist first! /new')
@@ -389,12 +394,10 @@ def update_timeframe(message):
         #if user dont have an analysis
         user = user_dict[message.chat.id]
         analysis = functions.get_user_analysis(connection ,user.username)
-        print(analysis)
         if not analysis:
-            analysis =functions.get_analysis(connection , 1)
-            #need loop for more analysis for now is one
             analysis_keyboard = telebot.types.InlineKeyboardMarkup()
-            analysis_keyboard.add(telebot.types.InlineKeyboardButton(analysis[0][0], callback_data=analysis[0][0]))
+            for index , analy in analysis_list:
+                analysis_keyboard.add(telebot.types.InlineKeyboardButton(analy, callback_data=analy))
             bot.send_message(chat_id=message.chat.id, text='📊️Select your analysis', reply_markup=analysis_keyboard)
         else:
             bot.reply_to(message, f'😏You already have {analysis} analysis \n'
