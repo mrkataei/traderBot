@@ -7,9 +7,11 @@ import tensorflow as tf
 from tensorflow.keras import *
 from tensorflow.keras.layers import *
 import matplotlib.pyplot as plt
+import os
 
 plt.style.use('seaborn')
-IBM_path = 'Static/IBM.csv'
+IBM_path = "IBM.csv"
+
 df = pd.read_csv(IBM_path, delimiter=',', usecols=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
 
 
@@ -24,10 +26,12 @@ def preprocess(data: pd.DataFrame):
 #     fig.add_trace(go.Candlestick(x=data['Date'], open=data['Open'], high=data['High'], low=data['Low'], close=data['Close']),
 #                   secondary_y=False)
 #     fig.show()
+
 class CNN:
     def __init__(self):
         pass
 
+    # for use CNN in any kinde of kernel size
     def A(self, layer_in, filter):
         branch1x1 = Conv1D(filter, kernel_size=1, padding="same", use_bias=False, activation='relu')(layer_in)
 
@@ -99,7 +103,7 @@ class CNN:
         outputs = Concatenate(axis=-1)([branch1x1, branch7x7, branch7x7dbl, branch_pool])
         return outputs
 
-
+#for use RNN+CNN to train and predict
 class ML:
     __data = None
     __train = None
@@ -112,14 +116,14 @@ class ML:
     X_test, y_test = None, None
 
     def __init__(self, data: pd.DataFrame, model=None, seq_len: int = 128, timefram: int = 1):
-        self.seq_len = seq_len
-        self.timefram = timefram
+        self.seq_len = seq_len #indicate the number of sequntiol data which wanna network see
+        self.timefram = timefram #indicate the number of days later to predict for it's price ex: if you wanna train 128 days ago you set seq_len=128 and then you wanna predict price for 3 days later you set timefram =3
         self.__model = model
         self.__data = preprocess(data)
         self.__preprocess(timeframe=self.timefram)
-        self.__normalizedata()
+        self.__normalizedata() #normalize data to make train better (convergence network)
         self.__split()
-        self.__make_sequntial_array()
+        self.__make_sequential_array() #transfer data to sequ
         if self.__model == None:
             self.__model = self.create_model()
         print("initialize has been done.")
@@ -136,29 +140,45 @@ class ML:
 
     def __normalizedata(self):
         '''Normalize price columns'''
-        op = self.__data.nsmallest(20, columns=["Open"]).Open.sum() / 20
-        hi = self.__data.nsmallest(20, columns=["High"]).High.sum() / 20
-        lo = self.__data.nsmallest(20, columns=["Low"]).Low.sum() / 20
-        cl = self.__data.nsmallest(20, columns=["Close"]).Close.sum() / 20
-        op2 = self.__data.nlargest(20, columns=["Open"]).Open.sum() / 20
-        hi2 = self.__data.nlargest(20, columns=["High"]).High.sum() / 20
-        lo2 = self.__data.nlargest(20, columns=["Low"]).Low.sum() / 20
-        cl2 = self.__data.nlargest(20, columns=["Close"]).Close.sum() / 20
-        min_return = min(op, hi, lo, cl)
-        max_return = max(op2, hi2, lo2, cl2)
+        bigdata = np.concatenate((np.array(self.__data['Open']), np.array(self.__data['High']), np.array(self.__data['Low']), np.array(self.__data["Close"])))
+        mean = np.mean(bigdata)
+        std = np.std(bigdata)
+        # standard normalize price columns (0-1 range)
+        self.__data['Open'] = (self.__data['Open'] - mean) / std
+        self.__data['High'] = (self.__data['High'] - mean) / std
+        self.__data['Low'] = (self.__data['Low'] - mean) / std
+        self.__data['Close'] = (self.__data['Close'] - mean) / std
+
+        vol = np.array(self.__data['Volume'])
+        volmean = np.mean(vol)
+        volstd = np.std(vol)
+
+        self.__data['Volume'] = (self.__data['Volume'] - volmean) / volstd
+
+        #remove noise
+
+        self.__data.drop(self.__data[self.__data['Close'] < -5].index, inplace=True)
+        self.__data.drop(self.__data[self.__data['Close'] > 5].index, inplace=True)
+        self.__data.drop(self.__data[self.__data["Volume"] > 5].index, inplace=True)
+        min_return = min(self.__data[['Open', 'High', 'Low', 'Close']].min(axis=0))
+        max_return = max(self.__data[['Open', 'High', 'Low', 'Close']].max(axis=0))
+
         # Min-max normalize price columns (0-1 range)
+
         self.__data['Open'] = (self.__data['Open'] - min_return) / (max_return - min_return)
         self.__data['High'] = (self.__data['High'] - min_return) / (max_return - min_return)
         self.__data['Low'] = (self.__data['Low'] - min_return) / (max_return - min_return)
         self.__data['Close'] = (self.__data['Close'] - min_return) / (max_return - min_return)
+
         '''Normalize volume column'''
-        vl = self.__data.nsmallest(20, columns=["Volume"]).Volume.sum() / 20
-        vl2 = self.__data.nlargest(20, columns=["Volume"]).Volume.sum() / 20
-        min_volume = vl
-        max_volume = vl2
+
+        min_volume = self.__data['Volume'].min(axis=0)
+        max_volume = self.__data['Volume'].max(axis=0)
 
         # Min-max normalize volume columns (0-1 range)
         self.__data['Volume'] = (self.__data['Volume'] - min_volume) / (max_volume - min_volume)
+
+        ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         print(self.__data)
 
     def __split(self):
@@ -174,7 +194,7 @@ class ML:
         self.__valid.drop(columns=['Date'], inplace=True)
         self.__test.drop(columns=['Date'], inplace=True)
 
-    def __make_sequntial_array(self):
+    def __make_sequential_array(self):
         # Convert pandas columns into arrays
         self.__train = self.__train.values
         self.__valid = self.__valid.values
