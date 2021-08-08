@@ -231,20 +231,25 @@ class ML:
 
     def create_model(self):
 
+        cnn=CNN()
         in_seq = Input(shape=(self.seq_len, 5))
-        cnn = CNN()
-        x = cnn.A(in_seq, 32)
-        x = cnn.A(x, 32)
-        x = cnn.B(x, 32)
-        x = cnn.B(x, 32)
-        x = cnn.C(x, 32)
-        x = cnn.C(x, 32)
-        x = Bidirectional(LSTM(128, return_sequences=True))(x)
+        x = Bidirectional(LSTM(64,return_sequences=True))(in_seq)
+        x=cnn.A(x,32)
+        x=LSTM(32)(x)
+
+        in_seq2 = Input(shape=(int(self.seq_len/2), 5))
+        x2 = Bidirectional(LSTM(64,return_sequences=True))(in_seq2)
+        x2=cnn.A(x2,32)
+        x2=LSTM(32)(x2)
+
+        in_seq3 = Input(shape=(int(self.seq_len/4), 5))
+        x3 = Bidirectional(LSTM(64,return_sequences=True))(in_seq3)
+        x3=cnn.A(x3,32)
+        x3=LSTM(32)(x3)
         # x = Bidirectional(LSTM(64, return_sequences=True))(in_seq)
         # avg_pool = GlobalAveragePooling1D()(x)
         # max_pool = GlobalMaxPooling1D()(x)
-        x = x[:, -1, :]
-        # conc = concatenate([avg_pool, max_pool,x])
+        conc = concatenate([x,x2,x3])
         conc = Dense(64, activation="relu")(x)
         out = Dense(1, activation="linear")(conc)
         model = Model(inputs=in_seq, outputs=out)
