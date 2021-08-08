@@ -111,9 +111,9 @@ class ML:
     __test = None
     __model = None
     __callback = None
-    X_train, y_train = None, None
-    X_val, y_val = None, None
-    X_test, y_test = None, None
+    X_train,X_train2 ,X_train3 , y_train = None, None,None, None
+    X_val, X_val2 ,X_val3 ,y_val = None, None,None, None
+    X_test, X_test2,X_test3,y_test = None, None,None, None
 
     def __init__(self, data: pd.DataFrame, model=None, seq_len: int = 128, timefram: int = 1):
         self.seq_len = seq_len #indicate the number of sequntiol data which wanna network see
@@ -203,10 +203,11 @@ class ML:
         print('Validation data shape: {}'.format(self.__valid.shape))
         print('Test data shape: {}'.format(self.__test.shape))
         # Training data
-        self.X_train, self.y_train = [], []
+        self.X_train, self.y_train,self.X_train2,self.X_train3 = [], [],[],[]
         for i in range(self.seq_len, len(self.__train) - (self.timefram - 1)):
-            self.X_train.append(
-                self.__train[i - self.seq_len:i])  # Chunks of training data with a length of 128 df-rows
+            self.X_train.append(self.__train[i - self.seq_len:i])  # Chunks of training data with a length of 128 df-rows
+            self.X_train2.append(self.__train[i - int(self.seq_len/2):i])
+            self.X_train3.append(self.__train[i - int(self.seq_len/4):i])
             self.y_train.append(
                 self.__train[:, 3][i + (self.timefram - 1)])  # Value of 4th column (Close Price) of df-row 128+1
         self.X_train, self.y_train = np.array(self.X_train), np.array(self.y_train)
@@ -214,18 +215,22 @@ class ML:
         ###############################################################################
 
         # Validation data
-        self.X_val, self.y_val = [], []
+        self.X_val, self.y_val,self.X_val2,self.X_val3 = [], [],[], []
         for i in range(self.seq_len, len(self.__valid) - (self.timefram - 1)):
             self.X_val.append(self.__valid[i - self.seq_len:i])
+            self.X_val2.append(self.__valid[i - int(self.seq_len/2):i])
+            self.X_val3.append(self.__valid[i - int(self.seq_len/4):i])
             self.y_val.append(self.__valid[:, 3][i + (self.timefram - 1)])
         self.X_val, self.y_val = np.array(self.X_val), np.array(self.y_val)
 
         ###############################################################################
 
         # Test data
-        self.X_test, self.y_test = [], []
+        self.X_test, self.y_test,self.X_test2,self.X_test3 = [], [],[], []
         for i in range(self.seq_len, len(self.__test) - (self.timefram - 1)):
             self.X_test.append(self.__test[i - self.seq_len:i])
+            self.X_test2.append(self.__test[i - int(self.seq_len/2):i])
+            self.X_test3.append(self.__test[i - int(self.seq_len / 4):i])
             self.y_test.append(self.__test[:, 3][i + (self.timefram - 1)])
         self.X_test, self.y_test = np.array(self.X_test), np.array(self.y_test)
 
@@ -233,17 +238,19 @@ class ML:
 
         cnn=CNN()
         in_seq = Input(shape=(self.seq_len, 5))
+        x=in_seq[:,:self.seq_len,:]
+        x2=in_seq[:,self.seq_len:self.seq_len+int(self.seq_len/2),:]
+        x3=in_seq[:,self.seq_len+int(self.seq_len/2):,:]
         x = Bidirectional(LSTM(64,return_sequences=True))(in_seq)
         x=cnn.A(x,32)
         x=LSTM(32)(x)
 
-        in_seq2 = Input(shape=(int(self.seq_len/2), 5))
-        x2 = Bidirectional(LSTM(64,return_sequences=True))(in_seq2)
+        x2= Input(shape=(int(self.seq_len/2), 5))
+        x2 = Bidirectional(LSTM(64,return_sequences=True))(x2)
         x2=cnn.A(x2,32)
         x2=LSTM(32)(x2)
-
-        in_seq3 = Input(shape=(int(self.seq_len/4), 5))
-        x3 = Bidirectional(LSTM(64,return_sequences=True))(in_seq3)
+        x3= Input(shape=(int(self.seq_len/4), 5))
+        x3 = Bidirectional(LSTM(64,return_sequences=True))(x3)
         x3=cnn.A(x3,32)
         x3=LSTM(32)(x3)
         # x = Bidirectional(LSTM(64, return_sequences=True))(in_seq)
