@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import os
 
 plt.style.use('seaborn')
-PAth = "BTC-USD.csv"
+PAth = "Static/BTC-USD.csv"
 
 df = pd.read_csv(PAth, delimiter=',', usecols=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
 
@@ -252,17 +252,17 @@ class ML:
         x = in_seq[:, :self.seq_len, :]
         x2 = in_seq[:, self.seq_len:self.seq_len + int(self.seq_len / 2), :]
         x3 = in_seq[:, self.seq_len + int(self.seq_len / 2):, :]
-        x = cnn.A(x, 32)
+        x = cnn.A(x, 64)
         # x = Bidirectional(LSTM(64,return_sequences=True))(x)
 
-        x = LSTM(32)(x)
-        x2 = cnn.A(x2, 32)
+        x = LSTM(16)(x)
+        x2 = cnn.A(x2, 64)
         # x2 = Bidirectional(LSTM(64,return_sequences=True))(x2)
         x2 = LSTM(32)(x2)
 
-        x3 = cnn.A(x3, 32)
+        x3 = cnn.A(x3, 64)
         # x3 = Bidirectional(LSTM(64,return_sequences=True))(x3)
-        x3 = LSTM(32)(x3)
+        x3 = LSTM(64)(x3)
         # x = Bidirectional(LSTM(64, return_sequences=True))(in_seq)
         # avg_pool = GlobalAveragePooling1D()(x)
         # max_pool = GlobalMaxPooling1D()(x)
@@ -278,7 +278,7 @@ class ML:
         model.fit(self.X_train, self.y_train, batch_size=2048,
                   verbose=2,
                   callbacks=[self.__callback],
-                  epochs=10,
+                  epochs=30,
                   # shuffle=True,
                   validation_data=(self.X_val, self.y_val), )
         return model
@@ -319,13 +319,16 @@ class ML:
         ax11.set_xlabel('Date')
         ax11.set_ylabel('IBM Closing Returns')
         ax22 = fig.add_subplot(312)
-        ax22.plot(self.__test[self.seq_len + self.timefram - 1:, 3], label='IBM Closing Returns')
-        ax22.plot(test_pred[:], color='yellow', linewidth=3, label='Predicted IBM Closing Returns')
+        ax22.plot(self.__test[self.seq_len + self.timefram - 1:, 3] * (
+                    (self.max_return - self.min_return) + self.min_return) * self.std + self.mean,
+                  label='IBM Closing Returns')
+        ax22.plot(test_pred[:] * ((self.max_return - self.min_return) + self.min_return) * self.std + self.mean,
+                  color='yellow', linewidth=3, label='Predicted IBM Closing Returns')
         ax22.set_title("test Data", fontsize=18)
         ax22.set_xlabel('Date')
         ax22.set_ylabel('IBM Closing Returns')
 
 
 model = tf.keras.models.load_model('Static/ARAN_model.hdf5')
-a = ML(df, seq_len=128, timefram=1, model=model)
+a = ML(df, seq_len=128, timefram=1)
 a.predict()
