@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import os
 
 plt.style.use('seaborn')
-IBM_path = "IBM.csv"
+PAth = "BTC-USD.csv"
 
-df = pd.read_csv(IBM_path, delimiter=',', usecols=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+df = pd.read_csv(PAth, delimiter=',', usecols=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
 
 
 # based on https://towardsdatascience.com/the-beginning-of-a-deep-learning-trading-bot-part1-95-accuracy-is-not-enough-c338abc98fc2
@@ -103,7 +103,8 @@ class CNN:
         outputs = Concatenate(axis=-1)([branch1x1, branch7x7, branch7x7dbl, branch_pool])
         return outputs
 
-#for use RNN+CNN to train and predict
+
+# for use RNN+CNN to train and predict
 class ML:
     __data = None
     __train = None
@@ -111,19 +112,24 @@ class ML:
     __test = None
     __model = None
     __callback = None
-    X_train,X_train2 ,X_train3 , y_train = None, None,None, None
-    X_val, X_val2 ,X_val3 ,y_val = None, None,None, None
-    X_test, X_test2,X_test3,y_test = None, None,None, None
+    max_return = None
+    min_return = None
+    std = None
+    mean = None
+    __test = None
+    X_train, X_train2, X_train3, y_train = None, None, None, None
+    X_val, X_val2, X_val3, y_val = None, None, None, None
+    X_test, X_test2, X_test3, y_test = None, None, None, None
 
     def __init__(self, data: pd.DataFrame, model=None, seq_len: int = 128, timefram: int = 1):
-        self.seq_len = seq_len #indicate the number of sequntiol data which wanna network see
-        self.timefram = timefram #indicate the number of days later to predict for it's price ex: if you wanna train 128 days ago you set seq_len=128 and then you wanna predict price for 3 days later you set timefram =3
+        self.seq_len = seq_len  # indicate the number of sequntiol data which wanna network see
+        self.timefram = timefram  # indicate the number of days later to predict for it's price ex: if you wanna train 128 days ago you set seq_len=128 and then you wanna predict price for 3 days later you set timefram =3
         self.__model = model
         self.__data = preprocess(data)
         self.__preprocess(timeframe=self.timefram)
-        self.__normalizedata() #normalize data to make train better (convergence network)
+        self.__normalizedata()  # normalize data to make train better (convergence network)
         self.__split()
-        self.__make_sequential_array() #transfer data to sequ
+        self.__make_sequential_array()  # transfer data to sequ
         if self.__model == None:
             self.__model = self.create_model()
         print("initialize has been done.")
@@ -140,14 +146,15 @@ class ML:
 
     def __normalizedata(self):
         '''Normalize price columns'''
-        bigdata = np.concatenate((np.array(self.__data['Open']), np.array(self.__data['High']), np.array(self.__data['Low']), np.array(self.__data["Close"])))
-        mean = np.mean(bigdata)
-        std = np.std(bigdata)
+        bigdata = np.concatenate((np.array(self.__data['Open']), np.array(self.__data['High']),
+                                  np.array(self.__data['Low']), np.array(self.__data["Close"])))
+        self.mean = np.mean(bigdata)
+        self.std = np.std(bigdata)
         # standard normalize price columns (0-1 range)
-        self.__data['Open'] = (self.__data['Open'] - mean) / std
-        self.__data['High'] = (self.__data['High'] - mean) / std
-        self.__data['Low'] = (self.__data['Low'] - mean) / std
-        self.__data['Close'] = (self.__data['Close'] - mean) / std
+        self.__data['Open'] = (self.__data['Open'] - self.mean) / self.std
+        self.__data['High'] = (self.__data['High'] - self.mean) / self.std
+        self.__data['Low'] = (self.__data['Low'] - self.mean) / self.std
+        self.__data['Close'] = (self.__data['Close'] - self.mean) / self.std
 
         vol = np.array(self.__data['Volume'])
         volmean = np.mean(vol)
@@ -155,20 +162,20 @@ class ML:
 
         self.__data['Volume'] = (self.__data['Volume'] - volmean) / volstd
 
-        #remove noise
+        # remove noise
 
         self.__data.drop(self.__data[self.__data['Close'] < -5].index, inplace=True)
         self.__data.drop(self.__data[self.__data['Close'] > 5].index, inplace=True)
         self.__data.drop(self.__data[self.__data["Volume"] > 5].index, inplace=True)
-        min_return = min(self.__data[['Open', 'High', 'Low', 'Close']].min(axis=0))
-        max_return = max(self.__data[['Open', 'High', 'Low', 'Close']].max(axis=0))
+        self.min_return = min(self.__data[['Open', 'High', 'Low', 'Close']].min(axis=0))
+        self.max_return = max(self.__data[['Open', 'High', 'Low', 'Close']].max(axis=0))
 
         # Min-max normalize price columns (0-1 range)
 
-        self.__data['Open'] = (self.__data['Open'] - min_return) / (max_return - min_return)
-        self.__data['High'] = (self.__data['High'] - min_return) / (max_return - min_return)
-        self.__data['Low'] = (self.__data['Low'] - min_return) / (max_return - min_return)
-        self.__data['Close'] = (self.__data['Close'] - min_return) / (max_return - min_return)
+        self.__data['Open'] = (self.__data['Open'] - self.min_return) / (self.max_return - self.min_return)
+        self.__data['High'] = (self.__data['High'] - self.min_return) / (self.max_return - self.min_return)
+        self.__data['Low'] = (self.__data['Low'] - self.min_return) / (self.max_return - self.min_return)
+        self.__data['Close'] = (self.__data['Close'] - self.min_return) / (self.max_return - self.min_return)
 
         '''Normalize volume column'''
 
@@ -203,60 +210,63 @@ class ML:
         print('Validation data shape: {}'.format(self.__valid.shape))
         print('Test data shape: {}'.format(self.__test.shape))
         # Training data
-        self.X_train, self.y_train,self.X_train2,self.X_train3 = [], [],[],[]
+        self.X_train, self.y_train, self.X_train2, self.X_train3 = [], [], [], []
         for i in range(self.seq_len, len(self.__train) - (self.timefram - 1)):
-            self.X_train.append(self.__train[i - self.seq_len:i])  # Chunks of training data with a length of 128 df-rows
-            self.X_train2.append(self.__train[i - int(self.seq_len/2):i])
-            self.X_train3.append(self.__train[i - int(self.seq_len/4):i])
+            self.X_train.append(
+                self.__train[i - self.seq_len:i])  # Chunks of training data with a length of 128 df-rows
+            self.X_train2.append(self.__train[i - int(self.seq_len / 2):i])
+            self.X_train3.append(self.__train[i - int(self.seq_len / 4):i])
             self.y_train.append(
                 self.__train[:, 3][i + (self.timefram - 1)])  # Value of 4th column (Close Price) of df-row 128+1
-        self.X_train, self.y_train = np.array(self.X_train), np.array(self.y_train)
-
+        self.X_train, self.y_train = np.concatenate(
+            (np.array(self.X_train), np.array(self.X_train2), np.array(self.X_train3)), axis=1), np.array(self.y_train)
+        print("sx", self.X_train.shape)
         ###############################################################################
 
         # Validation data
-        self.X_val, self.y_val,self.X_val2,self.X_val3 = [], [],[], []
+        self.X_val, self.y_val, self.X_val2, self.X_val3 = [], [], [], []
         for i in range(self.seq_len, len(self.__valid) - (self.timefram - 1)):
             self.X_val.append(self.__valid[i - self.seq_len:i])
-            self.X_val2.append(self.__valid[i - int(self.seq_len/2):i])
-            self.X_val3.append(self.__valid[i - int(self.seq_len/4):i])
+            self.X_val2.append(self.__valid[i - int(self.seq_len / 2):i])
+            self.X_val3.append(self.__valid[i - int(self.seq_len / 4):i])
             self.y_val.append(self.__valid[:, 3][i + (self.timefram - 1)])
-        self.X_val, self.y_val = np.array(self.X_val), np.array(self.y_val)
+        self.X_val, self.y_val = np.concatenate((np.array(self.X_val), np.array(self.X_val2), np.array(self.X_val3)),
+                                                axis=1), np.array(self.y_val)
 
         ###############################################################################
 
         # Test data
-        self.X_test, self.y_test,self.X_test2,self.X_test3 = [], [],[], []
+        self.X_test, self.y_test, self.X_test2, self.X_test3 = [], [], [], []
         for i in range(self.seq_len, len(self.__test) - (self.timefram - 1)):
             self.X_test.append(self.__test[i - self.seq_len:i])
-            self.X_test2.append(self.__test[i - int(self.seq_len/2):i])
+            self.X_test2.append(self.__test[i - int(self.seq_len / 2):i])
             self.X_test3.append(self.__test[i - int(self.seq_len / 4):i])
             self.y_test.append(self.__test[:, 3][i + (self.timefram - 1)])
-        self.X_test, self.y_test = np.array(self.X_test), np.array(self.y_test)
+        self.X_test, self.y_test = np.concatenate(
+            (np.array(self.X_test), np.array(self.X_test2), np.array(self.X_test3)), axis=1), np.array(self.y_test)
 
     def create_model(self):
+        cnn = CNN()
+        in_seq = Input(shape=(self.seq_len + int(self.seq_len / 2) + int(self.seq_len / 4), 5))
 
-        cnn=CNN()
-        in_seq = Input(shape=(self.seq_len, 5))
-        x=in_seq[:,:self.seq_len,:]
-        x2=in_seq[:,self.seq_len:self.seq_len+int(self.seq_len/2),:]
-        x3=in_seq[:,self.seq_len+int(self.seq_len/2):,:]
-        x = Bidirectional(LSTM(64,return_sequences=True))(in_seq)
-        x=cnn.A(x,32)
-        x=LSTM(32)(x)
+        x = in_seq[:, :self.seq_len, :]
+        x2 = in_seq[:, self.seq_len:self.seq_len + int(self.seq_len / 2), :]
+        x3 = in_seq[:, self.seq_len + int(self.seq_len / 2):, :]
+        x = cnn.A(x, 32)
+        # x = Bidirectional(LSTM(64,return_sequences=True))(x)
 
-        x2= Input(shape=(int(self.seq_len/2), 5))
-        x2 = Bidirectional(LSTM(64,return_sequences=True))(x2)
-        x2=cnn.A(x2,32)
-        x2=LSTM(32)(x2)
-        x3= Input(shape=(int(self.seq_len/4), 5))
-        x3 = Bidirectional(LSTM(64,return_sequences=True))(x3)
-        x3=cnn.A(x3,32)
-        x3=LSTM(32)(x3)
+        x = LSTM(32)(x)
+        x2 = cnn.A(x2, 32)
+        # x2 = Bidirectional(LSTM(64,return_sequences=True))(x2)
+        x2 = LSTM(32)(x2)
+
+        x3 = cnn.A(x3, 32)
+        # x3 = Bidirectional(LSTM(64,return_sequences=True))(x3)
+        x3 = LSTM(32)(x3)
         # x = Bidirectional(LSTM(64, return_sequences=True))(in_seq)
         # avg_pool = GlobalAveragePooling1D()(x)
         # max_pool = GlobalMaxPooling1D()(x)
-        conc = concatenate([x,x2,x3])
+        conc = concatenate([x, x2, x3], axis=1)
         conc = Dense(64, activation="relu")(x)
         out = Dense(1, activation="linear")(conc)
         model = Model(inputs=in_seq, outputs=out)
@@ -265,16 +275,16 @@ class ML:
         # callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=2)
         self.__callback = tf.keras.callbacks.ModelCheckpoint('Static/ARAN_model.hdf5', monitor='val_loss',
                                                              save_best_only=True, verbose=1)
-
+        model.fit(self.X_train, self.y_train, batch_size=2048,
+                  verbose=2,
+                  callbacks=[self.__callback],
+                  epochs=10,
+                  # shuffle=True,
+                  validation_data=(self.X_val, self.y_val), )
         return model
 
     def predict(self):
-        self.__model.fit(self.X_train, self.y_train, batch_size=2048,
-                         verbose=2,
-                         callbacks=[self.__callback],
-                         epochs=5,
-                         # shuffle=True,
-                         validation_data=(self.X_val, self.y_val), )
+
         '''Calculate predictions and metrics'''
 
         # Calculate predication for training, validation and test data
@@ -292,7 +302,11 @@ class ML:
                                                                                train_eval[2]))
         print('Validation Data - Loss: {:.4f}, MAE: {:.4f}, MAPE: {:.4f}'.format(val_eval[0], val_eval[1], val_eval[2]))
         print('Test Data - Loss: {:.4f}, MAE: {:.4f}, MAPE: {:.4f}'.format(test_eval[0], test_eval[1], test_eval[2]))
-
+        print("average error is:{}".format(np.mean(np.abs(
+            ((test_pred[:] * (self.max_return - self.min_return) + self.min_return) * self.std + self.mean).reshape(
+                -1) - ((self.__test[self.seq_len:, 3] * (
+                        self.max_return - self.min_return) + self.min_return) * self.std + self.mean))) * 100
+                                           ))
         fig = plt.figure(figsize=(60, 5))
         st = fig.suptitle("Bi-LSTM Model", fontsize=22)
         st.set_y(1.02)
@@ -305,13 +319,13 @@ class ML:
         ax11.set_xlabel('Date')
         ax11.set_ylabel('IBM Closing Returns')
         ax22 = fig.add_subplot(312)
-        ax22.plot(self.__test[128 + self.timefram - 1:, 3], label='IBM Closing Returns')
+        ax22.plot(self.__test[self.seq_len + self.timefram - 1:, 3], label='IBM Closing Returns')
         ax22.plot(test_pred[:], color='yellow', linewidth=3, label='Predicted IBM Closing Returns')
         ax22.set_title("test Data", fontsize=18)
         ax22.set_xlabel('Date')
         ax22.set_ylabel('IBM Closing Returns')
 
 
-# model = tf.keras.models.load_model('Static/ARAN_model.hdf5')
-a = ML(df, seq_len=128, timefram=1)
+model = tf.keras.models.load_model('Static/ARAN_model.hdf5')
+a = ML(df, seq_len=128, timefram=1, model=model)
 a.predict()
