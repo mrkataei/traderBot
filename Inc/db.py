@@ -25,6 +25,3 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
-
-# connection = con_db()
-# print(functions.get_user_analysis(connection , "kouroshataei"))

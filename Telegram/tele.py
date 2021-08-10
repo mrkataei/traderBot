@@ -424,5 +424,4 @@ def logout(message):
             bot.reply_to(message, 'logout unsuccessful')
 
 
-#needs always run
 bot.polling()

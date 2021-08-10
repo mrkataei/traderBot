@@ -249,6 +249,41 @@ def get_analysis(db_connection: MySQLConnection ,analysis_id:int=-1):
     return record
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+def get_user_chat_id(db_connection:MySQLConnection , username:str):
+  cursor = db_connection.cursor()
+  try:
+    # check user exist
+    if not check_username(db_connection, username):
+      sql = f'SELECT chat_id FROM users WHERE username="{username}"'
+      cursor.execute(sql)
+      record = cursor.fetchall()
+      return record[0][0]
+    else:
+      return False
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_users_analysis_with_analysis_id(db_connection:MySQLConnection , analysis_id:int ):
+  cursor = db_connection.cursor()
+  try:
+    sql = f'SELECT user FROM user_analysis WHERE analysis_id="{analysis_id}"'
+    cursor.execute(sql)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+def get_chat_id_with_analysis_id(db_connection:MySQLConnection , analysis_id:int ):
+  cursor = db_connection.cursor()
+  chat_id=[]
+  try:
+    sql = f'SELECT user FROM user_analysis WHERE analysis_id="{analysis_id}"'
+    cursor.execute(sql)
+    record = cursor.fetchall()
+    for user in record:
+      chat_id.append(int(get_user_chat_id(db_connection , user[0])))
+    return chat_id
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
 def get_user_analysis(db_connection:MySQLConnection , username:str ):
   cursor = db_connection.cursor()
   try:
@@ -304,5 +339,44 @@ def get_amount_bank_user(db_connection:MySQLConnection , username:str):
       return record[0][0]
     else:
       return False
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+#get last signal inserted in database
+def get_recommendations(db_connection:MySQLConnection , analysis_id:int=None , timeframe:id=None , coin_id:int=None):
+  cursor = db_connection.cursor()
+  try:
+    if analysis_id and timeframe and coin_id:
+      sql = f'SELECT * FROM recommendations WHERE coin_id="{coin_id}" ' \
+            f'AND  analysis_id="{analysis_id}" AND timeframe_id={timeframe} order by timestmp DESC LIMIT 1'
+    else:
+      sql = f'SELECT * FROM recommendations'
+    cursor.execute(sql)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def set_recommendation(db_connection:MySQLConnection, analysis_id:int
+                       , coin_id:int, timeframe_id:int, position:str,
+                       target_price:float, current_price:float, cost_price:float,
+                       risk:str):
+  cursor = db_connection.cursor()
+  try:
+    sql = "INSERT INTO recommendations (coin_id, analysis_id, position, target_price," \
+          " current_price, timeframe_id, cost_price, risk) VALUES (%s, %s , %s ,%s, %s , %s ,%s )"
+    val = (coin_id, analysis_id , position , target_price, current_price ,timeframe_id
+           ,cost_price , risk)
+    cursor.execute(sql, val)
+    db_connection.commit()
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def set_score(db_connection:MySQLConnection , username:str , score:int , recom_id = int , is_used:int=0):
+  cursor = db_connection.cursor()
+  try:
+    sql = "INSERT INTO score_analysis (recom_id, score, user, is_used) VALUES (%s, %s , %s ,%s)"
+    val = (recom_id, score, username, is_used)
+    cursor.execute(sql, val)
+    db_connection.commit()
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
