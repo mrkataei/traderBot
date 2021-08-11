@@ -147,7 +147,7 @@ def bot_actions():
                 bot.reply_to(call.message, "Coin already in watchlist /add")
             else:
                 bot.reply_to(call.message, "Done! /show to show your watchlist \n"
-                                           "Default time frame is 1m!\n"
+                                           "Default time frame is 30min!\n"
                                            "For change /frame")
 
         if call.data in timeframes_list[:,1] :

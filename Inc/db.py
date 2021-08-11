@@ -6,9 +6,13 @@ in future use .env
 for test your queries use here or import file like login,.. from Auth directory
 """
 import mysql.connector
-from Inc import functions
-import numpy as np
-#DB_HOST = os.getenv('DB_HOST')
+#for test queries
+# from Inc import functions
+# from decouple import config
+# DB_HOST = config('DB_HOST')
+# DB_NAME = config('DB_NAME')
+# DB_USERNAME = config('DB_USERNAME')
+# DB_PASSWORD = config('DB_PASSWORD')
 
 DB_HOST = "localhost"
 DB_NAME = "algowatch"

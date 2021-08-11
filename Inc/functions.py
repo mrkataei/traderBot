@@ -341,6 +341,14 @@ def set_amount_bank_user(db_connection:MySQLConnection , username:str , amount:f
       return False
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+def update_amount_user(db_connection:MySQLConnection , username:str , amount:float ):
+  cursor = db_connection.cursor()
+  try:
+    sql = f'UPDATE bank SET amount="{amount}" WHERE user="{username}" '
+    cursor.execute(sql)
+    db_connection.commit()
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
 def get_amount_bank_user(db_connection:MySQLConnection , username:str):
   cursor = db_connection.cursor()
   try:
@@ -412,3 +420,29 @@ def delete_watchlist(db_connection:MySQLConnection , username:str , name:str):
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
 
+def pay_transaction(db_connection:MySQLConnection , cost_price:float , username:str , detail:str="some signal send"):
+  cursor = db_connection.cursor()
+  try:
+    amount = float(get_amount_bank_user(db_connection , username) ) - cost_price
+    if float(amount)>= 0:
+      update_amount_user(db_connection , username , amount)
+      sql = "INSERT INTO transactions (user, operation, amount, detail) VALUES (%s, %s ,%s ,%s )"
+      val = (username, "deposit", cost_price, detail)
+      cursor.execute(sql, val)
+      db_connection.commit()
+    else:
+      return False
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+def charge_account(db_connection:MySQLConnection , amount:float , username:str , detail:str="charge account"):
+  cursor = db_connection.cursor()
+  try:
+    amount = float(get_amount_bank_user(db_connection , username) ) + amount
+    update_amount_user(db_connection , username , amount)
+    sql = "INSERT INTO transactions (user, operation, amount, detail) VALUES (%s, %s ,%s ,%s )"
+    val = (username, "withdrawal", amount , detail)
+    cursor.execute(sql, val)
+    db_connection.commit()
+
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
