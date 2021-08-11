@@ -57,6 +57,7 @@ class User:
         self.username = None
         self.session = None
         self.watchlist = []
+        self.temp_watch = None
         self.coin = None
         self.analysis =None
 
@@ -163,8 +164,57 @@ def bot_actions():
             functions.set_user_analysis(connection, user.username , int(analysis_id))
             bot.reply_to(call.message, f"Done!\n"
                                        f"Now {call.data} is working for you")
+        if call.data == "remove_watchlist":
+            user = user_dict[call.message.chat.id]
+            user.watchlist = functions.get_user_watchlist(connection, user.username)
+            if user.watchlist:
+                watchlist_remove = telebot.types.InlineKeyboardMarkup()
+                # for watch in user.watchlist :
+                user.temp_watch = user.watchlist[0][2]
+                watchlist_remove.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2], callback_data='watchlist_remove_step2'))
+                bot.send_message(chat_id=call.message.chat.id, text='Select your watchlist', reply_markup=watchlist_remove)
+            else:
+                bot.reply_to(call.message, 'You don\'t have any watchlist! /new' )
+        if call.data == "watchlist_remove_step2":
+            user = user_dict[call.message.chat.id]
+            functions.delete_watchlist(connection , user.username , user.temp_watch)
+            bot.reply_to(call.message, 'Done!\nFor create /new')
+
+        if call.data == "remove_coins":
+            user = user_dict[call.message.chat.id]
+            user.watchlist = functions.get_user_watchlist(connection, user.username)
+            if user.watchlist:
+                if functions.get_empty_coins_remain(connection, user.username, user.watchlist[0][2]) == 2 :
+                    bot.reply_to(call.message, 'No coins in your watchlist!/add😓')
+                else:
+                    watchlist_remove = telebot.types.InlineKeyboardMarkup()
+                    # for watch in user.watchlist :
+                    user.temp_watch = user.watchlist[0][2]
+                    watchlist_remove.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2],
+                                                                            callback_data='coins_remove_step2'))
+                    bot.send_message(chat_id=call.message.chat.id, text='Select your watchlist',
+                                     reply_markup=watchlist_remove)
+            else:
+                bot.reply_to(call.message, 'Create watchlist first! /new')
+        if call.data == "coins_remove_step2":
+            user = user_dict[call.message.chat.id]
+            user.watchlist = functions.get_user_watchlist(connection, user.username)
+            coin_keyboard = telebot.types.InlineKeyboardMarkup()
+            user_coins = functions.get_user_coins(connection, user.username, user.watchlist[0][2])
+            for coin in user_coins:
+                coin_keyboard.add(telebot.types.InlineKeyboardButton(coin, callback_data=coin + " delete"))
+            bot.send_message(chat_id=call.message.chat.id, text='Select your coin', reply_markup=coin_keyboard)
+
+        if "delete" in call.data :
+            user = user_dict[call.message.chat.id]
+            temp = str(call.data).split(" ")
+            coin = coins_list[np.where(coins_list[:, 1] == temp[0])][0][0]
+            functions.set_null_coin_user(connection , user.username , coin)
+            bot.reply_to(call.message, 'Done!\n /add coins now!')
+
         #after call back done keyboard delete
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+
 
     """
         login handler
@@ -432,7 +482,27 @@ def bot_actions():
                 bot.reply_to(message, f'😏You already have {analysis} analysis \n'
                                       f'/show to remove or see details')
 
+    """
+            removes command handler
+    """
 
+    @bot.message_handler(commands=['remove'])
+    def remove(message):
+        if not message.chat.id in user_dict:
+            bot.reply_to(message, '😪Please /start to login')
+        #check user login
+        elif not user_dict[message.chat.id].session :
+            bot.reply_to(message, '😪Please /start to login')
+        else:
+            try:
+                remove_keyboard = telebot.types.InlineKeyboardMarkup()
+                remove_keyboard.add(telebot.types.InlineKeyboardButton("Watchlist", callback_data="remove_watchlist"))
+                remove_keyboard.add(telebot.types.InlineKeyboardButton("Coins", callback_data="remove_coins"))
+                bot.send_message(chat_id=message.chat.id, text='select option you want to delete',
+                                 reply_markup=remove_keyboard)
+
+            except Exception as e:
+                bot.reply_to(message, 'logout unsuccessful')
     """
         logout command handler
     """
