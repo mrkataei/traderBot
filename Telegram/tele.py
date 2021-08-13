@@ -17,11 +17,10 @@ from Inc import db , functions
 import numpy as np
 from binance.client import Client
 from Telegram import candle
-import threading
+# from decouple import config
 
 #statics
-# API_KEY = os.getenv('API_KEY')
-
+# API_KEY = config('API_KEY')
 API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
 # bot = telebot.TeleBot(API_KEY)
 client = Client()
@@ -71,12 +70,7 @@ class Register:
         self.security_question:str
         self.security_answer:str
 
-def broadcast_messages():
-    chat_ids = functions.get_chat_id_with_analysis_id(connection , 1)
-    while True:
-        for user in chat_ids:
-            bot.send_message(chat_id=user, text='salam')
-        sleep(20)
+
 def bot_actions():
     # /start command enter by user
     @bot.message_handler(commands=['start'])

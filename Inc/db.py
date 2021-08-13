@@ -7,7 +7,7 @@ for test your queries use here or import file like login,.. from Auth directory
 """
 import mysql.connector
 #for test queries
-# from Inc import functions
+from Inc import functions
 # from decouple import config
 # DB_HOST = config('DB_HOST')
 # DB_NAME = config('DB_NAME')
@@ -29,3 +29,12 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+
+
+# connection = con_db()
+# print(functions.get_user_recommendation(connection , 2,1,1))
+# test = functions.get_user_recommendation(connection )
+# for user in test:
+#   print(user[0])
+#   print(functions.get_user_chat_id(connection ,user[0]))
+# print(functions.get_recommendations(connection))

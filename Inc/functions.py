@@ -370,7 +370,7 @@ def get_recommendations(db_connection:MySQLConnection , analysis_id:int=None , t
       sql = f'SELECT * FROM recommendations WHERE coin_id="{coin_id}" ' \
             f'AND  analysis_id="{analysis_id}" AND timeframe_id={timeframe} order by timestmp DESC LIMIT 1'
     else:
-      sql = f'SELECT * FROM recommendations'
+      sql = f'SELECT * FROM recommendations order by timestmp DESC LIMIT 1'
     cursor.execute(sql)
     record = cursor.fetchall()
     return record
@@ -384,7 +384,7 @@ def set_recommendation(db_connection:MySQLConnection, analysis_id:int
   cursor = db_connection.cursor()
   try:
     sql = "INSERT INTO recommendations (coin_id, analysis_id, position, target_price," \
-          " current_price, timeframe_id, cost_price, risk) VALUES (%s, %s , %s ,%s, %s , %s ,%s )"
+          " current_price, timeframe_id, cost_price, risk) VALUES (%s, %s , %s ,%s, %s , %s ,%s ,%s)"
     val = (coin_id, analysis_id , position , target_price, current_price ,timeframe_id
            ,cost_price , risk)
     cursor.execute(sql, val)
@@ -444,5 +444,53 @@ def charge_account(db_connection:MySQLConnection , amount:float , username:str ,
     cursor.execute(sql, val)
     db_connection.commit()
 
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_all_user_watchlist(db_connection:MySQLConnection):
+  cursor = db_connection.cursor()
+  try:
+    query = f'SELECT * from watchlist'
+    cursor.execute(query)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_all_user_analysis(db_connection:MySQLConnection):
+  cursor = db_connection.cursor()
+  try:
+    query = f'SELECT * from watchlist'
+    cursor.execute(query)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_all_user_timeframe(db_connection:MySQLConnection):
+  cursor = db_connection.cursor()
+  try:
+    query = f'SELECT * from watchlist'
+    cursor.execute(query)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)
+
+def get_user_recommendation(db_connection:MySQLConnection , coin_id:int=None , analysis_id:int=None , timeframe_id:int=None):
+  cursor = db_connection.cursor()
+  try:
+    if coin_id and analysis_id and timeframe_id:
+      query = f'SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ,user_analysis.analysis_id  FROM watchlist ' \
+              f'INNER JOIN user_timeframe ON watchlist.user = user_timeframe.user ' \
+              f'INNER JOIN user_analysis ON user_timeframe.user = user_analysis.user ' \
+              f'WHERE coin_id ="{coin_id}" AND analysis_id="{analysis_id}" AND timeframe_id="{timeframe_id}"'
+    else:
+      query = f'SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ,user_analysis.analysis_id  FROM watchlist ' \
+              f'INNER JOIN user_timeframe ON watchlist.user = user_timeframe.user ' \
+              f'INNER JOIN user_analysis ON user_timeframe.user = user_analysis.user '
+    cursor.execute(query)
+    record = cursor.fetchall()
+    return record
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
