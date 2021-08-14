@@ -3,6 +3,8 @@ import threading
 from Inc import db ,functions
 from time import sleep
 import telebot
+import asyncio
+from Analysis import ichimoku
 
 connection = db.con_db()
 API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'

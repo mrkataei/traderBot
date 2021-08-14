@@ -24,22 +24,22 @@ def get_time_interval(time_frame):
         '1week': AsyncClient.KLINE_INTERVAL_1WEEK,
         '1month': AsyncClient.KLINE_INTERVAL_1MONTH,
     }.get(time_frame, AsyncClient.KLINE_INTERVAL_1MINUTE)
-def handle_message(msg):
-    if msg['e'] == 'error':
-        print(msg['m'])
-    else:
-        bitcoins_exchanged = float(msg['p']) * float(msg['q'])
-        timestamp = msg['T'] / 1000
-        timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-        if msg['m']:
-            event_side = 'SELL'
-        else:
-            event_side = 'BUY '
-        print("{} - {} - {} - Price: {} - Qty: {} BTC Qty: {}$".format(timestamp,
-                                                                       event_side,
-                                                                       msg['s'],
-                                                                       msg['p'],
-                                                                       msg['q'],bitcoins_exchanged))
+# def handle_message(msg):
+#     if msg['e'] == 'error':
+#         print(msg['m'])
+#     else:
+#         bitcoins_exchanged = float(msg['p']) * float(msg['q'])
+#         timestamp = msg['T'] / 1000
+#         timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+#         if msg['m']:
+#             event_side = 'SELL'
+#         else:
+#             event_side = 'BUY '
+#         print("{} - {} - {} - Price: {} - Qty: {} BTC Qty: {}$".format(timestamp,
+#                                                                        event_side,
+#                                                                        msg['s'],
+#                                                                        msg['p'],
+#                                                                        msg['q'],bitcoins_exchanged))
 
 
 class AsWebSocketClient:
