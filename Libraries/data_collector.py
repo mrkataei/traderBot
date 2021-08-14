@@ -1,3 +1,9 @@
+"""
+Mr.Kataei 8/4/2021
+for init server and analysis which have not any machine learning we dont need any big data so
+collect data from binance who get us 500 rows of candles we want , in start server we get this
+and store in Static and use it in indicators analysis continuously , for now 30min , 1hour ,4hour ,1day timeframes
+"""
 from binance.client import Client
 import pandas as pd
 
@@ -14,11 +20,14 @@ def generate_data(symbol:str):
     data4hour = pd.DataFrame(candles4hour,columns=columns)
     candles30min = client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_30MINUTE)
     data30min = pd.DataFrame(candles30min,columns=columns)
+    #private functions
+    #in future we will add new timezones for now Tehran
     def convert_timezone():
         data30min['date'] = pd.DatetimeIndex(pd.to_datetime(data30min['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert('Asia/Tehran')
         data1hour['date'] = pd.DatetimeIndex(pd.to_datetime(data1hour['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert('Asia/Tehran')
         data4hour['date'] = pd.DatetimeIndex(pd.to_datetime(data4hour['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert('Asia/Tehran')
         data1day['date'] = pd.DatetimeIndex(pd.to_datetime(data1day['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert('Asia/Tehran')
+    #delet close time and Ignore cols
     def delete_columns():
         del data30min['time2']
         del data1hour['time2']

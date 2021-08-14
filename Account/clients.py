@@ -1,4 +1,7 @@
-
+"""
+Mr.Kataei 8/4/2021
+use for telegram bot to register and login and logout
+"""
 class User:
     def __init__(self):
         self.username = None

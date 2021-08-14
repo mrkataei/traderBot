@@ -1,3 +1,8 @@
+"""
+Mr.Kataei 8/4/2021
+this is simple neural network perceptron for test , element_number input for get number of input
+our network has , training_iterations number of repeat loop on think methode and synaptic_weights update
+"""
 import numpy as np
 
 def sigmoid(x):

@@ -29,12 +29,3 @@ def con_db():
     return database
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
-
-
-# connection = con_db()
-# print(functions.get_user_recommendation(connection , 2,1,1))
-# test = functions.get_user_recommendation(connection )
-# for user in test:
-#   print(user[0])
-#   print(functions.get_user_chat_id(connection ,user[0]))
-# print(functions.get_recommendations(connection))
