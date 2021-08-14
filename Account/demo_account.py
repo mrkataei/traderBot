@@ -1,22 +1,12 @@
-from Account.client import ClientBinance
 import datetime
 from xlwt import Workbook
-import pandas as pd
-import numpy as np
 
-def get_detect(data: pd.DataFrame, start_time: str):
-    correct_data = pd.DataFrame(data.loc[(data['date'] >= start_time)].detect)
-    correct_data = np.array(correct_data)  # array for ml
-    return correct_data
-
-
-class Account(ClientBinance):
+class Demo:
     __balance = 0
     __name = ""
     __transaction = []
     __coins = {'btc' : 0.0}
-    def __init__(self , balance:float , name:str , api_key:str , api_secret:str):
-        super(Account, self).__init__(api_key=api_key , api_secret=api_secret )
+    def __init__(self , balance:float , name:str):
         self.__balance = balance
         self.__name = name
     def get_balance(self):

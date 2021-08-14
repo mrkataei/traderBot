@@ -17,12 +17,12 @@ from Inc import db , functions
 import numpy as np
 from binance.client import Client
 from Telegram import candle
+from Account.clients import User , Register
 # from decouple import config
 
 #statics
 # API_KEY = config('API_KEY')
 API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
-# bot = telebot.TeleBot(API_KEY)
 client = Client()
 connection = db.con_db()
 user_dict = {}
@@ -51,25 +51,6 @@ def bot_polling():
             break #End loop
 
 #need more develop on classes
-class User:
-    def __init__(self):
-        self.username = None
-        self.session = None
-        self.watchlist = []
-        self.temp_watch = None
-        self.coin = None
-        self.analysis =None
-
-class Register:
-    def __init__(self ,chat_id):
-        self.chat_id = chat_id
-        self.username:str
-        self.password1:str
-        self.password2:str
-        self.security_question_id:int
-        self.security_question:str
-        self.security_answer:str
-
 
 def bot_actions():
     # /start command enter by user

@@ -1,9 +1,9 @@
-from Account.demoAccount import Account
+from Account.demo_account import Demo
 import pandas as pd
 class Test:
     __account = None
     __last_detect = None
-    def __init__(self , account:Account):
+    def __init__(self, account:Demo):
         self.__account = account
         self.__last_detect = 0 if self.__account.get_coins_amount('btc') == 0 else 1
     def bankAccount_with_coin_ideal(self ,data:pd.DataFrame ,  symbol:str ,sell_amount:float, buy_amount:float):
