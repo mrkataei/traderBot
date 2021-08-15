@@ -11,12 +11,20 @@ use this query for get user who have this signal with this coin and time:
         users = functions.get_user_recommendation(connection, coin_id=1,analysis_id=1, timeframe_id=1)
 and get chat_id for notify them with this query :
         chat_id = functions.get_user_chat_id(connection , user[0])
+all of this in Telegram/message just use broadcast method
+for insert new signal :
+        functions.set_recommendation(connection, 1, 1, 1, "sell", 2500, 2300, 2, "high")
+        broadcast_message(*args)
 """
 import asyncio
 from binance import AsyncClient ,BinanceSocketManager ,Client
 import pandas as pd
 import pandas_ta as ta
 from Libraries import data_collector
+from Inc import db , functions
+
+connection = db.con_db()
+
 
 def init_statics():
     #this method work with n parameters and return stored csvs in Static with 4 timeframes
