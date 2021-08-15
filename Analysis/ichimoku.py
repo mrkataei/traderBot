@@ -73,12 +73,8 @@ async def stream_30min_candle(*symbols:str ,socket:BinanceSocketManager):
 
             #30min sleep for new data
             if count == 2:
-                print("salam")
                 count = 0
-                await asyncio.sleep(50)
-
-            # print(c_30m_data0)
-            # print(c_30m_data1)
+                await asyncio.sleep(1780)
 
 async def stream_1hour_candle(*symbols:str ,socket:BinanceSocketManager):
     count = 0
@@ -157,4 +153,5 @@ async def stream():
                          stream_4hour_candle("BTCUSDT" , "ETHUSDT" ,socket=bm) ,
                          stream_1day_candle("BTCUSDT" , "ETHUSDT" ,socket=bm))
 
+#use this in main
 asyncio.run(stream())
