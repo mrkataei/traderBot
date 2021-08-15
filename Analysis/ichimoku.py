@@ -3,6 +3,14 @@ Mr.Kataei 8/15/2021
 async functions for get data stream from binance socket for 30m , 1h , 4h , 1day timeframes and multiple symbols
 .first you must init statics you have because when new data append date work truth , after that check your analysis
 with csvs stored
+database configure :
+        coin_id -> 1=BTCUSDT , 2=ETHUSDT
+        timeframe_id -> 1=30min , 2=1hour ,3=4hour ,4=1day
+        analysis_id -> 1=ichimoku
+use this query for get user who have this signal with this coin and time:
+        users = functions.get_user_recommendation(connection, coin_id=1,analysis_id=1, timeframe_id=1)
+and get chat_id for notify them with this query :
+        chat_id = functions.get_user_chat_id(connection , user[0])
 """
 import asyncio
 from binance import AsyncClient ,BinanceSocketManager ,Client
@@ -16,6 +24,33 @@ def init_statics():
 
 #for append new row in our csvs , candle details from binance in bellow
 def append(data:pd.DataFrame , symbol:str, timeframe:str , candle):
+    """
+        candle details
+            {
+                "e": "kline",					# event type
+                "E": 1499404907056,				# event time
+                "s": "ETHBTC",					# symbol
+                "k": {
+                    "t": 1499404860000, 		# start time of this bar
+                    "T": 1499404919999, 		# end time of this bar
+                    "s": "ETHBTC",				# symbol
+                    "i": "1m",					# interval
+                    "f": 77462,					# first trade id
+                    "L": 77465,					# last trade id
+                    "o": "0.10278577",			# open
+                    "c": "0.10278645",			# close
+                    "h": "0.10278712",			# high
+                    "l": "0.10278518",			# low
+                    "v": "17.47929838",			# volume
+                    "n": 4,						# number of trades
+                    "x": false,					# whether this bar is final
+                    "q": "1.79662878",			# quote volume
+                    "V": "2.34879839",			# volume of active buy
+                    "Q": "0.24142166",			# quote volume of active buy
+                    "B": "13279784.01349473"	# can be ignored
+                }
+            }
+    """
     time = pd.to_datetime(candle['k']['t'], unit='ms', yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
     data = data.append({'date': time,
                         'open': candle['k']['o'],
@@ -25,33 +60,6 @@ def append(data:pd.DataFrame , symbol:str, timeframe:str , candle):
                         'TBAV': candle['k']['V'], 'TQAV': candle['k']['Q']}, ignore_index=True)
     data.to_csv(path_or_buf=f'../Static/{symbol}-{timeframe}.csv' ,index=False)
     return data
-    """
-    candle details
-        {
-            "e": "kline",					# event type
-            "E": 1499404907056,				# event time
-            "s": "ETHBTC",					# symbol
-            "k": {
-                "t": 1499404860000, 		# start time of this bar
-                "T": 1499404919999, 		# end time of this bar
-                "s": "ETHBTC",				# symbol
-                "i": "1m",					# interval
-                "f": 77462,					# first trade id
-                "L": 77465,					# last trade id
-                "o": "0.10278577",			# open
-                "c": "0.10278645",			# close
-                "h": "0.10278712",			# high
-                "l": "0.10278518",			# low
-                "v": "17.47929838",			# volume
-                "n": 4,						# number of trades
-                "x": false,					# whether this bar is final
-                "q": "1.79662878",			# quote volume
-                "V": "2.34879839",			# volume of active buy
-                "Q": "0.24142166",			# quote volume of active buy
-                "B": "13279784.01349473"	# can be ignored
-            }
-        }
-"""
 #for now we have 2 coins and 2 parameters in future need loop for all coins
 #there is 4 functions for 4 timeframes after all used in main async
 async def stream_30min_candle(*symbols:str ,socket:BinanceSocketManager):
@@ -154,4 +162,5 @@ async def stream():
                          stream_1day_candle("BTCUSDT" , "ETHUSDT" ,socket=bm))
 
 #use this in main
-asyncio.run(stream())
+def run():
+    asyncio.run(stream())
