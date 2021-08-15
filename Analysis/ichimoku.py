@@ -15,7 +15,7 @@ def init_statics():
     data_collector.generate_data("BTCUSDT" , "ETHUSDT")
 
 #for append new row in our csvs , candle details from binance in bellow
-def append(data:pd.DataFrame , symbol:str , candle):
+def append(data:pd.DataFrame , symbol:str, timeframe:str , candle):
     time = pd.to_datetime(candle['k']['t'], unit='ms', yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
     data = data.append({'date': time,
                         'open': candle['k']['o'],
@@ -23,7 +23,8 @@ def append(data:pd.DataFrame , symbol:str , candle):
                         'close': candle['k']['c'], 'volume': candle['k']['v'],
                         'QAV': candle['k']['q'], 'trades': candle['k']['n'],
                         'TBAV': candle['k']['V'], 'TQAV': candle['k']['Q']}, ignore_index=True)
-    data.to_csv(path_or_buf=f'../Static/{symbol}-1min.csv' ,index=False)
+    data.to_csv(path_or_buf=f'../Static/{symbol}-{timeframe}.csv' ,index=False)
+    return data
     """
     candle details
         {
@@ -54,6 +55,7 @@ def append(data:pd.DataFrame , symbol:str , candle):
 #for now we have 2 coins and 2 parameters in future need loop for all coins
 #there is 4 functions for 4 timeframes after all used in main async
 async def stream_30min_candle(*symbols:str ,socket:BinanceSocketManager):
+    count = 0
     data0_30min = pd.read_csv(f'../Static/{symbols[0]}-30min.csv')
     data1_30min = pd.read_csv(f'../Static/{symbols[1]}-30min.csv')
     candle0_30min = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_30MINUTE)
@@ -62,15 +64,24 @@ async def stream_30min_candle(*symbols:str ,socket:BinanceSocketManager):
         while True:
             c_30m_data0 = await candle0_30min.recv()
             c_30m_data1 = await candle1_30min.recv()
-            if c_30m_data0['k']['x'] and c_30m_data1['k']['x']:
-                append(data0_30min ,symbols[0] ,c_30m_data0 )
-                append(data1_30min ,symbols[1] ,c_30m_data1 )
-                # print(c_30m_data0)
-                # print(c_30m_data1)
+            if c_30m_data0['k']['x']:
+                data0_30min = append(data0_30min ,symbols[0] ,"30min" ,c_30m_data0 )
+                count +=1
+            if c_30m_data1['k']['x']:
+                data1_30min = append(data1_30min ,symbols[1] ,"30min" ,c_30m_data1 )
+                count += 1
+
             #30min sleep for new data
-            await asyncio.sleep(1780)
+            if count == 2:
+                print("salam")
+                count = 0
+                await asyncio.sleep(50)
+
+            # print(c_30m_data0)
+            # print(c_30m_data1)
 
 async def stream_1hour_candle(*symbols:str ,socket:BinanceSocketManager):
+    count = 0
     data0_1hour = pd.read_csv(f'../Static/{symbols[0]}-1hour.csv')
     data1_1hour = pd.read_csv(f'../Static/{symbols[1]}-1hour.csv')
     candle0_1hour = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_1HOUR)
@@ -79,15 +90,21 @@ async def stream_1hour_candle(*symbols:str ,socket:BinanceSocketManager):
         while True:
             c_1h_data0 = await candle0_1hour.recv()
             c_1h_data1 = await candle1_1hour.recv()
-            if c_1h_data0['k']['x'] and c_1h_data1['k']['x']:
-                append(data0_1hour , symbols[0] , c_1h_data0)
-                append(data1_1hour , symbols[1] , c_1h_data1)
-                # print(c_1h_data0)
-                # print(c_1h_data1)
+            if c_1h_data0['k']['x']:
+                data0_1hour = append(data0_1hour , symbols[0] ,"1hour",c_1h_data0)
+                count += 1
+
+            if c_1h_data1['k']['x']:
+                data1_1hour = append(data1_1hour , symbols[1] ,"1hour",c_1h_data1)
+                count += 1
+
             #1hour sleep for new data
-            await asyncio.sleep(3590)
+            if count == 2:
+                count = 0
+                await asyncio.sleep(3590)
 
 async def stream_4hour_candle(*symbols:str ,socket:BinanceSocketManager):
+    count = 0
     data0_4hour = pd.read_csv(f'../Static/{symbols[0]}-4hour.csv')
     data1_4hour = pd.read_csv(f'../Static/{symbols[1]}-4hour.csv')
     candle0_4hour = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_4HOUR)
@@ -96,15 +113,21 @@ async def stream_4hour_candle(*symbols:str ,socket:BinanceSocketManager):
         while True:
             c_4h_data0 = await candle0_4hour.recv()
             c_4h_data1 = await candle1_4hour.recv()
-            if c_4h_data0['k']['x'] and c_4h_data1['k']['x']:
-                append(data0_4hour, symbols[0], c_4h_data0)
-                append(data1_4hour, symbols[1], c_4h_data1)
-                # print(c_4h_data0)
-                # print(c_4h_data1)
+            if c_4h_data0['k']['x']:
+                data0_4hour = append(data0_4hour, symbols[0],"4hour", c_4h_data0)
+                count += 1
+
+            if c_4h_data1['k']['x']:
+                data1_4hour = append(data1_4hour, symbols[1],"4hour", c_4h_data1)
+                count += 1
+
             #sleep 4hours for new data
-            await asyncio.sleep(14380)
+            if count == 2:
+                count = 0
+                await asyncio.sleep(14380)
 
 async def stream_1day_candle(*symbols:str ,socket:BinanceSocketManager):
+    count = 0
     data0_1day = pd.read_csv(f'../Static/{symbols[0]}-1day.csv')
     data1_1day = pd.read_csv(f'../Static/{symbols[1]}-1day.csv')
     candle0_1day = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_1DAY)
@@ -113,15 +136,20 @@ async def stream_1day_candle(*symbols:str ,socket:BinanceSocketManager):
         while True:
             c_1d_data0 = await candle0_1day.recv()
             c_1d_data1 = await candle1_1day.recv()
-            if c_1d_data0['k']['x'] and c_1d_data1['k']['x']:
-                append(data0_1day, symbols[0], c_1d_data0)
-                append(data1_1day, symbols[1], c_1d_data1)
-                # print(c_1d_data0)
-                # print(c_1d_data1)
-            #sleep 24hour for new data
-            await asyncio.sleep(86390)
+            if c_1d_data0['k']['x'] :
+                data0_1day = append(data0_1day, symbols[0],"1day", c_1d_data0)
+                count +=1
+            if c_1d_data1['k']['x']:
+                data1_1day = append(data1_1day, symbols[1],"1day", c_1d_data1)
+                count +=1
+            # sleep 24hour for new data
+            if count == 2:
+                count = 0
+                await asyncio.sleep(86390)
 
 async def stream():
+    #init statics for clean date
+    init_statics()
     client = await AsyncClient.create()
     bm = BinanceSocketManager(client)
     await asyncio.gather(stream_30min_candle("BTCUSDT" , "ETHUSDT" ,socket=bm) ,
@@ -129,5 +157,4 @@ async def stream():
                          stream_4hour_candle("BTCUSDT" , "ETHUSDT" ,socket=bm) ,
                          stream_1day_candle("BTCUSDT" , "ETHUSDT" ,socket=bm))
 
-init_statics()
 asyncio.run(stream())
