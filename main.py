@@ -2,7 +2,7 @@ from Telegram import tele
 import threading
 from time import sleep
 import asyncio
-from Analysis import ichimoku
+from Analysis import stream
 
 
 polling_thread = threading.Thread(target=tele.bot_polling)
