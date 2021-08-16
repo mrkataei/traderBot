@@ -3,25 +3,34 @@ Arman hajimirza
 """
 import pandas as pd
 import pandas_ta as ta
-import numpy as np
+
+
+# import numpy as np
 
 def get_ichimoku(data:pd.DataFrame , tenkan:int=9 , kijun:int=26 , senkou:int=52):
 
     ichimoku = pd.DataFrame(data.ta.ichimoku(tenkan=tenkan , kijun=kijun , senkou=senkou)[0])
     ichimoku.columns = ['spanA' ,'spanB' ,'tenkensen' ,'kijunsen' ,'chiku']
-    return ichimoku
+    #continious rows from clouds
+    def get_future_spans():
+        ichimoku_future = pd.DataFrame(data.ta.ichimoku(tenkan=tenkan , kijun=kijun , senkou=senkou)[1])
+        ichimoku_future.columns = ['spanA', 'spanB']
+        return ichimoku_future
+    return ichimoku ,get_future_spans()
 
 def signal(data:pd.DataFrame):
-    ichimoku = get_ichimoku(data)
+    ichimoku_all = get_ichimoku(data)
+    ichimoku = ichimoku_all[0]
     ichimoku['close'] = data.close
     ichimoku['date'] = data.date
-    ichimoku = ichimoku.dropna()
-    ichimoku = ichimoku.reset_index(drop=True)
+    # ichimoku = ichimoku.dropna()
+    # ichimoku = ichimoku.reset_index(drop=True)
 
     def buy_signals(current):
         status = False
         # first signal
         # close<spanA<spanB
+
         if (ichimoku.loc[current,'spanA'] < ichimoku.loc[current, 'spanB'] and ichimoku.loc[current, "close"] < ichimoku.loc[current,'spanA']):
             # laggingspan_i < close_i & laggingspan_i-1 < close_i-1
             if (ichimoku.loc[current - 1, 'chiku'] < ichimoku.loc[current - 1, "close"] and ichimoku.loc[current, 'chiku'] < ichimoku.loc[
@@ -105,4 +114,4 @@ def signal(data:pd.DataFrame):
     ichimoku.to_csv('test.csv')
     print(ichimoku)
 
-signal(pd.read_csv('../Static/BTCUSDT-30min.csv'))
+signal(pd.read_csv('../Static/BTCUSDT-1day.csv'))
