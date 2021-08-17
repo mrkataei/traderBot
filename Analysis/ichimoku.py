@@ -1,11 +1,11 @@
 """
-Arman hajimirza
+Arman hajimirza & Mr.Kataei
 """
 import pandas as pd
 import pandas_ta as ta
 
 
-# import numpy as np
+import numpy as np
 
 def get_ichimoku(data:pd.DataFrame , tenkan:int=9 , kijun:int=26 , senkou:int=52):
 
@@ -21,10 +21,47 @@ def get_ichimoku(data:pd.DataFrame , tenkan:int=9 , kijun:int=26 , senkou:int=52
 def signal(data:pd.DataFrame):
     ichimoku_all = get_ichimoku(data)
     ichimoku = ichimoku_all[0]
+    future = ichimoku_all[1]
     ichimoku['close'] = data.close
     ichimoku['date'] = data.date
-    # ichimoku = ichimoku.dropna()
-    # ichimoku = ichimoku.reset_index(drop=True)
+    ichimoku['change'] = ichimoku['close'].pct_change()
+    future['signal'] = np.where(future['spanA']>=future['spanB'] , 'buy' , 'sell')
+    print(future)
+    ichimoku.change = ichimoku.change.shift(-1)
+    # ichimoku['tenkensen-rec'] = np.where(ichimoku['tenkensen'] == -1, -1,
+    #                                  np.where(ichimoku['tenkensen'] < ichimoku['close'], 1, 0)).astype(int)
+    # ichimoku['kijunsen-rec'] = np.where(ichimoku['kijunsen'] == -1, -1,
+    #                                 np.where(ichimoku['kijunsen'] < ichimoku['close'], 1, 0)).astype(int)
+    # ichimoku['spanA-rec'] = np.where(ichimoku['spanA'] == -1, -1,
+    #                              np.where(ichimoku['spanA'] < ichimoku['close'], 1, 0)).astype(int)
+    # ichimoku['spanB-rec'] = np.where(ichimoku['spanB'] == -1, -1,
+    #                              np.where(ichimoku['spanB'] < ichimoku['close'], 1, 0)).astype(int)
+    # ichimoku['chiku-rec'] = np.where(ichimoku['chiku'] == -1, -1,
+    #                              np.where(ichimoku['chiku'] > ichimoku['close'], 1, 0)).astype(int)
+    # ichimoku['kijunAndspanBCross'] = np.where(ichimoku['spanB'] == -1, -1,
+    #                                           np.where(ichimoku['kijunsen'] == ichimoku['spanB'], -1,
+    #                                                    np.where(ichimoku['kijunsen'] > ichimoku['spanB'], 1, 0))).astype(
+    #     int)
+    # ichimoku['tenkensenAndkijunsen'] = np.where(ichimoku['kijunsen'] == -1, -1,
+    #                                             np.where(ichimoku['tenkensen'] == ichimoku['kijunsen'], 0,
+    #                                                      np.where(ichimoku['tenkensen'] > ichimoku['kijunsen'], 1,
+    #                                                               0))).astype(int)
+    # ichimoku['priceAndABspan'] = np.where(ichimoku['spanB'] == -1, -1, np.where(ichimoku['spanA'] == 0, 0,
+    #                                                                             np.where(ichimoku['spanB'] == 1, 1,
+    #                                                                                      0))).astype(int)
+    # ichimoku['tenkensenAndPriceWithKijunsen'] = np.where(ichimoku['kijunsen'] == -1, -1,
+    #                                                      np.where(ichimoku['tenkensen'] == 0, 0,
+    #                                                               np.where(ichimoku['tenkensen'] > ichimoku['kijunsen'], 1,
+    #                                                                        0))).astype(int)
+    # ichimoku['sAAndB'] = np.where(ichimoku['spanB'] == -1, -1,
+    #                               np.where(ichimoku['spanA'] >= ichimoku['spanB'], 1, 0)).astype(int)
+    #
+    # ichimoku.chiku = ichimoku.chiku.shift(26)  # shif 26 rows for chiku
+    # # ichimoku.chiku = ichimoku.chiku.fillna(value=-1)  # fill 26 first data that shifted with -1
+    # ichimoku['sum'] = ichimoku['tenkensen-rec'] + ichimoku['kijunsen-rec'] + ichimoku['spanA-rec'] \
+    #                   + ichimoku['spanB-rec'] + ichimoku['chiku-rec'] + ichimoku['kijunAndspanBCross']\
+    #                   + ichimoku['tenkensenAndkijunsen'] + ichimoku['priceAndABspan'] +\
+    #                   ichimoku['tenkensenAndPriceWithKijunsen']+ ichimoku['sAAndB']
 
     def buy_signals(current):
         status = False
@@ -102,7 +139,7 @@ def signal(data:pd.DataFrame):
 
     def analyse():
         count = 0
-        for i in range(10, len(ichimoku) - 1):
+        for i in range(0, len(ichimoku)):
             if buy_signals(i):
                 count +=1
                 ichimoku.loc[i, "status"] = "Buy"
@@ -114,4 +151,4 @@ def signal(data:pd.DataFrame):
     ichimoku.to_csv('test.csv')
     print(ichimoku)
 
-signal(pd.read_csv('../Static/BTCUSDT-1day.csv'))
+signal(pd.read_csv('../Static/BTCUSDT-1hour.csv'))
