@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 11, 2021 at 06:56 PM
+-- Generation Time: Aug 18, 2021 at 11:07 AM
 -- Server version: 10.4.20-MariaDB
 -- PHP Version: 8.0.9
 
@@ -223,7 +223,7 @@ CREATE TABLE `user_timeframe` (
 --
 
 INSERT INTO `user_timeframe` (`id`, `user`, `timeframe_id`) VALUES
-(1, 'kouroshataei', 4);
+(1, 'kouroshataei', 1);
 
 -- --------------------------------------------------------
 
@@ -357,7 +357,7 @@ ALTER TABLE `coins`
 -- AUTO_INCREMENT for table `recommendations`
 --
 ALTER TABLE `recommendations`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `timeframes`
@@ -375,19 +375,19 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `user_analysis`
 --
 ALTER TABLE `user_analysis`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `user_timeframe`
 --
 ALTER TABLE `user_timeframe`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `watchlist`
 --
 ALTER TABLE `watchlist`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- Constraints for dumped tables

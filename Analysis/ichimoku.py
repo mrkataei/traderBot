@@ -82,3 +82,7 @@ def signal(data:pd.DataFrame ,gain:float ,cost:float ,coin_id:int ,timeframe_id:
                                coin_id=coin_id , current_price=last_ichimoku[5],
                                target_price=target_price ,risk=result[1] ,position=position,
                                timeframe_id=timeframe_id)
+    #for transaction in future
+    # users = functions.get_user_recommendation(connection, coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id)
+    # for user in users:
+    #     functions.pay_transaction(db_connection=connection ,cost_price=cost ,username=user ,detail="kharid kardi")
