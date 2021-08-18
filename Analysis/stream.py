@@ -21,6 +21,7 @@ from binance import AsyncClient ,BinanceSocketManager ,Client
 import pandas as pd
 from Libraries import data_collector
 from Inc import db , functions
+from Analysis import ichimoku
 
 connection = db.con_db()
 
@@ -88,6 +89,8 @@ async def stream_30min_candle(*symbols:str ,socket:BinanceSocketManager):
 
             #30min sleep for new data
             if count == 2:
+                ichimoku.signal(data=data0_30min ,gain=0.03 ,cost=1,coin_id=0 ,timeframe_id=0)
+                ichimoku.signal(data=data1_30min ,gain=0.03 ,cost=1,coin_id=1 ,timeframe_id=0)
                 count = 0
                 await asyncio.sleep(1780)
 
@@ -111,6 +114,8 @@ async def stream_1hour_candle(*symbols:str ,socket:BinanceSocketManager):
 
             #1hour sleep for new data
             if count == 2:
+                ichimoku.signal(data=data0_1hour, gain=0.03, cost=1, coin_id=0, timeframe_id=1)
+                ichimoku.signal(data=data1_1hour, gain=0.03, cost=1, coin_id=1, timeframe_id=1)
                 count = 0
                 await asyncio.sleep(3590)
 
@@ -134,6 +139,8 @@ async def stream_4hour_candle(*symbols:str ,socket:BinanceSocketManager):
 
             #sleep 4hours for new data
             if count == 2:
+                ichimoku.signal(data=data0_4hour, gain=0.03, cost=1, coin_id=0, timeframe_id=2)
+                ichimoku.signal(data=data1_4hour, gain=0.03, cost=1, coin_id=1, timeframe_id=2)
                 count = 0
                 await asyncio.sleep(14380)
 
@@ -155,6 +162,8 @@ async def stream_1day_candle(*symbols:str ,socket:BinanceSocketManager):
                 count +=1
             # sleep 24hour for new data
             if count == 2:
+                ichimoku.signal(data=data0_1day, gain=0.03, cost=1, coin_id=0, timeframe_id=3)
+                ichimoku.signal(data=data1_1day, gain=0.03, cost=1, coin_id=1, timeframe_id=3)
                 count = 0
                 await asyncio.sleep(86390)
 
