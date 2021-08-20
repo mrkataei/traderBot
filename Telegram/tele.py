@@ -19,7 +19,7 @@ from binance.client import Client
 from Telegram import candle
 from Account.clients import User , Register
 from decouple import config
-
+#    test
 #statics
 API_KEY = config('API_KEY')
 # API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
