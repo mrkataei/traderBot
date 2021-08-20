@@ -7,17 +7,17 @@ for test your queries use here or import file like login,.. from Auth directory
 """
 import mysql.connector
 #for test queries
-#from Inc import functions
-from decouple import config
-DB_HOST = config('DB_HOST')
-DB_NAME = config('DB_NAME')
-DB_USERNAME = config('DB_USERNAME')
-DB_PASSWORD = config('DB_PASSWORD')
+from Inc import functions
+# from decouple import config
+# DB_HOST = config('DB_HOST')
+# DB_NAME = config('DB_NAME')
+# DB_USERNAME = config('DB_USERNAME')
+# DB_PASSWORD = config('DB_PASSWORD')
 
-# DB_HOST = "localhost"
-# DB_NAME = "algowatch"
-# DB_USERNAME = "root"
-# DB_PASSWORD = ""
+DB_HOST = "localhost"
+DB_NAME = "algowatch"
+DB_USERNAME = "root"
+DB_PASSWORD = ""
 def con_db():
   try:
     database = mysql.connector.connect(

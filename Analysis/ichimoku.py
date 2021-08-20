@@ -21,6 +21,7 @@ from Inc import db , functions
 from Telegram import message
 
 connection = db.con_db()
+
 def get_ichimoku(data:pd.DataFrame , tenkan:int=9 , kijun:int=26 , senkou:int=52):
 
     ichimoku = pd.DataFrame(data.ta.ichimoku(tenkan=tenkan , kijun=kijun , senkou=senkou)[0])
@@ -41,13 +42,14 @@ def signal(data:pd.DataFrame ,gain:float ,cost:float ,coin_id:int ,timeframe_id:
     future['signal'] = np.where(future['spanA']>future['spanB'] , 'buy' , 'sell')
     #one last row in ichimoku
     last_ichimoku = np.array(ichimoku.tail(1))[0].astype(float)
+    close = float(last_ichimoku[5])
     def check():
         #return Tuple ( buy->True , sell->False ) and risk (0(low)-10(high))
         if future.iloc[-1,2] == 'buy':#3 col signal last row
             if last_ichimoku[0] > last_ichimoku[1] :
-                if last_ichimoku[5] > last_ichimoku[3]:
-                    if last_ichimoku[5]> last_ichimoku[4]:
-                        if last_ichimoku[5] > last_ichimoku[0]:
+                if close > last_ichimoku[3]:
+                    if close> last_ichimoku[4]:
+                        if close > last_ichimoku[0]:
                             return True , 'low'
                         else:
                             return True , 'medium'
@@ -58,9 +60,9 @@ def signal(data:pd.DataFrame ,gain:float ,cost:float ,coin_id:int ,timeframe_id:
             else:
                 return True , 'very high'
         else:
-            if  last_ichimoku[5] > last_ichimoku[0]:
-                if last_ichimoku[5]> last_ichimoku[4]:
-                    if last_ichimoku[5]> last_ichimoku[3]:
+            if  close > last_ichimoku[0]:
+                if close > last_ichimoku[4]:
+                    if close> last_ichimoku[3]:
                         if last_ichimoku[0] < last_ichimoku[1]:
                             return False ,'low'
                         else:
@@ -72,14 +74,14 @@ def signal(data:pd.DataFrame ,gain:float ,cost:float ,coin_id:int ,timeframe_id:
             else:
                 return False , 'very high'
     result = check()
-    target_price = last_ichimoku[5]*gain + last_ichimoku[5] if result[0] else -last_ichimoku[5]*gain + last_ichimoku[5]
+    target_price = close*gain + close if result[0] else -close*gain + close
     position = 'buy' if result[0] else 'sell'
     functions.set_recommendation(db_connection=connection , analysis_id=1 ,
-                                 coin_id=coin_id ,cost_price=cost , current_price=last_ichimoku[5],
-                                 target_price=target_price ,risk=result[1] ,position=position,
-                                 timeframe_id=timeframe_id)
+                                 coin_id=coin_id ,timeframe_id=timeframe_id,position=position,
+                                 target_price=target_price ,current_price=close
+                                 ,cost_price=cost , risk=result[1] )
     message.broadcast_messages(connection=connection , analysis_id=1 ,
-                               coin_id=coin_id , current_price=last_ichimoku[5],
+                               coin_id=coin_id , current_price=close,
                                target_price=target_price ,risk=result[1] ,position=position,
                                timeframe_id=timeframe_id)
     #for transaction in future

@@ -40,7 +40,7 @@ def generate_data(*symbols:str):
             del data1day['Ignore']
         convert_timezone()
         delete_columns()
-        data1hour.to_csv(path_or_buf=f'../Static/{symbol}-1hour.csv' ,index=False)
-        data30min.to_csv(path_or_buf=f'../Static/{symbol}-30min.csv',index=False)
-        data4hour.to_csv(path_or_buf=f'../Static/{symbol}-4hour.csv',index=False)
-        data1day.to_csv(path_or_buf=f'../Static/{symbol}-1day.csv',index=False)
+        data1hour.to_csv(path_or_buf=f'Static/{symbol}-1hour.csv' ,index=False)
+        data30min.to_csv(path_or_buf=f'Static/{symbol}-30min.csv',index=False)
+        data4hour.to_csv(path_or_buf=f'Static/{symbol}-4hour.csv',index=False)
+        data1day.to_csv(path_or_buf=f'Static/{symbol}-1day.csv',index=False)

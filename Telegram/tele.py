@@ -18,11 +18,10 @@ import numpy as np
 from binance.client import Client
 from Telegram import candle
 from Account.clients import User , Register
-from decouple import config
-#    test
+# from decouple import config
 #statics
-API_KEY = config('API_KEY')
-# API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
+# API_KEY = config('API_KEY', default='')
+API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
 client = Client()
 connection = db.con_db()
 user_dict = {}
