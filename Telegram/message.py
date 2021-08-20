@@ -22,8 +22,8 @@ def broadcast_messages(connection:MySQLConnection , coin_id:int , analysis_id:in
     for user in users:
         message = f'👋🏼 Hey {user[0]}!\n💥New received from *{analysis[0][0]}*!!!\n' \
                   f'*{coin}* now in *{position}* position\n' \
-                  f'Current price: {current_price}\n' \
-                  f'Target price: {target_price}\n' \
+                  f'Current price: {current_price}$\n' \
+                  f'Target price: {target_price}$\n' \
                   f'Risk: *{risk}*\n' \
                   f'Timeframe: {timeframe[0][0]}'
         bot.send_message(chat_id=int(functions.get_user_chat_id(connection , user[0]) ), text=message , parse_mode= 'Markdown')
