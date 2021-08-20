@@ -55,20 +55,21 @@ def bot_actions():
     # /start command enter by user
     @bot.message_handler(commands=['start'])
     def welcome(message):
-        #some action with delay to typing bot
-        bot.send_chat_action(chat_id=message.chat.id, action="typing")
-        sleep(1)
-        #welcome message and instructions
-        bot.reply_to(message, "Hey " + message.chat.first_name + "!\n" +
-                     "I am Aran , your trade assistance \n"
-                     "/help show commands")
-        #the markup help us we have call back with inlinekeyboard when yours tap one of those
-        #some callback data send and we receive with @bot.callback_query_handler
-        step_kb = telebot.types.InlineKeyboardMarkup()
-        step_kb.add(telebot.types.InlineKeyboardButton('🔑Login', callback_data='login'))
-        step_kb.add(telebot.types.InlineKeyboardButton('🤩Sign up', callback_data='reg'))
-        step_kb.add(telebot.types.InlineKeyboardButton('🔏Forget password', callback_data='forget'))
-        bot.send_message(chat_id=message.chat.id,text='Have not any account?\nSign up now!',reply_markup=step_kb)
+        if not message.chat.id in user_dict:
+            #some action with delay to typing bot
+            bot.send_chat_action(chat_id=message.chat.id, action="typing")
+            sleep(1)
+            #welcome message and instructions
+            bot.reply_to(message, "Hey " + message.chat.first_name + "!\n" +
+                         "I am Aran , your trade assistance \n"
+                         "/help show commands")
+            #the markup help us we have call back with inlinekeyboard when yours tap one of those
+            #some callback data send and we receive with @bot.callback_query_handler
+            step_kb = telebot.types.InlineKeyboardMarkup()
+            step_kb.add(telebot.types.InlineKeyboardButton('🔑Login', callback_data='login'))
+            step_kb.add(telebot.types.InlineKeyboardButton('🤩Sign up', callback_data='reg'))
+            step_kb.add(telebot.types.InlineKeyboardButton('🔏Forget password', callback_data='forget'))
+            bot.send_message(chat_id=message.chat.id,text='Have not any account?\nSign up now!',reply_markup=step_kb)
     #after callback @bot.callback_query_handler get function parameter ,this always true
     #and w8 to one case login and reg and .. happened . need to develop func in parameter
     @bot.callback_query_handler(func=lambda call: True)
