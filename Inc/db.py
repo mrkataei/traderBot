@@ -1,10 +1,19 @@
+""""
+Mr.Kataei 8/4/2021
+there is 2way to connect database 1-use local static variable
+2- set in environment on linux - first in local without any customers use local
+in future use .env
+for test your queries use here or import file like login,.. from Auth directory
+"""
 import mysql.connector
-from Auth import login , register
+#for test queries
+from Inc import functions
+# from decouple import config
+# DB_HOST = config('DB_HOST')
+# DB_NAME = config('DB_NAME')
+# DB_USERNAME = config('DB_USERNAME')
+# DB_PASSWORD = config('DB_PASSWORD')
 
-#mrkataei.mysql.pythonanywhere-services.com -> hostname
-#username -> mrkataei
-#password
-# DB_HOST = os.getenv('DB_HOST')
 DB_HOST = "localhost"
 DB_NAME = "algowatch"
 DB_USERNAME = "root"
@@ -19,14 +28,4 @@ def con_db():
     )
     return database
   except mysql.connector.Error as err:
-    print("Something went wrong: {}".format(err))
-
-# for row in records:
-#   print(row)
-#
-# print(mycursor.rowcount, "record inserted.")
-# mycursor.execute("SHOW TABLES")
-# for x in mycursor:
-#   print(x)
-
-# mycursor.execute("SHOW TABLES")
+    return "Something went wrong: {}".format(err)

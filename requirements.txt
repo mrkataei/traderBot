@@ -1,0 +1,10 @@
+python-binance
+pandas
+pandas-ta
+numpy
+mysql-connector-python
+pyTelegramBotAPI
+python-decouple
+
+
+

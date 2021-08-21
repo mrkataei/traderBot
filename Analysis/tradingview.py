@@ -1,3 +1,7 @@
+"""
+Mr.Kataei 8/4/2021
+tradingview api signals
+"""
 from tradingview_ta import TA_Handler, Interval
 
 def get_time_interval(time):

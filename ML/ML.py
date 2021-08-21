@@ -1,9 +1,9 @@
+"""
+Mr.Kataei 8/4/2021
+this is simple neural network perceptron for test , element_number input for get number of input
+our network has , training_iterations number of repeat loop on think methode and synaptic_weights update
+"""
 import numpy as np
-# import tensorflow as tf
-# from tensorflow.python.ops import rnn, rnn_cell
-# from tensorflow import keras
-
-#statics methods
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -28,11 +28,3 @@ class BasicNeuralNetwork:
         inputs = inputs.astype(float)
         output = sigmoid(np.dot(inputs, self.synaptic_weights))
         return output
-#
-# class RecurrentNeuralNetwork:
-#     def __init__(self):
-#         rnn_cell.BasicRNNCell()
-#         print("hello")
-class LinearRegression:
-    def __init__(self):
-        print("")
