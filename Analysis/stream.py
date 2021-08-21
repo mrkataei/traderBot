@@ -115,9 +115,9 @@ async def stream_1hour_candle(*symbols:str ,socket:BinanceSocketManager):
                 # count += 1
 
             # 1hour sleep for new data
-            if count == 2:
-                count = 0
-                await asyncio.sleep(3598)
+            # if count == 2:
+            #     count = 0
+            #     await asyncio.sleep(3598)
 
 async def stream_4hour_candle(*symbols:str ,socket:BinanceSocketManager):
     # count = 0
