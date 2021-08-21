@@ -18,7 +18,7 @@ import pandas as pd
 import pandas_ta as ta
 import numpy as np
 from Inc import db , functions
-from Telegram import message
+from Telegram.message import broadcast_messages
 
 connection = db.con_db()
 
@@ -80,10 +80,10 @@ def signal(data:pd.DataFrame ,gain:float ,cost:float ,coin_id:int ,timeframe_id:
                                  coin_id=coin_id ,timeframe_id=timeframe_id,position=position,
                                  target_price=target_price ,current_price=close
                                  ,cost_price=cost , risk=result[1] )
-    message.broadcast_messages(connection=connection , analysis_id=1 ,
-                               coin_id=coin_id , current_price=close,
-                               target_price=target_price ,risk=result[1] ,position=position,
-                               timeframe_id=timeframe_id)
+    broadcast_messages(connection=connection , analysis_id=1 ,
+                       coin_id=coin_id , current_price=close,
+                       target_price=target_price ,risk=result[1] ,position=position,
+                       timeframe_id=timeframe_id)
     #for transaction in future
     # users = functions.get_user_recommendation(connection, coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id)
     # for user in users:
