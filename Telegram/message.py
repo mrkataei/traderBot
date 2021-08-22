@@ -26,5 +26,8 @@ def broadcast_messages(connection:MySQLConnection , coin_id:int , analysis_id:in
                   f'Target price: {target_price}$\n' \
                   f'Risk: *{risk}*\n' \
                   f'Timeframe: {timeframe[0][0]}'
-        bot.send_message(chat_id=int(functions.get_user_chat_id(connection , user[0]) ), text=message , parse_mode= 'Markdown')
+        try:
+            bot.send_message(chat_id=int(functions.get_user_chat_id(connection , user[0]) ), text=message , parse_mode= 'Markdown')
+        except Exception as e:
+            print( e + "{"+user[0]+"}" )
     del bot
