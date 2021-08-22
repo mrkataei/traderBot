@@ -8,8 +8,7 @@ from Inc import functions
 # from decouple import config
 
 # API_KEY = config('API_KEY')
-# API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
-API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
 
 
 def broadcast_messages(connection:MySQLConnection , coin_id:int , analysis_id:int , timeframe_id:int,
