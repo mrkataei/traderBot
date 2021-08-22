@@ -17,11 +17,11 @@ def login(db_connection:MySQLConnection , username:str , password:str):
     cursor.execute(query)
     record = cursor.fetchall()
     if record and record[0][2] == hash_pass(password=password, salt=record[0][3])[0] :
-      return "You are logged in🤩"
+      return True , "You are logged in🤩"
     else:
-      return "Your username or password is incorrect🥵\n" \
+      return False ,"Your username or password is incorrect🥵\n" \
              "Try again /start"
   #exception must be complete
   except mysql.connector.Error as err:
-    return "Something went wrong: {}".format(err)
+    return False , "Something went wrong: {}".format(err)
     #kourosh

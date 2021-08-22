@@ -21,7 +21,8 @@ from Account.clients import User , Register
 # from decouple import config
 #statics
 # API_KEY = config('API_KEY', default='')
-API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
+# API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
+API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 client = Client()
 connection = db.con_db()
 user_dict = {}
@@ -55,7 +56,7 @@ def bot_actions():
     # /start command enter by user
     @bot.message_handler(commands=['start'])
     def welcome(message):
-        if not message.chat.id in user_dict:
+        if not message.chat.id in user_dict :
             #some action with delay to typing bot
             bot.send_chat_action(chat_id=message.chat.id, action="typing")
             sleep(1)
@@ -214,10 +215,14 @@ def bot_actions():
         try:
             user = user_dict[message.chat.id]
             res = login.login(db_connection=connection , username=user.username , password=message.text)
-            bot.delete_message(message.chat.id , message.message_id)
-            bot.send_message(message.chat.id , res)
-            user.session = True
-            print(user_dict)
+            if res[0]:
+                bot.delete_message(message.chat.id , message.message_id)
+                bot.send_message(message.chat.id , res[1])
+                user.session = True
+                print(user_dict)
+            else:
+                bot.send_message(message.chat.id, res[1])
+                del user_dict[message.chat.id]
         except Exception as e:
             bot.reply_to(message, 'Please /start bot again')
             del user_dict[message.chat.id]
