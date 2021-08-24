@@ -494,3 +494,15 @@ def get_user_recommendation(db_connection:MySQLConnection , coin_id:int=None , a
     return record
   except mysql.connector.Error as err:
     return "Something went wrong: {}".format(err)
+
+
+def get_admins(db_connection:MySQLConnection):
+  cursor = db_connection.cursor()
+  admin = 'admin'
+  try:
+    query = f'SELECT username from users WHERE role="{admin}"'
+    cursor.execute(query)
+    record = cursor.fetchall()
+    return record
+  except mysql.connector.Error as err:
+    return "Something went wrong: {}".format(err)

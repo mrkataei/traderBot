@@ -8,7 +8,10 @@ from Inc import functions
 # from decouple import config
 
 # API_KEY = config('API_KEY')
-API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
+#master bot already run on vps dont use this @arantraderbot -> address
+# API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
+#@testkourosh2bot -> address // use this bot for test your code
+API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 
 
 def broadcast_messages(connection:MySQLConnection , coin_id:int , analysis_id:int , timeframe_id:int,
