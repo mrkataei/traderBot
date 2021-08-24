@@ -1,4 +1,4 @@
-from Telegram import tele
+from Telegram.Client import tele
 import threading
 from Analysis import stream
 

@@ -1,5 +1,5 @@
 """"
-Mr.Kataei 8/4/2021
+Mr.Kataenewi 8/4/2021
 for telebot library need token which father bot make for us , for now we define it ,
 in static variable in future define and use in environment linux
 
@@ -16,7 +16,7 @@ from Auth import login , register , reset_password
 from Inc import db , functions
 import numpy as np
 from binance.client import Client
-from Telegram import candle
+from Telegram.Client import candle
 from Account.clients import User , Register
 # from decouple import config
 #statics
