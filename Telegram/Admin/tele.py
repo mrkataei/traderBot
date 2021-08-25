@@ -96,3 +96,16 @@ def bot_actions():
         except Exception as e:
             bot.reply_to(message, 'Please /start bot again')
             del user_dict[message.chat.id]
+
+    @bot.message_handler(commands=['users'])
+    def show_users(message):
+        if not message.chat.id in user_dict:
+            bot.reply_to(message, 'Please login /start')
+        elif not user_dict[message.chat.id].session:
+            bot.reply_to(message, 'Please login /start')
+        else:
+            usernames = ''
+            users = np.array(functions.get_usernames(connection))
+            for index, user in enumerate(users, start=1):
+                usernames += str(index) + '-' + str(user[0]) + ' ,'
+            bot.reply_to(message, usernames)
