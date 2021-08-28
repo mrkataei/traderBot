@@ -5,14 +5,17 @@ our network has , training_iterations number of repeat loop on think methode and
 """
 import numpy as np
 
+
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
+
 def sigmoid_derivative(x):
     return x * (1 - x)
 
 
 class BasicNeuralNetwork:
-    def __init__(self , element_number:int=1  ):
+    def __init__(self, element_number: int = 1):
         np.random.seed(1)
         self.synaptic_weights = 2 * np.random.random((element_number, 1)) - 1
 
@@ -24,7 +27,6 @@ class BasicNeuralNetwork:
             self.synaptic_weights += adjustments
 
     def think(self, inputs):
-
         inputs = inputs.astype(float)
         output = sigmoid(np.dot(inputs, self.synaptic_weights))
         return output

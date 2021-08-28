@@ -1,23 +1,26 @@
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from tensorflow.keras import *
-from tensorflow.keras.layers import Bidirectional , LSTM ,Dense ,Activation
+from tensorflow.keras.layers import Bidirectional, LSTM, Dense, Activation
 
-#based on https://towardsdatascience.com/the-beginning-of-a-deep-learning-trading-bot-part1-95-accuracy-is-not-enough-c338abc98fc2
-def preprocess(data:pd.DataFrame):
+
+# based on https://towardsdatascience.com/the-beginning-of-a-deep-learning-trading-bot-part1-95-accuracy-
+# is-not-enough-c338abc98fc2
+def preprocess(data: pd.DataFrame):
     data['Date'] = pd.to_datetime(data['Date'])
     return data
 
-def plot_historical(data:pd.DataFrame):
+
+def plot_historical(data: pd.DataFrame):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(go.Candlestick(x=data['Date'], open=data['Open'], high=data['High'], low=data['Low'], close=data['Close']),
-                  secondary_y=False)
+    fig.add_trace(
+        go.Candlestick(x=data['Date'], open=data['Open'], high=data['High'], low=data['Low'], close=data['Close']),
+        secondary_y=False)
     fig.show()
 
-def create_model():
 
+def create_model():
     model = Sequential()
     model.add(Bidirectional(LSTM(10, return_sequences=True), input_shape=(5, 10)))
     model.add(Bidirectional(LSTM(10)))
@@ -34,7 +37,7 @@ class BidirectionalLSTM:
     __test = None
     __model = None
 
-    def __init__(self , data:pd.DataFrame ):
+    def __init__(self, data: pd.DataFrame):
         self.__data = preprocess(data)
         self.__preprocess()
         self.__split()
@@ -73,7 +76,3 @@ class BidirectionalLSTM:
         self.__train = self.__data[(self.__data.index < last_20pct)]  # Training data are 80% of total data
         self.__valid = self.__data[(self.__data.index >= last_20pct) & (self.__data.index < last_10pct)]
         self.__test = self.__data[(self.__data.index >= last_10pct)]
-
-
-
-

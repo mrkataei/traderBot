@@ -5,3 +5,5 @@ numpy~=1.19.5
 mysql-connector-python~=8.0.26
 pyTelegramBotAPI
 python-decouple
+xlwt
+tradingview_ta
