@@ -126,11 +126,16 @@ def get_user_watchlist(db_connection: MySQLConnection, username: str, name: str 
         return "Something went wrong: {}".format(err)
 
 
-def get_user_coins(db_connection: MySQLConnection, username: str, watchlist: str):
+def get_user_coins(db_connection: MySQLConnection, username: str, watchlist: str = None):
     cursor = db_connection.cursor()
     coins = []
     try:
-        query = f'SELECT coin_id from watchlist WHERE user="{username}"  AND name="{watchlist}"'
+        if watchlist:
+            query = f'SELECT coin_id from watchlist WHERE user="{username}"  AND name="{watchlist}"'
+
+        else:
+            query = f'SELECT coin_id from watchlist WHERE user="{username}"'
+
         cursor.execute(query)
         record = cursor.fetchall()
         for coin in record:
@@ -563,6 +568,23 @@ def get_usernames(db_connection: MySQLConnection):
     cursor = db_connection.cursor()
     try:
         query = f'SELECT username from users'
+        cursor.execute(query)
+        record = cursor.fetchall()
+        return record
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def get_user_details(db_connection: MySQLConnection, username: str):
+    cursor = db_connection.cursor()
+    try:
+
+        query = f'SELECT users.username , users.timestamp , users.role , bank.amount , user_timeframe.timeframe_id ,' \
+                f'user_analysis.analysis_id FROM users ' \
+                f'INNER JOIN user_timeframe ON users.username = user_timeframe.user ' \
+                f'INNER JOIN user_analysis ON user_timeframe.user = user_analysis.user ' \
+                f'INNER JOIN bank ON user_analysis.user = bank.user ' \
+                f'WHERE username="{username}"'
         cursor.execute(query)
         record = cursor.fetchall()
         return record

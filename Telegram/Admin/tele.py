@@ -103,7 +103,7 @@ def bot_actions():
 
     @bot.message_handler(commands=['users'])
     def show_users(message):
-        if not message.chat.id in user_dict:
+        if message.chat.id not in user_dict:
             bot.reply_to(message, 'Please login /start')
         elif not user_dict[message.chat.id].session:
             bot.reply_to(message, 'Please login /start')
@@ -113,3 +113,33 @@ def bot_actions():
             for index, user in enumerate(users, start=1):
                 usernames += str(index) + '-' + str(user[0]) + ' ,'
             bot.reply_to(message, usernames)
+
+    @bot.message_handler(commands=['detail'])
+    def show_users(message):
+        if message.chat.id not in user_dict:
+            bot.reply_to(message, 'Please login /start')
+        elif not user_dict[message.chat.id].session:
+            bot.reply_to(message, 'Please login /start')
+        else:
+            bot.reply_to(message, "Enter username")
+            bot.register_next_step_handler(message, process_user_details)
+
+    def process_user_details(message):
+        try:
+            # ('username', timestmp, 'role', assets, timeframe, analysis_is)
+            qu = functions.get_user_details(connection, message.text)[0]
+            analysis = functions.get_analysis(connection, qu[5])[0][0]
+            timeframe = functions.get_timeframe(connection, qu[4])[0][0]
+            coins = functions.get_user_coins(connection, qu[0])
+            res = f"Username:{qu[0]}\n" \
+                  f"Join at:{qu[1]}\n" \
+                  f"Assets:{qu[3]}\n" \
+                  f"Role:{qu[2]}\n" \
+                  f"Coins:{coins}\n" \
+                  f"Analysis:{analysis}\n" \
+                  f"Timeframe:{timeframe}"
+
+            bot.reply_to(message, res)
+        except Exception as e:
+            bot.reply_to(message, 'Please /start bot again')
+        print()
