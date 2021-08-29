@@ -9,6 +9,8 @@ from time import sleep
 from Account.clients import User
 from Auth import login
 import numpy as np
+import os
+import subprocess
 
 # @aranadminbot -> address
 API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
@@ -143,3 +145,31 @@ def bot_actions():
         except Exception as e:
             bot.reply_to(message, 'Please /start bot again')
         print()
+
+    @bot.message_handler(commands=['ps'])
+    def show_users(message):
+        if message.chat.id not in user_dict:
+            bot.reply_to(message, 'Please login /start')
+        elif not user_dict[message.chat.id].session:
+            bot.reply_to(message, 'Please login /start')
+        else:
+            result = subprocess.check_output('ps aux --sort -rss | grep main.py | head -n 1', shell=True)
+            bot.reply_to(message, result)
+
+    @bot.message_handler(commands=['restart'])
+    def show_users(message):
+        if message.chat.id not in user_dict:
+            bot.reply_to(message, 'Please login /start')
+        elif not user_dict[message.chat.id].session:
+            bot.reply_to(message, 'Please login /start')
+        else:
+            bot.reply_to(message, "Enter PID process")
+            bot.register_next_step_handler(message, process_restart_bot)
+
+    def process_restart_bot(message):
+        try:
+            os.system(f'kill {message.text}')
+            os.system("nohup python3 main.py &")
+            bot.reply_to(message, "Done!\n /ps to watch process")
+        except Exception as e:
+            bot.reply_to(message, 'Something wrong please try again!')
