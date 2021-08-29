@@ -15,6 +15,7 @@ for insert new signal :
         broadcast_message(*args)
 """
 import pandas as pd
+import pandas_ta as ta
 import numpy as np
 from Inc import db, functions
 from Telegram.Client.message import broadcast_messages
