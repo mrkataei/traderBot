@@ -11,6 +11,7 @@ security question and question id and answer for insert to database after insert
 avoid memory leak ,
 """
 import telebot
+from telebot import apihelper
 from time import sleep
 from Auth import login, register, reset_password
 from Inc import db, functions
@@ -18,6 +19,9 @@ import numpy as np
 from binance.client import Client
 from Telegram.Client import candle
 from Account.clients import User, Register
+from Libraries.definitions import *
+
+apihelper.ENABLE_MIDDLEWARE = True
 
 # from decouple import config
 # statics
@@ -61,6 +65,10 @@ def bot_polling():
 # need more develop on classes
 
 def bot_actions():
+    @bot.middleware_handler(update_types=['message'])
+    def activate_language(bot_instance, message):
+        activate(message.from_user.language_code)
+
     # /start command enter by user
     @bot.message_handler(commands=['start'])
     def welcome(message):
@@ -217,7 +225,7 @@ def bot_actions():
             bot.register_next_step_handler(msg, process_password)
         # some exception need develop
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del user_dict[message.chat.id]
 
     # if session assign True user login ,if any exception happened -
@@ -235,7 +243,7 @@ def bot_actions():
                 bot.send_message(message.chat.id, res[1])
                 del user_dict[message.chat.id]
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del user_dict[message.chat.id]
 
     """
@@ -253,7 +261,7 @@ def bot_actions():
                                         '🔹and lower/upper case at least')
             bot.register_next_step_handler(msg, process_reg_password)
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     def process_reg_password(message):
@@ -265,7 +273,7 @@ def bot_actions():
             # delete password for privacy
             bot.delete_message(message.chat.id, message.message_id)
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     def process_reg_password_again(message):
@@ -280,7 +288,7 @@ def bot_actions():
             questions.add(telebot.types.InlineKeyboardButton(question_dict[1][1], callback_data="2"))
             bot.send_message(chat_id=message.chat.id, text='⚠️Select your security question', reply_markup=questions)
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again ')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     def process_reg_answer(message):
@@ -295,10 +303,10 @@ def bot_actions():
             functions.set_timeframe(connection, user.username, 1)
             # init first amount bank
             functions.set_amount_bank_user(connection, user.username, 10)
-            bot.reply_to(message, res + "\nplease /start to login")
+            bot.reply_to(message, res + "\n" + trans('C_please_start'))
             del reg_dict[message.chat.id]
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     """
@@ -322,7 +330,7 @@ def bot_actions():
                 del reg_dict[message.chat.id]
 
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     def process_forget_answer(message):
@@ -332,7 +340,7 @@ def bot_actions():
             msg = bot.reply_to(message, '🔓Enter your new password')
             bot.register_next_step_handler(msg, process_forget_new_pass)
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     def process_forget_new_pass(message):
@@ -343,7 +351,7 @@ def bot_actions():
             bot.delete_message(message.chat.id, message.message_id)
             bot.register_next_step_handler(msg, process_forget_new_pass_again)
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     def process_forget_new_pass_again(message):
@@ -358,7 +366,7 @@ def bot_actions():
             # after reset password and update database we dont need this object
             del reg_dict[message.chat.id]
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
 
     """
@@ -368,9 +376,9 @@ def bot_actions():
     @bot.message_handler(commands=['new'])
     def new_watchlist(message):
         if message.chat.id not in user_dict:
-            bot.reply_to(message, 'Please login /start')
+            bot.reply_to(message, trans('C_please_start'))
         elif not user_dict[message.chat.id].session:
-            bot.reply_to(message, 'Please login /start')
+            bot.reply_to(message, trans('C_please_start'))
         else:
             user = user_dict[message.chat.id]
             # if len(functions.get_user_watchlist(connection , user.username)) < 1:
@@ -389,14 +397,14 @@ def bot_actions():
             user.watchlist = message.text
             bot.reply_to(message, "Good!👀\n/add to add coin in your watchlist")
         except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
+            bot.reply_to(message, trans('C_please_start'))
 
     @bot.message_handler(commands=['add'])
     def add_coin(message):
         if message.chat.id not in user_dict:
-            bot.reply_to(message, 'Please login /start')
+            bot.reply_to(message, trans('C_please_start'))
         elif not user_dict[message.chat.id].session:
-            bot.reply_to(message, 'Please login /start')
+            bot.reply_to(message, trans('C_please_start'))
         else:
             user = user_dict[message.chat.id]
             user.watchlist = functions.get_user_watchlist(connection, user.username)
@@ -406,7 +414,7 @@ def bot_actions():
                     watchlist.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2], callback_data='watchlist'))
                     bot.send_message(chat_id=message.chat.id, text='Select your watchlist', reply_markup=watchlist)
                 else:
-                    bot.reply_to(message, 'your watchlist is full!😓')
+                    bot.reply_to(message, trans('C_full_watchlist'))
             else:
                 bot.reply_to(message, 'Create watchlist first! /new')
 
@@ -417,7 +425,7 @@ def bot_actions():
     @bot.message_handler(commands=['frame'])
     def update_timeframe(message):
         if message.chat.id not in user_dict:
-            bot.reply_to(message, '😪Please /start to login')
+            bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
             bot.reply_to(message, '😪You are logged out')
@@ -434,7 +442,7 @@ def bot_actions():
     @bot.message_handler(commands=['show'])
     def update_timeframe(message):
         if message.chat.id not in user_dict:
-            bot.reply_to(message, '😪Please /start to login')
+            bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
             bot.reply_to(message, '😪You are logged out')
@@ -463,7 +471,7 @@ def bot_actions():
     @bot.message_handler(commands=['analysis'])
     def update_timeframe(message):
         if message.chat.id not in user_dict:
-            bot.reply_to(message, '😪Please /start to login')
+            bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
             bot.reply_to(message, '😪You are logged out')
@@ -488,10 +496,10 @@ def bot_actions():
     @bot.message_handler(commands=['remove'])
     def remove(message):
         if message.chat.id not in user_dict:
-            bot.reply_to(message, '😪Please /start to login')
+            bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif not user_dict[message.chat.id].session:
-            bot.reply_to(message, '😪Please /start to login')
+            bot.reply_to(message, trans('C_please_start'))
         else:
             try:
                 remove_keyboard = telebot.types.InlineKeyboardMarkup()
@@ -510,7 +518,7 @@ def bot_actions():
     @bot.message_handler(commands=['logout'])
     def logout(message):
         if message.chat.id not in user_dict:
-            bot.reply_to(message, '😪Please /start to login')
+            bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
             bot.reply_to(message, '😪You are logged out')

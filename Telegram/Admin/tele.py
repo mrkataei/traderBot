@@ -13,7 +13,9 @@ import os
 import subprocess
 
 # @aranadminbot -> address
-API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
+# API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
+# test bot fro admin
+API_KEY = '1991184876:AAGfWUbxXEbnbWHeKrlh2knooi8lF1PSWKI'
 user_dict = {}
 connection = db.con_db()
 admins = np.array(functions.get_admins(connection))
@@ -43,7 +45,7 @@ def bot_actions():
     # /start command enter by admin
     @bot.message_handler(commands=['start'])
     def welcome(message):
-        if not message.chat.id in user_dict:
+        if message.chat.id not in user_dict:
             # welcome message and instructions
             bot.reply_to(message, "Hey " + message.chat.first_name + "!\n")
             # the markup help us we have call back with inlinekeyboard when yours tap one of those
@@ -89,6 +91,7 @@ def bot_actions():
     # start again with /start and object user removed
     def process_password(message):
         try:
+            connection = db.con_db()
             user = user_dict[message.chat.id]
             res = login.login(db_connection=connection, username=user.username, password=message.text)
             if res[0]:
@@ -110,41 +113,42 @@ def bot_actions():
         elif not user_dict[message.chat.id].session:
             bot.reply_to(message, 'Please login /start')
         else:
+            connection = db.con_db()
             usernames = ''
             users = np.array(functions.get_usernames(connection))
             for index, user in enumerate(users, start=1):
                 usernames += str(index) + '-' + str(user[0]) + ' ,'
             bot.reply_to(message, usernames)
 
-    @bot.message_handler(commands=['detail'])
-    def show_users(message):
-        if message.chat.id not in user_dict:
-            bot.reply_to(message, 'Please login /start')
-        elif not user_dict[message.chat.id].session:
-            bot.reply_to(message, 'Please login /start')
-        else:
-            bot.reply_to(message, "Enter username")
-            bot.register_next_step_handler(message, process_user_details)
-
-    def process_user_details(message):
-        try:
-            # ('username', timestmp, 'role', assets, timeframe, analysis_is)
-            qu = functions.get_user_details(connection, message.text)[0]
-            analysis = functions.get_analysis(connection, qu[5])[0][0]
-            timeframe = functions.get_timeframe(connection, qu[4])[0][0]
-            coins = functions.get_user_coins(connection, qu[0])
-            res = f"Username:{qu[0]}\n" \
-                  f"Join at:{qu[1]}\n" \
-                  f"Assets:{qu[3]}\n" \
-                  f"Role:{qu[2]}\n" \
-                  f"Coins:{coins}\n" \
-                  f"Analysis:{analysis}\n" \
-                  f"Timeframe:{timeframe}"
-
-            bot.reply_to(message, res)
-        except Exception as e:
-            bot.reply_to(message, 'Please /start bot again')
-        print()
+    # @bot.message_handler(commands=['detail'])
+    # def show_users(message):
+    #     if message.chat.id not in user_dict:
+    #         bot.reply_to(message, 'Please login /start')
+    #     elif not user_dict[message.chat.id].session:
+    #         bot.reply_to(message, 'Please login /start')
+    #     else:
+    #         bot.reply_to(message, "Enter username")
+    #         bot.register_next_step_handler(message, process_user_details)
+    #
+    # def process_user_details(message):
+    #     try:
+    #         connection = db.con_db()
+    #         # ('username', timestmp, 'role', assets, timeframe, analysis_is)
+    #         qu = functions.get_user_details(connection, message.text)[0]
+    #         analysis = functions.get_analysis(connection, qu[5])[0][0]
+    #         timeframe = functions.get_timeframe(connection, qu[4])[0][0]
+    #         coins = functions.get_user_coins(connection, qu[0])
+    #         res = f"Username:{qu[0]}\n" \
+    #               f"Join at:{qu[1]}\n" \
+    #               f"Assets:{qu[3]}\n" \
+    #               f"Role:{qu[2]}\n" \
+    #               f"Coins:{coins}\n" \
+    #               f"Analysis:{analysis}\n" \
+    #               f"Timeframe:{timeframe}"
+    #
+    #         bot.reply_to(message, res)
+    #     except Exception as e:
+    #         bot.reply_to(message, 'Please try again')
 
     @bot.message_handler(commands=['ps'])
     def show_users(message):
@@ -156,20 +160,36 @@ def bot_actions():
             result = subprocess.check_output('ps aux --sort -rss | grep main.py | head -n 1', shell=True)
             bot.reply_to(message, result)
 
-    @bot.message_handler(commands=['restart'])
-    def show_users(message):
-        if message.chat.id not in user_dict:
-            bot.reply_to(message, 'Please login /start')
-        elif not user_dict[message.chat.id].session:
-            bot.reply_to(message, 'Please login /start')
-        else:
-            bot.reply_to(message, "Enter PID process")
-            bot.register_next_step_handler(message, process_restart_bot)
+    # @bot.message_handler(commands=['restart'])
+    # def show_users(message):
+    #     if message.chat.id not in user_dict:
+    #         bot.reply_to(message, 'Please login /start')
+    #     elif not user_dict[message.chat.id].session:
+    #         bot.reply_to(message, 'Please login /start')
+    #     else:
+    #         bot.reply_to(message, "Enter PID process")
+    #         bot.register_next_step_handler(message, process_restart_bot)
+    #
+    # def process_restart_bot(message):
+    #     try:
+    #         os.system(f'kill {message.text}')
+    #         os.system("nohup python3 main.py &")
+    #         bot.reply_to(message, "Done!\n /ps to watch process")
+    #     except Exception as e:
+    #         bot.reply_to(message, 'Something wrong please try again!')
 
-    def process_restart_bot(message):
-        try:
-            os.system(f'kill {message.text}')
-            os.system("nohup python3 main.py &")
-            bot.reply_to(message, "Done!\n /ps to watch process")
-        except Exception as e:
-            bot.reply_to(message, 'Something wrong please try again!')
+    @bot.message_handler(commands=['logout'])
+    def logout(message):
+        if message.chat.id not in user_dict:
+            bot.reply_to(message, '😪Please /start to login')
+        # check user login
+        elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
+            bot.reply_to(message, '😪You are logged out')
+        else:
+            try:
+                user_dict[message.chat.id].session = False
+                bot.reply_to(message, '👋🏼Goodbye!\nFor login /start bot ')
+                del user_dict[message.chat.id]
+                print(user_dict)
+            except Exception as e:
+                bot.reply_to(message, 'logout unsuccessful')
