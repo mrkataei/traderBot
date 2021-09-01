@@ -7,6 +7,7 @@ is private and inner def in reset password for security
 import mysql.connector
 from mysql.connector import MySQLConnection
 from Inc.functions import chek_password, check_username, hash_pass
+from Libraries.definitions import *
 
 
 def reset_password(db_connection: MySQLConnection, username: str, answer: str, new_password: str, new_password2: str):
@@ -47,10 +48,10 @@ def reset_password(db_connection: MySQLConnection, username: str, answer: str, n
                 return False
 
     if check_username(db_connection, username):
-        return "user not exist"
+        return trans('C_username_exist')
     elif not check_answer():
-        return "answer is wrong /start bot again"
+        return trans('R_wrong_answer') + "\n" + trans('C_please_start')
     elif set_password():
-        return "success /start to login"
+        return trans('R_success') + "\n" + trans('C_please_start')
     else:
-        return "try again /start bot again"
+        return trans('R_try_again') + "\n" + trans('C_please_start')

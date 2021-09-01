@@ -7,6 +7,7 @@ need hash function for password - any registration in app for now needs username
 
 from mysql.connector import MySQLConnection
 from Inc.functions import chek_password, check_username, hash_pass
+from Libraries.definitions import *
 
 
 def register(db_connection: MySQLConnection, username: str, chat_id: str, password: str, password2: str,
@@ -16,7 +17,7 @@ def register(db_connection: MySQLConnection, username: str, chat_id: str, passwo
     chek_pass = chek_password(password=password, password2=password2)
     # check_username function return True if username not exists
     if not check_username(db_connection, username):
-        return "username already exist"
+        return trans('R_username_exist')
     elif not chek_pass[0]:
         return chek_pass[1]
     else:
@@ -27,4 +28,4 @@ def register(db_connection: MySQLConnection, username: str, chat_id: str, passwo
         cursor.execute(sql, val)
         # insert into database
         db_connection.commit()
-        return "🥳welcome"
+        return "🥳" + trans('R_welcome')

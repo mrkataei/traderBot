@@ -77,16 +77,14 @@ def bot_actions():
             bot.send_chat_action(chat_id=message.chat.id, action="typing")
             sleep(1)
             # welcome message and instructions
-            bot.reply_to(message, "Hey " + message.chat.first_name + "!\n" +
-                         "I am Aran , your trade assistance \n"
-                         "/help show commands")
+            bot.reply_to(message, trans('C_hello') + message.chat.first_name + "!\n" + trans('C_welcome'))
             # the markup help us we have call back with inlinekeyboard when yours tap one of those
             # some callback data send and we receive with @bot.callback_query_handler
             step_kb = telebot.types.InlineKeyboardMarkup()
-            step_kb.add(telebot.types.InlineKeyboardButton('🔑Login', callback_data='login'))
-            step_kb.add(telebot.types.InlineKeyboardButton('🤩Sign up', callback_data='reg'))
-            step_kb.add(telebot.types.InlineKeyboardButton('🔏Forget password', callback_data='forget'))
-            bot.send_message(chat_id=message.chat.id, text='Have not any account?\nSign up now!', reply_markup=step_kb)
+            step_kb.add(telebot.types.InlineKeyboardButton(trans('C_login'), callback_data='login'))
+            step_kb.add(telebot.types.InlineKeyboardButton(trans('C_register'), callback_data='reg'))
+            step_kb.add(telebot.types.InlineKeyboardButton(trans('C_forget_password'), callback_data='forget'))
+            bot.send_message(chat_id=message.chat.id, text=trans('C_any_account'), reply_markup=step_kb)
 
     # after callback @bot.callback_query_handler get function parameter ,this always true
     # and w8 to one case login and reg and .. happened . need to develop func in parameter
@@ -96,7 +94,7 @@ def bot_actions():
             # create object from user and store in our dictionary with chat_id key value
             user = User()
             user_dict[call.message.chat.id] = user
-            bot.reply_to(call.message, "🔑Enter your username")
+            bot.reply_to(call.message, trans('C_enter_username'))
             # handle next step message user enter after login
             bot.register_next_step_handler(call.message, callback=process_login_username)
         if call.data == "reg":
@@ -104,32 +102,33 @@ def bot_actions():
                 # create object from user and store in our dictionary with chat_id key value
                 user = Register(call.message.chat.id)
                 reg_dict[call.message.chat.id] = user
-                bot.reply_to(call.message, "🔑Enter your username")
+                bot.reply_to(call.message, trans('C_enter_username'))
                 # handle next step message user enter after sign up
                 bot.register_next_step_handler(call.message, callback=process_reg_username)
             else:
                 username = functions.get_user_with_chat_id(connection, call.message.chat.id)
-                bot.reply_to(call.message, f"You already have an account : {username} \nPlease /start to login ")
+                bot.reply_to(call.message,
+                             trans('C_already_have_account') + f" {username} \n" + trans('C_please_start'))
         if call.data == "1" or call.data == "2":
             # in other keyboard we need calls back from user choose which one question
             user = reg_dict[call.message.chat.id]
             # store in our object
             user.security_question_id = int(call.data)
-            bot.reply_to(call.message, "Enter your answer")
+            bot.reply_to(call.message, trans('C_enter_answer'))
             # handle next step message user enter after choose question
             bot.register_next_step_handler(call.message, callback=process_reg_answer)
         if call.data == "forget":
             # create object from user and store in our dictionary with chat_id key value
             user = Register(call.message.chat.id)
             reg_dict[call.message.chat.id] = user
-            bot.reply_to(call.message, "🔑Enter your username")
+            bot.reply_to(call.message, trans('C_enter_username'))
             # handle next step message user enter after forget password
             bot.register_next_step_handler(call.message, callback=process_forget_username)
         if call.data == "watchlist":
             coin_keyboard = telebot.types.InlineKeyboardMarkup()
             for index, coin in coins_list:
                 coin_keyboard.add(telebot.types.InlineKeyboardButton(coin, callback_data=coin))
-            bot.send_message(chat_id=call.message.chat.id, text='Select your coin', reply_markup=coin_keyboard)
+            bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_coin'), reply_markup=coin_keyboard)
 
         # need more develop
         if call.data in coins_list[:, 1]:
@@ -137,11 +136,10 @@ def bot_actions():
             # for coins in coins[:1]:
             user = user_dict[call.message.chat.id]
             if not functions.set_coin(connection, user.username, coin, user.watchlist[0][2])[0]:
-                bot.reply_to(call.message, "Coin already in watchlist /add")
+                bot.reply_to(call.message, trans('C_coin_already_exist'))
             else:
-                bot.reply_to(call.message, "Done! /show to show your watchlist \n"
-                                           "Default time frame is 30min!\n"
-                                           "For change /frame")
+                bot.reply_to(call.message, trans('C_done') + "\n"
+                             + trans('C_default_timeframe') + "\n" + trans('C_change_timeframe'))
 
         if call.data in timeframes_list[:, 1]:
             time_id = timeframes_list[np.where(timeframes_list[:, 1] == call.data)][0][0]
@@ -149,14 +147,13 @@ def bot_actions():
             # for coins in coins[:1]:
             user = user_dict[call.message.chat.id]
             functions.update_timeframe(connection, user.username, time_id)
-            bot.reply_to(call.message, f"Done! timeframe change to {time}")
+            bot.reply_to(call.message, trans('C_done') + time + trans('C_timeframe_changed'))
 
         if call.data in analysis_list[:, 1]:
             user = user_dict[call.message.chat.id]
             analysis_id = analysis_list[np.where(analysis_list[:, 1] == call.data)][0][0]
             functions.set_user_analysis(connection, user.username, int(analysis_id))
-            bot.reply_to(call.message, f"Done!\n"
-                                       f"Now {call.data} is working for you")
+            bot.reply_to(call.message, trans('C_done') + "\n" + trans('C_now') + call.data + trans('C_working_for_you'))
         if call.data == "remove_watchlist":
             user = user_dict[call.message.chat.id]
             user.watchlist = functions.get_user_watchlist(connection, user.username)
@@ -166,31 +163,31 @@ def bot_actions():
                 user.temp_watch = user.watchlist[0][2]
                 watchlist_remove.add(
                     telebot.types.InlineKeyboardButton(user.watchlist[0][2], callback_data='watchlist_remove_step2'))
-                bot.send_message(chat_id=call.message.chat.id, text='Select your watchlist',
+                bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_watchlist'),
                                  reply_markup=watchlist_remove)
             else:
-                bot.reply_to(call.message, 'You don\'t have any watchlist! /new')
+                bot.reply_to(call.message, trans('C_null_watchlist'))
         if call.data == "watchlist_remove_step2":
             user = user_dict[call.message.chat.id]
             functions.delete_watchlist(connection, user.username, user.temp_watch)
-            bot.reply_to(call.message, 'Done!\nFor create /new')
+            bot.reply_to(call.message, trans('C_done') + '\n' + trans('C_create_watchlist'))
 
         if call.data == "remove_coins":
             user = user_dict[call.message.chat.id]
             user.watchlist = functions.get_user_watchlist(connection, user.username)
             if user.watchlist:
                 if functions.get_empty_coins_remain(connection, user.username, user.watchlist[0][2]) == 2:
-                    bot.reply_to(call.message, 'No coins in your watchlist!/add😓')
+                    bot.reply_to(call.message, trans('C_null_coin'))
                 else:
                     watchlist_remove = telebot.types.InlineKeyboardMarkup()
                     # for watch in user.watchlist :
                     user.temp_watch = user.watchlist[0][2]
                     watchlist_remove.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2],
                                                                             callback_data='coins_remove_step2'))
-                    bot.send_message(chat_id=call.message.chat.id, text='Select your watchlist',
+                    bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_watchlist'),
                                      reply_markup=watchlist_remove)
             else:
-                bot.reply_to(call.message, 'Create watchlist first! /new')
+                bot.reply_to(call.message, trans('C_create_watchlist_first') + '\n' + trans('C_create_watchlist'))
         if call.data == "coins_remove_step2":
             user = user_dict[call.message.chat.id]
             user.watchlist = functions.get_user_watchlist(connection, user.username)
@@ -198,14 +195,14 @@ def bot_actions():
             user_coins = functions.get_user_coins(connection, user.username, user.watchlist[0][2])
             for coin in user_coins:
                 coin_keyboard.add(telebot.types.InlineKeyboardButton(coin, callback_data=coin + " delete"))
-            bot.send_message(chat_id=call.message.chat.id, text='Select your coin', reply_markup=coin_keyboard)
+            bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_coin'), reply_markup=coin_keyboard)
 
         if "delete" in call.data:
             user = user_dict[call.message.chat.id]
             temp = str(call.data).split(" ")
             coin = coins_list[np.where(coins_list[:, 1] == temp[0])][0][0]
             functions.set_null_coin_user(connection, user.username, coin)
-            bot.reply_to(call.message, 'Done!\n /add coins now!')
+            bot.reply_to(call.message, trans('C_done') + '\n' + trans('C_add_coins'))
 
         # after call back done keyboard delete
         bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
@@ -221,7 +218,7 @@ def bot_actions():
             user.username = message.text
             # get password with process_password and register_next_step_handler
             # to handle next enter user's message
-            msg = bot.reply_to(message, '🔒Enter your password')
+            msg = bot.reply_to(message, trans('C_enter_password'))
             bot.register_next_step_handler(msg, process_password)
         # some exception need develop
         except Exception as e:
@@ -255,10 +252,7 @@ def bot_actions():
             # fetch object
             user = reg_dict[message.chat.id]
             user.username = message.text
-            msg = bot.reply_to(message, '👮🏻‍♂️Enter your password\n'
-                                        '\n🔹your password must be at least 8 characters\n'
-                                        '🔹And a number and special character(@#$%^&+=)\n'
-                                        '🔹and lower/upper case at least')
+            msg = bot.reply_to(message, '👮🏻‍♂' + trans('C_enter_password') + trans('C_password_instruction'))
             bot.register_next_step_handler(msg, process_reg_password)
         except Exception as e:
             bot.reply_to(message, trans('C_please_start'))
@@ -268,7 +262,7 @@ def bot_actions():
         try:
             user = reg_dict[message.chat.id]
             user.password1 = message.text
-            msg = bot.reply_to(message, '🔒Enter your password again')
+            msg = bot.reply_to(message, trans('C_enter_password') + trans('C_again'))
             bot.register_next_step_handler(msg, process_reg_password_again)
             # delete password for privacy
             bot.delete_message(message.chat.id, message.message_id)
@@ -286,7 +280,8 @@ def bot_actions():
             questions = telebot.types.InlineKeyboardMarkup()
             questions.add(telebot.types.InlineKeyboardButton(question_dict[0][1], callback_data="1"))
             questions.add(telebot.types.InlineKeyboardButton(question_dict[1][1], callback_data="2"))
-            bot.send_message(chat_id=message.chat.id, text='⚠️Select your security question', reply_markup=questions)
+            bot.send_message(chat_id=message.chat.id, text='⚠️' + trans('C_select_security_question'),
+                             reply_markup=questions)
         except Exception as e:
             bot.reply_to(message, trans('C_please_start'))
             del reg_dict[message.chat.id]
@@ -326,7 +321,8 @@ def bot_actions():
                 msg = bot.reply_to(message, question[0][1])
                 bot.register_next_step_handler(msg, process_forget_answer)
             else:
-                bot.send_message(chat_id=message.chat.id, text="😞Username not exists\nTry again /start")
+                bot.send_message(chat_id=message.chat.id,
+                                 text=trans('C_username_exist') + '\n' + trans('C_please_start'))
                 del reg_dict[message.chat.id]
 
         except Exception as e:
@@ -337,7 +333,7 @@ def bot_actions():
         try:
             user = reg_dict[message.chat.id]
             user.answer = message.text
-            msg = bot.reply_to(message, '🔓Enter your new password')
+            msg = bot.reply_to(message, trans('C_new_password'))
             bot.register_next_step_handler(msg, process_forget_new_pass)
         except Exception as e:
             bot.reply_to(message, trans('C_please_start'))
@@ -347,7 +343,7 @@ def bot_actions():
         try:
             user = reg_dict[message.chat.id]
             user.password1 = message.text
-            msg = bot.reply_to(message, '🔒Enter your new password again')
+            msg = bot.reply_to(message, trans('C_enter_password') + trans('C_again'))
             bot.delete_message(message.chat.id, message.message_id)
             bot.register_next_step_handler(msg, process_forget_new_pass_again)
         except Exception as e:
@@ -383,10 +379,10 @@ def bot_actions():
             user = user_dict[message.chat.id]
             # if len(functions.get_user_watchlist(connection , user.username)) < 1:
             if not functions.get_user_watchlist(connection, user.username):
-                bot.reply_to(message, "Enter your watchlist name")
+                bot.reply_to(message, trans('C_enter_watchlist_name'))
                 bot.register_next_step_handler(message, process_new_watch)
             else:
-                bot.reply_to(message, "😅 You have already one watchlist /show")
+                bot.reply_to(message, trans('C_already_have_watchlist'))
 
     def process_new_watch(message):
         try:
@@ -395,7 +391,7 @@ def bot_actions():
             for create in range(0, 2):
                 functions.create_watchlist(connection, user.username, message.text)
             user.watchlist = message.text
-            bot.reply_to(message, "Good!👀\n/add to add coin in your watchlist")
+            bot.reply_to(message, trans('C_good') + "\n" + trans('C_add_coins'))
         except Exception as e:
             bot.reply_to(message, trans('C_please_start'))
 
@@ -412,11 +408,11 @@ def bot_actions():
                 if functions.get_empty_coins_remain(connection, user.username, user.watchlist[0][2]) != 0:
                     watchlist = telebot.types.InlineKeyboardMarkup()
                     watchlist.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2], callback_data='watchlist'))
-                    bot.send_message(chat_id=message.chat.id, text='Select your watchlist', reply_markup=watchlist)
+                    bot.send_message(chat_id=message.chat.id, text=trans('C_select_watchlist'), reply_markup=watchlist)
                 else:
                     bot.reply_to(message, trans('C_full_watchlist'))
             else:
-                bot.reply_to(message, 'Create watchlist first! /new')
+                bot.reply_to(message, trans('C_create_watchlist_first'))
 
     """
         timeframe command handler update 
@@ -428,12 +424,12 @@ def bot_actions():
             bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
-            bot.reply_to(message, '😪You are logged out')
+            bot.reply_to(message, trans('C_logged_out'))
         else:
             time_keyboard = telebot.types.InlineKeyboardMarkup()
             for index, time in timeframes_list:
                 time_keyboard.add(telebot.types.InlineKeyboardButton(time, callback_data=time))
-            bot.send_message(chat_id=message.chat.id, text='Select your timeframe', reply_markup=time_keyboard)
+            bot.send_message(chat_id=message.chat.id, text=trans('C_select_timeframe'), reply_markup=time_keyboard)
 
     """
         show command handler
@@ -445,7 +441,7 @@ def bot_actions():
             bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
-            bot.reply_to(message, '😪You are logged out')
+            bot.reply_to(message, trans('C_logged_out'))
         else:
             user = user_dict[message.chat.id]
             user.watchlist = functions.get_user_watchlist(connection, user.username)
@@ -460,13 +456,12 @@ def bot_actions():
                         percent = str(percent) + " 🔴" if percent < 0 else str(percent) + " 🟢"
                         coins += coin + " %" + percent + "\n"
                 # amount = 0
-                res = "💰 Assets\n" + str(amount) + "$\n\n" \
-                                                    "👀 Watchlists\n" + user.watchlist[0][
-                          2] + "\n\n💎 Coins\n" + coins + "\n⏱ Timeframe\n" \
-                      + timeframe
+                res = "💰 " + trans('C_assets') + "\n" + str(amount) + "$\n\n👀 " \
+                      + trans('C_watchlist') + "\n" + user.watchlist[0][2] + "\n\n💎 " \
+                      + trans('C_coin') + "\n" + coins + "\n⏱ " + trans('C_timeframe') + "\n" + timeframe
                 bot.reply_to(message, res)
             else:
-                bot.reply_to(message, 'Create watchlist first! /new')
+                bot.reply_to(message, trans('C_create_watchlist_first'))
 
     @bot.message_handler(commands=['analysis'])
     def update_timeframe(message):
@@ -474,7 +469,7 @@ def bot_actions():
             bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
-            bot.reply_to(message, '😪You are logged out')
+            bot.reply_to(message, trans('C_logged_out'))
         else:
             # if user dont have an analysis
             user = user_dict[message.chat.id]
@@ -483,11 +478,10 @@ def bot_actions():
                 analysis_keyboard = telebot.types.InlineKeyboardMarkup()
                 for index, analy in analysis_list:
                     analysis_keyboard.add(telebot.types.InlineKeyboardButton(analy, callback_data=analy))
-                bot.send_message(chat_id=message.chat.id, text='📊️Select your analysis',
+                bot.send_message(chat_id=message.chat.id, text=trans('C_select_analysis'),
                                  reply_markup=analysis_keyboard)
             else:
-                bot.reply_to(message, f'😏You already have {analysis} analysis \n'
-                                      f'/show to remove or see details')
+                bot.reply_to(message, trans('C_already_have_analysis') + analysis)
 
     """
             removes command handler
@@ -503,13 +497,15 @@ def bot_actions():
         else:
             try:
                 remove_keyboard = telebot.types.InlineKeyboardMarkup()
-                remove_keyboard.add(telebot.types.InlineKeyboardButton("Watchlist", callback_data="remove_watchlist"))
-                remove_keyboard.add(telebot.types.InlineKeyboardButton("Coins", callback_data="remove_coins"))
-                bot.send_message(chat_id=message.chat.id, text='select option you want to delete',
+                remove_keyboard.add(telebot.types.InlineKeyboardButton(trans('C_watchlist')
+                                                                       , callback_data="remove_watchlist"))
+                remove_keyboard.add(telebot.types.InlineKeyboardButton(trans('C_coin')
+                                                                       , callback_data="remove_coins"))
+                bot.send_message(chat_id=message.chat.id, text=trans('C_select_option_delete'),
                                  reply_markup=remove_keyboard)
 
             except Exception as e:
-                bot.reply_to(message, 'logout unsuccessful')
+                bot.reply_to(message, trans('C_unsuccessful_operation'))
 
     """
         logout command handler
@@ -521,12 +517,12 @@ def bot_actions():
             bot.reply_to(message, trans('C_please_start'))
         # check user login
         elif user_dict[message.chat.id] and not user_dict[message.chat.id].session:
-            bot.reply_to(message, '😪You are logged out')
+            bot.reply_to(message, trans('C_logged_out'))
         else:
             try:
                 user_dict[message.chat.id].session = False
-                bot.reply_to(message, '👋🏼Goodbye!\nFor login /start bot ')
+                bot.reply_to(message, trans('C_goodbye') + '\n' + trans('C_login_again'))
                 del user_dict[message.chat.id]
                 print(user_dict)
             except Exception as e:
-                bot.reply_to(message, 'logout unsuccessful')
+                bot.reply_to(message, trans('C_unsuccessful_logout'))

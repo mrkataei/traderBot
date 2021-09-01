@@ -5,6 +5,7 @@ Mr.Kataei 8/15/2021
 import telebot
 from mysql.connector import MySQLConnection
 from Inc import functions
+from Libraries.definitions import *
 
 # from decouple import config
 
@@ -23,13 +24,14 @@ def broadcast_messages(connection: MySQLConnection, coin_id: int, analysis_id: i
     analysis = functions.get_analysis(connection, analysis_id)
     timeframe = functions.get_timeframe(connection, timeframe_id)
     bot = telebot.TeleBot(API_KEY)
+    # position if get_lang() == 'en'
     for user in users:
-        message = f'👋🏼 Hey {user[0]}!\n💥New received from *{analysis[0][0]}*!!!\n' \
-                  f'*{coin}* now in *{position}* position\n' \
-                  f'Current price: {current_price}$\n' \
-                  f'Target price: {target_price}$\n' \
-                  f'Risk: *{risk}*\n' \
-                  f'Timeframe: {timeframe[0][0]}'
+        message = f'👋🏼 {trans("C_hello")} {user[0]}!\n💥{trans("M_new_signal")}*{analysis[0][0]}*!!!\n' \
+                  f'*{coin}* {trans("C_now")} {trans("M_in")} *{position}* {trans("M_position")}\n' \
+                  f'{trans("M_current_price")}: {current_price}$\n' \
+                  f'{trans("M_target_price")}: {target_price}$\n' \
+                  f'{trans("M_risk")}: *{risk}*\n' \
+                  f'{trans("C_timeframe")}: {timeframe[0][0]}'
         try:
             bot.send_message(chat_id=int(functions.get_user_chat_id(connection, user[0])), text=message,
                              parse_mode='Markdown')

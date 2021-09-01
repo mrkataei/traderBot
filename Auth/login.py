@@ -8,6 +8,7 @@ and compare to database row
 import mysql.connector
 from mysql.connector import MySQLConnection
 from Inc.functions import hash_pass
+from Libraries.definitions import *
 
 
 def login(db_connection: MySQLConnection, username: str, password: str):
@@ -17,10 +18,9 @@ def login(db_connection: MySQLConnection, username: str, password: str):
         cursor.execute(query)
         record = cursor.fetchall()
         if record and record[0][2] == hash_pass(password=password, salt=record[0][3])[0]:
-            return True, "You are logged in🤩"
+            return True, trans('L_successful_login')
         else:
-            return False, "Your username or password is incorrect🥵\n" \
-                          "Try again /start"
+            return False, trans('L_invalid_login') + "\n" + trans("C_please_start")
     # exception must be complete
     except mysql.connector.Error as err:
         return False, "Something went wrong: {}".format(err)
