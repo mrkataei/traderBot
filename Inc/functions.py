@@ -581,12 +581,24 @@ def get_user_details(db_connection: MySQLConnection, username: str):
 
         query = f'SELECT users.username , users.timestamp , users.role , bank.amount , user_timeframe.timeframe_id ,' \
                 f'user_analysis.analysis_id FROM users ' \
-                f'INNER JOIN user_timeframe ON users.username = user_timeframe.user ' \
-                f'INNER JOIN user_analysis ON user_timeframe.user = user_analysis.user ' \
-                f'INNER JOIN bank ON user_analysis.user = bank.user ' \
+                f'LEFT JOIN bank ON users.username = bank.user ' \
+                f'LEFT JOIN user_timeframe ON users.username = user_timeframe.user  ' \
+                f'LEFT JOIN user_analysis ON user_timeframe.user = user_analysis.user ' \
                 f'WHERE username="{username}"'
         cursor.execute(query)
         record = cursor.fetchall()
         return record
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
+
+
+def set_accuracy(db_connection: MySQLConnection, recom_id: int, validity: int):
+    cursor = db_connection.cursor()
+    try:
+        sql = "INSERT INTO accuracy (recom_id, validity) VALUES (%s, %s )"
+        val = (recom_id, validity)
+        cursor.execute(sql, val)
+        db_connection.commit()
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+

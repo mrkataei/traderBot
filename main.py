@@ -1,8 +1,10 @@
-from Telegram.Client import tele as client
-from Telegram.Admin import tele as admin
+from Telegram.Client.tele import ClientBot
+from Telegram.Admin.tele import AdminBot
 import threading
 from Analysis import stream
 
+admin = AdminBot()
+client = ClientBot()
 # client bot
 polling_thread = threading.Thread(target=client.bot_polling)
 polling_thread.daemon = True
