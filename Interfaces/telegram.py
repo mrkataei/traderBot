@@ -62,11 +62,11 @@ class Telegram:
             user.username = message.text
             # get password with process_password and register_next_step_handler
             # to handle next enter user's message
-            msg = self.bot.reply_to(message, '🔒Enter your password')
+            msg = self.bot.reply_to(message, trans('C_enter_password'))
             self.bot.register_next_step_handler(msg, self.process_password)
         # some exception need develop
         except Exception as e:
-            self.bot.reply_to(message, 'Please /start bot again')
+            self.bot.reply_to(message, trans('C_please_start'))
             del self.user_dict[message.chat.id]
             print(e)
 
