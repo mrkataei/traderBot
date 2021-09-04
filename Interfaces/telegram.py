@@ -72,10 +72,10 @@ class Telegram:
 
     def check_login(self, message):
         if message.chat.id not in self.user_dict:
-            self.bot.reply_to(message, trans('C_please_start'))
+            self.bot.reply_to(message, trans('C_please_login'))
             return False
         elif not self.user_dict[message.chat.id].session:
-            self.bot.reply_to(message, trans('C_please_start'))
+            self.bot.reply_to(message, trans('C_please_login'))
             return False
         else:
             return True

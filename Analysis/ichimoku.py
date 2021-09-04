@@ -41,11 +41,17 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     ichimoku = ichimoku_all[0]
     future = ichimoku_all[1]
     ichimoku['close'] = data.close
-    # futur cloud and market trend
+    # future cloud and market trend
     future['signal'] = np.where(future['spanA'] > future['spanB'], 'buy', 'sell')
     # one last row in ichimoku
     last_ichimoku = np.array(ichimoku.tail(1))[0].astype(float)
     close = float(last_ichimoku[5])
+    try:
+        old_position = functions.get_recommendations(connection, coin_id=coin_id, analysis_id=1, timeframe=timeframe_id)[0][2]
+        # when no rows in database
+    except Exception as e:
+        old_position = 'sell'
+        print(e)
 
     def check():
         # return Tuple ( buy->True , sell->False ) and risk (0(low)-10(high))
@@ -81,15 +87,16 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     result = check()
     target_price = close * gain + close if result[0] else -close * gain + close
     position = 'buy' if result[0] else 'sell'
-    functions.set_recommendation(db_connection=connection, analysis_id=1,
-                                 coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                 target_price=target_price, current_price=close,
-                                 cost_price=cost, risk=result[1])
-    broadcast_messages(connection=connection, analysis_id=1,
-                       coin_id=coin_id, current_price=close,
-                       target_price=target_price, risk=result[1], position=position,
-                       timeframe_id=timeframe_id)
+    if old_position != position:
+        functions.set_recommendation(db_connection=connection, analysis_id=1,
+                                     coin_id=coin_id, timeframe_id=timeframe_id, position=position,
+                                     target_price=target_price, current_price=close,
+                                     cost_price=cost, risk=result[1])
+        broadcast_messages(connection=connection, analysis_id=1,
+                           coin_id=coin_id, current_price=close,
+                           target_price=target_price, risk=result[1], position=position,
+                           timeframe_id=timeframe_id)
     # for transaction in future
     # users = functions.get_user_recommendation(connection, coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id)
     # for user in users:
-    #     functions.pay_transaction(db_connection=connection ,cost_price=cost ,username=user ,detail="kharid kardi")
+    #     functions.pay_transaction(db_connection=connection ,cost_price=cost ,username=user ,detail="")

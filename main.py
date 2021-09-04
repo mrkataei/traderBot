@@ -2,6 +2,8 @@ from Telegram.Client.tele import ClientBot
 from Telegram.Admin.tele import AdminBot
 import threading
 from Analysis import stream
+import sys
+sys.stdout = open('output.txt', 'w')
 
 admin = AdminBot()
 client = ClientBot()

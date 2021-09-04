@@ -58,12 +58,10 @@ def candle_details_to_string(symbol: str, timeframe: str):
             data[0, 4]) + \
                "\n" + "Volume : " + str(data[0, 5]) + "\n" + "Number of trades : " + str(data[0, 8])
     else:
-        text = "😰" + symbol + "\n🔴" + str(percent) + "%\n" + "⏱Timeframe: " + timeframe + "Open time : " + str(
+        text = "😰" + symbol + "\n🔴" + str(percent) + "%\n" + "⏱Timeframe: " + timeframe + "\n" + "Open time : " + str(
             time) + "\n" + "Open : " + str(data[0, 1]) + \
                "\n" + "High : " + str(data[0, 2]) + "\n" + "Low : " + str(data[0, 3]) + "\n" + "Close : " + str(
             data[0, 4]) + \
                "\n" + "Volume : " + str(data[0, 5]) + "\n" + "Number of trades : " + str(data[0, 8])
-    print(text)
+    return text
 
-
-get_percent_candle("btcusdt", "1min")

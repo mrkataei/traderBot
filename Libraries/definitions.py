@@ -15,6 +15,10 @@ TRANSLATIONS = {
         'en': 'Please /start bot again',
         'fa': 'لطفا دوباره بات را استارت کنید /start'
     },
+    'C_please_login': {
+        'en': 'Please login to bot /start',
+        'fa': 'لطفا وارد شودید /start'
+    },
     'C_full_watchlist': {
         'en': 'your watchlist is full!😓',
         'fa': 'واچلیست شما پر است! 😓'

@@ -2,7 +2,7 @@
 Mr.Kataei 8/15/2021
 async functions for get data stream from binance socket for 30m , 1h , 4h , 1day timeframes and multiple symbols
 .first you must init statics you have because when new data append date work truth , after that check your analysis
-with csvs stored
+with CSVs stored
 database configure :
         coin_id -> 1=BTCUSDT , 2=ETHUSDT
         timeframe_id -> 1=30min , 2=1hour ,3=4hour ,4=1day
@@ -27,11 +27,11 @@ connection = db.con_db()
 
 
 def init_statics():
-    # this method work with n parameters and return stored csvs in Static with 4 timeframes
+    # this method work with n parameters and return stored CSVs in Static with 4 timeframes
     data_collector.generate_data("BTCUSDT", "ETHUSDT")
 
 
-# for append new row in our csvs , candle details from binance in bellow
+# for append new row in our CSVs , candle details from binance in bellow
 def append(data: pd.DataFrame, symbol: str, timeframe: str, candle):
     """
         candle details
@@ -95,7 +95,7 @@ async def stream_30min_candle(*symbols: str, socket: BinanceSocketManager):
             # 30min sleep for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(900)
+                await asyncio.sleep(1500)
 
 
 async def stream_1hour_candle(*symbols: str, socket: BinanceSocketManager):
@@ -121,7 +121,7 @@ async def stream_1hour_candle(*symbols: str, socket: BinanceSocketManager):
             # 1hour sleep for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(2000)
+                await asyncio.sleep(3000)
 
 
 async def stream_4hour_candle(*symbols: str, socket: BinanceSocketManager):
@@ -147,7 +147,7 @@ async def stream_4hour_candle(*symbols: str, socket: BinanceSocketManager):
             # sleep 4hours for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(12500)
+                await asyncio.sleep(14000)
 
 
 async def stream_1day_candle(*symbols: str, socket: BinanceSocketManager):
@@ -171,7 +171,7 @@ async def stream_1day_candle(*symbols: str, socket: BinanceSocketManager):
             # sleep 24hour for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(84000)
+                await asyncio.sleep(85000)
 
 
 async def stream():

@@ -406,6 +406,16 @@ class ClientBot(Telegram):
                 else:
                     self.bot.reply_to(message, trans('C_create_watchlist_first'))
 
+        @self.bot.message_handler(commands=['candle'])
+        def update_timeframe(message):
+            if self.check_login(message):
+                user = self.user_dict[message.chat.id]
+                coins = functions.get_user_coins(connection, user.username)
+                timeframe = functions.get_user_timeframe(connection, user.username)
+                for coin in coins:
+                    res = candle.candle_details_to_string(coin, timeframe)
+                    self.bot.reply_to(message, res)
+
         @self.bot.message_handler(commands=['analysis'])
         def update_timeframe(message):
             if self.check_login(message):
