@@ -15,6 +15,26 @@ TRANSLATIONS = {
         'en': 'Please /start bot again',
         'fa': 'لطفا دوباره بات را استارت کنید /start'
     },
+    'C_help': {
+        'en': '/start - login or Create account\n'
+              '/new - Create new watchlist \n'
+              '/add - Add coins in your selected watchlist \n'
+              '/frame - Change your timeframe \n'
+              '/analysis - Add analysis  candle \n'
+              '/candle - show your coins details \n'
+              '/show - Show all details \n'
+              '/remove - Remove coins or watchlists \n'
+              '/logout  - Logout from account\n',
+        'fa': '/start - ورود یا ایجاد حساب کاربری'
+              '\n/new - ایجاد واچلیست جدید '
+              '\n/add - اضافه کردن رمزارز به واچلیست  '
+              '\n/frame - عوض کردن تایم فریم  '
+              '\n/candle - نمایش اطلاعات رمزارزها'
+              '\n/analysis - اضافه کردن آنالیز'
+              '\n/show - نمایش اطلاعات حساب'
+              '\n/remove - حذف رمزارز یا واچلیست '
+              '\n/logout  - خروج از حساب کاربری',
+    },
     'C_please_login': {
         'en': 'Please login to bot /start',
         'fa': 'لطفا وارد شودید /start'

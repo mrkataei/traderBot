@@ -51,13 +51,18 @@ def candle_details_to_string(symbol: str, timeframe: str):
     time = pd.to_datetime(data[0, 0], unit='ms', yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
     percent = (float(data[0, 4]) - float(data[0, 1])) * 100 / float(data[0, 1])
     percent = round(percent, 3)
+    open_p = round(float(data[0, 1]), 4)
+    high_p = round(float(data[0, 2]), 4)
+    low_p = round(float(data[0, 3]), 4)
+    close_p = round(float(data[0, 4]), 4)
+    volume_p = round(float(data[0, 5]), 4)
     if percent > 0:
         emoji = "🤑" + symbol + "\n🟢"
     else:
         emoji = "😰" + symbol + "\n🔴"
     text = emoji + str(percent) + "%\n" + "⏱" + trans('C_timeframe') + " " + timeframe + "\n" \
-           + trans('C_open_time') + str(time) + "\n" + trans('C_open') + str(data[0, 1]) + "\n" \
-           + trans('C_high') + str(data[0, 2]) + "\n" + trans('C_low') + str(data[0, 3]) + "\n" \
-           + trans('C_close') + str(data[0, 4]) + "\n" + trans('C_volume') + str(data[0, 5]) + "\n" \
+           + trans('C_open_time') + str(time) + "\n" + trans('C_open') + str(open_p) + "$\n" \
+           + trans('C_high') + str(high_p) + "$\n" + trans('C_low') + str(low_p) + "$\n" \
+           + trans('C_close') + str(close_p) + "$\n" + trans('C_volume') + str(volume_p) + "\n" \
            + trans('C_number_trades') + str(data[0, 8])
     return text

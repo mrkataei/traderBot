@@ -127,7 +127,7 @@ class ClientBot(Telegram):
                 # for coins in coins[:1]:
                 user = self.user_dict[call.message.chat.id]
                 functions.update_timeframe(connection, user.username, time_id)
-                self.bot.reply_to(call.message, trans('C_done') + time + trans('C_timeframe_changed'))
+                self.bot.reply_to(call.message, trans('C_done') + trans('C_timeframe_changed') + time)
 
             if call.data in self.analysis_list[:, 1]:
                 user = self.user_dict[call.message.chat.id]
@@ -450,6 +450,15 @@ class ClientBot(Telegram):
                 except Exception as e:
                     self.bot.reply_to(message, trans('C_unsuccessful_operation'))
                     print(e)
+
+        @self.bot.message_handler(commands=['help'])
+        def remove(message):
+            try:
+                self.bot.reply_to(message, trans('C_help'))
+
+            except Exception as e:
+                self.bot.reply_to(message, trans('C_unsuccessful_operation'))
+                print(e)
 
         """
             logout command handler
