@@ -5,6 +5,7 @@ detail : percent of candle ( close - open)*100/open
 """
 from binance.client import Client
 import pandas as pd
+from Libraries.definitions import *
 
 client = Client()
 
@@ -51,17 +52,12 @@ def candle_details_to_string(symbol: str, timeframe: str):
     percent = (float(data[0, 4]) - float(data[0, 1])) * 100 / float(data[0, 1])
     percent = round(percent, 3)
     if percent > 0:
-        text = "🤑" + symbol + "\n🟢" + str(
-            percent) + "%\n" + "⏱Timeframe: " + timeframe + "\n" + "Open time : " + str(
-            time) + "\n" + "Open : " + str(data[0, 1]) + \
-               "\n" + "High : " + str(data[0, 2]) + "\n" + "Low : " + str(data[0, 3]) + "\n" + "Close : " + str(
-            data[0, 4]) + \
-               "\n" + "Volume : " + str(data[0, 5]) + "\n" + "Number of trades : " + str(data[0, 8])
+        emoji = "🤑" + symbol + "\n🟢"
     else:
-        text = "😰" + symbol + "\n🔴" + str(percent) + "%\n" + "⏱Timeframe: " + timeframe + "\n" + "Open time : " + str(
-            time) + "\n" + "Open : " + str(data[0, 1]) + \
-               "\n" + "High : " + str(data[0, 2]) + "\n" + "Low : " + str(data[0, 3]) + "\n" + "Close : " + str(
-            data[0, 4]) + \
-               "\n" + "Volume : " + str(data[0, 5]) + "\n" + "Number of trades : " + str(data[0, 8])
+        emoji = "😰" + symbol + "\n🔴"
+    text = emoji + str(percent) + "%\n" + "⏱" + trans('C_timeframe') + " " + timeframe + "\n" \
+           + trans('C_open_time') + str(time) + "\n" + trans('C_open') + str(data[0, 1]) + "\n" \
+           + trans('C_high') + str(data[0, 2]) + "\n" + trans('C_low') + str(data[0, 3]) + "\n" \
+           + trans('C_close') + str(data[0, 4]) + "\n" + trans('C_volume') + str(data[0, 5]) + "\n" \
+           + trans('C_number_trades') + str(data[0, 8])
     return text
-

@@ -211,6 +211,34 @@ TRANSLATIONS = {
         'en': 'Assets',
         'fa': 'دارایی ها'
     },
+    'C_open_time': {
+        'en': 'Open time : ',
+        'fa': 'زمان بازگشایی : '
+    },
+    'C_open': {
+        'en': 'Open : ',
+        'fa': 'بازگشایی : '
+    },
+    'C_high': {
+        'en': 'High : ',
+        'fa': 'بالاترین : '
+    },
+    'C_low': {
+        'en': 'Low : ',
+        'fa': 'کمترین : '
+    },
+    'C_close': {
+        'en': 'Close : ',
+        'fa': 'پایانی : '
+    },
+    'C_volume': {
+        'en': 'Volume : ',
+        'fa': 'حجم : '
+    },
+    'C_number_trades': {
+        'en': 'Number of trades : ',
+        'fa': 'تعداد معاملات : '
+    },
     'M_new_signal': {
         'en': 'New received from ',
         'fa': 'سیگنال جدیدی رسید از '
