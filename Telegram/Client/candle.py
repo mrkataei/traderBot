@@ -50,7 +50,7 @@ def candle_details_to_string(symbol: str, timeframe: str):
     time = pd.to_datetime(data[0, 0], unit='ms', yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
     percent = (float(data[0, 4]) - float(data[0, 1])) * 100 / float(data[0, 1])
     percent = round(percent, 3)
-    if percent < 0:
+    if percent > 0:
         text = "🤑" + symbol + "\n🟢" + str(
             percent) + "%\n" + "⏱Timeframe: " + timeframe + "\n" + "Open time : " + str(
             time) + "\n" + "Open : " + str(data[0, 1]) + \

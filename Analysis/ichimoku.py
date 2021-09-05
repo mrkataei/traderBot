@@ -47,18 +47,21 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     last_ichimoku = np.array(ichimoku.tail(1))[0].astype(float)
     close = float(last_ichimoku[5])
     try:
-        old_position = functions.get_recommendations(connection, coin_id=coin_id, analysis_id=1, timeframe=timeframe_id)[0][2]
+        query = functions.get_recommendations(connection, coin_id=coin_id, analysis_id=1, timeframe=timeframe_id)
+        old_position = query[0][2]
+        old_risk = query[0][7]
         # when no rows in database
     except Exception as e:
-        old_position = 'sell'
+        old_position = 'buy'
+        old_risk = 'low'
         print(e)
 
     def check():
         # return Tuple ( buy->True , sell->False ) and risk (0(low)-10(high))
         if future.iloc[-1, 2] == 'buy':  # 3 col signal last row
             if last_ichimoku[0] > last_ichimoku[1]:
-                if close > last_ichimoku[3]:
-                    if close > last_ichimoku[4]:
+                if close > last_ichimoku[2]:
+                    if close > last_ichimoku[3]:
                         if close > last_ichimoku[0]:
                             return True, 'low'
                         else:
@@ -71,8 +74,8 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
                 return True, 'very high'
         else:
             if close > last_ichimoku[0]:
-                if close > last_ichimoku[4]:
-                    if close > last_ichimoku[3]:
+                if close > last_ichimoku[3]:
+                    if close > last_ichimoku[2]:
                         if last_ichimoku[0] < last_ichimoku[1]:
                             return False, 'low'
                         else:
@@ -87,7 +90,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     result = check()
     target_price = close * gain + close if result[0] else -close * gain + close
     position = 'buy' if result[0] else 'sell'
-    if old_position != position:
+    if old_position != position or old_risk != result[1]:
         functions.set_recommendation(db_connection=connection, analysis_id=1,
                                      coin_id=coin_id, timeframe_id=timeframe_id, position=position,
                                      target_price=target_price, current_price=close,

@@ -24,7 +24,6 @@ def broadcast_messages(connection: MySQLConnection, coin_id: int, analysis_id: i
     analysis = functions.get_analysis(connection, analysis_id)
     timeframe = functions.get_timeframe(connection, timeframe_id)
     bot = telebot.TeleBot(API_KEY)
-    # position if get_lang() == 'en'
     for user in users:
         message = f'👋🏼 {trans("C_hello")} {user[0]}!\n💥{trans("M_new_signal")}*{analysis[0][0]}*!!!\n' \
                   f'*{coin}* {trans("C_now")} {trans("M_in")} *{position}* {trans("M_position")}\n' \

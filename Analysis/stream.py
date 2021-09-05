@@ -95,7 +95,7 @@ async def stream_30min_candle(*symbols: str, socket: BinanceSocketManager):
             # 30min sleep for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(1500)
+                await asyncio.sleep(900)
 
 
 async def stream_1hour_candle(*symbols: str, socket: BinanceSocketManager):
@@ -121,7 +121,7 @@ async def stream_1hour_candle(*symbols: str, socket: BinanceSocketManager):
             # 1hour sleep for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(3000)
+                await asyncio.sleep(2000)
 
 
 async def stream_4hour_candle(*symbols: str, socket: BinanceSocketManager):
@@ -147,7 +147,7 @@ async def stream_4hour_candle(*symbols: str, socket: BinanceSocketManager):
             # sleep 4hours for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(14000)
+                await asyncio.sleep(12500)
 
 
 async def stream_1day_candle(*symbols: str, socket: BinanceSocketManager):
@@ -171,7 +171,7 @@ async def stream_1day_candle(*symbols: str, socket: BinanceSocketManager):
             # sleep 24hour for new data
             if count == 2:
                 count = 0
-                await asyncio.sleep(85000)
+                await asyncio.sleep(84000)
 
 
 async def stream():
