@@ -605,8 +605,8 @@ def set_accuracy(db_connection: MySQLConnection, recom_id: int, validity: int):
 def realtime_accuracy(db_connection:MySQLConnection,timeframe_id: int,timestamp,coin_id:int,accuracy:float):
     cursor = db_connection.cursor()
     try:
-        sql = "INSERT INTO accuracy (coine_id, timeframe ,timestamp, accuracy) VALUES (%s, %s ,%s , %s)"
-        val = (coin_id, timeframe_id,timestamp,accuracy)
+        sql = "INSERT INTO accuracy (recom_id, accuracy) VALUES (%s , %s)"
+        val = (recom_id,accuracy)
         cursor.execute(sql, val)
         db_connection.commit()
     except mysql.connector.Error as err:
