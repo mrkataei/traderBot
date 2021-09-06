@@ -24,8 +24,11 @@ from Inc import db
 from Analysis import ichimoku
 
 connection = db.con_db()
-
-
+#ebrahimi
+acc=None
+accuracy= pd.DataFrame(columns=['timeframe_id','coin_id','price','timestamp','position','highest','lowest','true/false'])
+global num,step_a
+num,step_a=0,0
 def init_statics():
     # this method work with n parameters and return stored CSVs in Static with 4 timeframes
     data_collector.generate_data("BTCUSDT", "ETHUSDT")
@@ -85,13 +88,24 @@ async def stream_30min_candle(*symbols: str, socket: BinanceSocketManager):
             c_30m_data1 = await candle1_30min.recv()
             if c_30m_data0['k']['x']:
                 data0_30min = append(data0_30min, symbols[0], "30min", c_30m_data0)
-                ichimoku.signal(data=data0_30min, gain=0.003, cost=1, coin_id=1, timeframe_id=1)
+                #ebrahimi
+                acc=ichimoku.signal(data=data0_30min, gain=0.003, cost=1, coin_id=1, timeframe_id=1)
+                trick=True
                 count += 1
+            highest=float(c_30m_data0['k']['h'])
+            lowest=float(c_30m_data0['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False        
             if c_30m_data1['k']['x']:
                 data1_30min = append(data1_30min, symbols[1], "30min", c_30m_data1)
-                ichimoku.signal(data=data1_30min, gain=0.003, cost=1, coin_id=2, timeframe_id=1)
+                #ebrahimi
+                acc=ichimoku.signal(data=data1_30min, gain=0.003, cost=1, coin_id=2, timeframe_id=1)
+                trick=True
                 count += 1
-
+            highest=float(c_30m_data1['k']['h'])
+            lowest=float(c_30m_data1['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False
             # 30min sleep for new data
             if count == 2:
                 count = 0
@@ -110,19 +124,28 @@ async def stream_1hour_candle(*symbols: str, socket: BinanceSocketManager):
             c_1h_data1 = await candle1_1hour.recv()
             if c_1h_data0['k']['x']:
                 data0_1hour = append(data0_1hour, symbols[0], "1hour", c_1h_data0)
-                ichimoku.signal(data=data0_1hour, gain=0.003, cost=1, coin_id=1, timeframe_id=2)
+                #ebrahimi
+                acc=ichimoku.signal(data=data0_1hour, gain=0.003, cost=1, coin_id=1, timeframe_id=2)
+                trick=True
                 count += 1
-
+            highest=float(c_1h_data0['k']['h'])
+            lowest=float(c_1h_data0['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False
             if c_1h_data1['k']['x']:
                 data1_1hour = append(data1_1hour, symbols[1], "1hour", c_1h_data1)
-                ichimoku.signal(data=data1_1hour, gain=0.003, cost=1, coin_id=2, timeframe_id=2)
+                #ebrahimi
+                acc=ichimoku.signal(data=data1_1hour, gain=0.003, cost=1, coin_id=2, timeframe_id=2)
+                trick=True
                 count += 1
-
+            highest=float(c_1h_data1['k']['h'])
+            lowest=float(c_1h_data1['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False
             # 1hour sleep for new data
             if count == 2:
                 count = 0
                 await asyncio.sleep(3000)
-
 
 async def stream_4hour_candle(*symbols: str, socket: BinanceSocketManager):
     count = 0
@@ -136,14 +159,24 @@ async def stream_4hour_candle(*symbols: str, socket: BinanceSocketManager):
             c_4h_data1 = await candle1_4hour.recv()
             if c_4h_data0['k']['x']:
                 data0_4hour = append(data0_4hour, symbols[0], "4hour", c_4h_data0)
-                ichimoku.signal(data=data0_4hour, gain=0.003, cost=1, coin_id=1, timeframe_id=3)
+                #ebrahimi
+                acc=ichimoku.signal(data=data0_4hour, gain=0.003, cost=1, coin_id=1, timeframe_id=3)
+                trick=True
                 count += 1
-
+            highest=float(c_4h_data0['k']['h'])
+            lowest=float(c_4h_data0['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False
             if c_4h_data1['k']['x']:
                 data1_4hour = append(data1_4hour, symbols[1], "15min", c_4h_data1)
-                ichimoku.signal(data=data1_4hour, gain=0.003, cost=1, coin_id=2, timeframe_id=3)
+                #ebrahimi
+                acc=ichimoku.signal(data=data1_4hour, gain=0.003, cost=1, coin_id=2, timeframe_id=3)
+                trick=True
                 count += 1
-
+            highest=float(c_4h_data1['k']['h'])
+            lowest=float(c_4h_data1['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False
             # sleep 4hours for new data
             if count == 2:
                 count = 0
@@ -162,17 +195,32 @@ async def stream_1day_candle(*symbols: str, socket: BinanceSocketManager):
             c_1d_data1 = await candle1_1day.recv()
             if c_1d_data0['k']['x']:
                 data0_1day = append(data0_1day, symbols[0], "1day", c_1d_data0)
-                ichimoku.signal(data=data0_1day, gain=0.003, cost=1, coin_id=1, timeframe_id=4)
+                #ebrahimi
+                acc=ichimoku.signal(data=data0_1day, gain=0.003, cost=1, coin_id=1, timeframe_id=4)
+                trick=True
                 count += 1
+            highest=float(c_1d_data0['k']['h'])
+            lowest=float(c_1d_data0['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False
+            
+
             if c_1d_data1['k']['x']:
                 data1_1day = append(data1_1day, symbols[1], "1day", c_1d_data1)
-                ichimoku.signal(data=data1_1day, gain=0.003, cost=1, coin_id=2, timeframe_id=4)
+                 #ebrahimi
+                acc=ichimoku.signal(data=data1_1day, gain=0.003, cost=1, coin_id=2, timeframe_id=4)
+                trick=True
                 count += 1
+            highest=float(c_1d_data1['k']['h'])
+            lowest=float(c_1d_data1['k']['l'])
+            function(acc=acc,dataframe=accuracy,trick=trick,highest=highest,lowest=lowest)
+            trick=False
             # sleep 24hour for new data
             if count == 2:
                 count = 0
                 await asyncio.sleep(85000)
-
+            #ebrahimi
+            
 
 async def stream():
     # init statics for clean date
@@ -188,3 +236,19 @@ async def stream():
 # use this in main
 def run():
     asyncio.run(stream())
+def function(acc,dataframe,trick,highest,lowest):
+    if trick == True:
+        acc.extend(['nan','nan','nan'])
+        dataframe.loc[num]=acc
+        step_a = num 
+        num+=1
+    if  step_a>=0 :
+        dataframe.loc[num-1][-3] = highest
+        dataframe.loc[num-1][-2] = lowest
+    for xi in range(2,4):
+        if step_a>=xi-1:
+            if dataframe.loc[num-xi][-3] <= highest:
+                dataframe.loc[num-xi][-3] = highest
+            if dataframe.loc[num-xi][-2] >= lowest:
+                dataframe.loc[num-xi][-2] = lowest
+    
