@@ -21,6 +21,7 @@ from Telegram.Client import candle
 from Account.clients import User, Register
 from Libraries.definitions import *
 from Interfaces.telegram import Telegram
+from Analysis.tradingview import tradingview_recommendations as tr
 
 apihelper.ENABLE_MIDDLEWARE = True
 
@@ -187,6 +188,22 @@ class ClientBot(Telegram):
                 coin = self.coins_list[np.where(self.coins_list[:, 1] == temp[0])][0][0]
                 functions.set_null_coin_user(connection, user.username, coin)
                 self.bot.reply_to(call.message, trans('C_done') + '\n' + trans('C_add_coins'))
+
+            if '_tradingview_' in call.data:
+                user = self.user_dict[call.message.chat.id]
+                data = str(call.data).split('_')
+                option = data[2]
+                recom = tr(data[0], user.timeframe, option)[0]
+                indicators = ''
+                for compute in recom['COMPUTE']:
+                    indicators += compute + ':' + recom['COMPUTE'][compute] + ',    '
+                result = f'{data[0]}\n' \
+                         f'{trans("C_recommendation")} : {recom["RECOMMENDATION"]} \n' \
+                         f'{trans("C_buy")} : {recom["BUY"]} \n' \
+                         f'{trans("C_sell")} : {recom["SELL"]} \n' \
+                         f'{trans("C_neutral")} : {recom["NEUTRAL"]}\n' \
+                         f'{trans("C_Compute")} :    {indicators}'
+                self.bot.reply_to(call.message, result)
 
             # after call back done keyboard delete
             self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
@@ -415,6 +432,29 @@ class ClientBot(Telegram):
                 for coin in coins:
                     res = candle.candle_details_to_string(coin, timeframe)
                     self.bot.reply_to(message, res)
+
+        @self.bot.message_handler(commands=['recommendation'])
+        def update_timeframe(message):
+            if self.check_login(message):
+                user = self.user_dict[message.chat.id]
+                coins = functions.get_user_coins(connection, user.username)
+                timeframe = functions.get_user_timeframe(connection, user.username)
+                user.timeframe = timeframe
+                for coin in coins:
+                    recommendation = telebot.types.InlineKeyboardMarkup()
+                    recom = tr(coin, timeframe, 'summary')[0]
+                    result = f'{coin}\n' \
+                             f'{trans("C_recommendation")} : {recom["RECOMMENDATION"]} \n' \
+                             f'{trans("C_buy")} : {recom["BUY"]} \n' \
+                             f'{trans("C_sell")} : {recom["SELL"]} \n' \
+                             f'{trans("C_neutral")} : {recom["NEUTRAL"]}'
+                    recommendation.add(
+                        telebot.types.InlineKeyboardButton(trans('C_moving_averages'),
+                                                           callback_data=f'{coin}_tradingview_MA'),
+                        telebot.types.InlineKeyboardButton(trans('C_oscillators'),
+                                                           callback_data=f'{coin}_tradingview_OSI'))
+                    self.bot.send_message(chat_id=message.chat.id, text=result,
+                                          reply_markup=recommendation)
 
         @self.bot.message_handler(commands=['analysis'])
         def update_timeframe(message):

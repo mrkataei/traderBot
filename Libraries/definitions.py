@@ -183,6 +183,34 @@ TRANSLATIONS = {
         'en': '😪You are logged out',
         'fa': '😪شما خارج شده اید'
     },
+    'C_buy': {
+        'en': 'Buy',
+        'fa': 'خرید'
+    },
+    'C_sell': {
+        'en': 'Sell',
+        'fa': 'فروش'
+    },
+    'C_neutral': {
+        'en': 'Neutral',
+        'fa': 'خنثی'
+    },
+    'C_recommendation': {
+        'en': 'Recommendation',
+        'fa': 'پیشنهاد'
+    },
+    'C_Compute': {
+        'en': 'Compute',
+        'fa': 'محاسبه شده'
+    },
+    'C_moving_averages': {
+        'en': 'Moving averages',
+        'fa': 'میانگین متحرک ها'
+    },
+    'C_oscillators': {
+        'en': 'Oscillators',
+        'fa': 'اسیلاتورها'
+    },
     'C_select_timeframe': {
         'en': 'Select your timeframe',
         'fa': 'تایم فریم خود را وارد کنید'

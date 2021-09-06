@@ -12,6 +12,7 @@ class User:
         self.temp_watch = None
         self.coin = None
         self.analysis = None
+        self.timeframe = None
 
 
 class Register:

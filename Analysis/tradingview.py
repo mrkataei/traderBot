@@ -17,10 +17,11 @@ def get_time_interval(time):
 def tradingview_recommendations(symbol: str, timeframe: str, *option: str):
     ta = TA_Handler(symbol=symbol, screener='crypto', exchange='BINANCE',
                     interval=get_time_interval(timeframe))
-    result = []
+    res = []
     for opt in option:
-        result.append({'summary': ta.get_analysis().summary,
-                   'MA': ta.get_analysis().moving_averages,
-                   'OSI': ta.get_analysis().oscillators
-                   }.get(opt, ta.get_analysis().summary))
-    return result
+        res.append({'summary': ta.get_analysis().summary,
+                       'MA': ta.get_analysis().moving_averages,
+                       'OSI': ta.get_analysis().oscillators
+                    }.get(opt, ta.get_analysis().summary))
+    return res
+
