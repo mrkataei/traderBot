@@ -13,6 +13,7 @@ class User:
         self.coin = None
         self.analysis = None
         self.timeframe = None
+        self.temp = None
 
 
 class Register:

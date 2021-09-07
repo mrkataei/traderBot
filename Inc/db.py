@@ -32,3 +32,7 @@ def con_db():
         return database
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
+
+import numpy as np
+df = np.array(functions.get_chat_ids(con_db()))
+print(df)

@@ -602,3 +602,13 @@ def set_accuracy(db_connection: MySQLConnection, recom_id: int, validity: int):
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
 
+
+def get_chat_ids(db_connection: MySQLConnection):
+    cursor = db_connection.cursor()
+    try:
+        query = f'SELECT chat_id from users'
+        cursor.execute(query)
+        record = cursor.fetchall()
+        return record
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)

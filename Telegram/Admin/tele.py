@@ -3,6 +3,7 @@ Mr.Kataei 8/4/2021
 This section run in other bot only use with admins project
 for see details about users and recommendations
 """
+import os
 import telebot
 from Inc import db, functions
 from Account.clients import User
@@ -47,6 +48,23 @@ class AdminBot(Telegram):
                 self.bot.reply_to(call.message, "🔑Enter your username")
                 # handle next step message user enter after login
                 self.bot.register_next_step_handler(call.message, callback=process_login_username)
+            if "sure_question_" in call.data:
+                user = self.user_dict[call.message.chat.id]
+                message = user.temp
+                if str(call.data).split('_')[2] == "yes":
+                    connection = db.con_db()
+                    chat_ids = np.array(functions.get_chat_ids(connection))
+                    try:
+                        for chat_id in chat_ids:
+                            self.bot.send_message(chat_id=int(chat_id), text=message)
+                    except Exception as e:
+                        print(e)
+                else:
+                    self.bot.reply_to(call.message, "Deleted, try again /broadcast")
+                user.temp = None
+
+            self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+
 
         """
                 login handler
@@ -102,23 +120,40 @@ class AdminBot(Telegram):
                 result = subprocess.check_output('ps aux --sort -rss | grep main.py | head -n 1', shell=True)
                 self.bot.reply_to(message, result)
 
-        # @bot.message_handler(commands=['restart'])
-        # def show_users(message):
-        #     if message.chat.id not in user_dict:
-        #         bot.reply_to(message, 'Please login /start')
-        #     elif not user_dict[message.chat.id].session:
-        #         bot.reply_to(message, 'Please login /start')
-        #     else:
-        #         bot.reply_to(message, "Enter PID process")
-        #         bot.register_next_step_handler(message, process_restart_bot)
-        #
-        # def process_restart_bot(message):
-        #     try:
-        #         os.system(f'kill {message.text}')
-        #         os.system("nohup python3 main.py &")
-        #         bot.reply_to(message, "Done!\n /ps to watch process")
-        #     except Exception as e:
-        #         bot.reply_to(message, 'Something wrong please try again!')
+        @self.bot.message_handler(commands=['broadcast'])
+        def show_users(message):
+            if self.check_login(message):
+                self.bot.reply_to(message, "Enter your message you want broadcast")
+                self.bot.register_next_step_handler(message, process_broadcast)
+
+        def process_broadcast(message):
+            sure_question = telebot.types.InlineKeyboardMarkup()
+            user = self.user_dict[message.chat.id]
+            user.temp = message.text
+            sure_question.add(telebot.types.InlineKeyboardButton('Ok, send it', callback_data="sure_question_yes"))
+            sure_question.add(telebot.types.InlineKeyboardButton('Delete', callback_data="sure_question_no"))
+            self.bot.send_message(chat_id=message.chat.id, text='Your message:\n' + message.text,
+                                  reply_markup=sure_question)
+
+        @self.bot.message_handler(commands=['restart'])
+        def show_users(message):
+            if message.chat.id not in self.user_dict:
+                self.bot.reply_to(message, 'Please login /start')
+            elif not self.user_dict[message.chat.id].session:
+                self.bot.reply_to(message, 'Please login /start')
+            else:
+                self.bot.reply_to(message, "Enter PID process")
+                self.bot.register_next_step_handler(message, process_restart_bot)
+
+        def process_restart_bot(message):
+            try:
+                os.system(f'kill {int(message.text)}')
+                os.system("cd /root/traderBot")
+                os.system("nohup python3 main.py &")
+                self.bot.reply_to(message, "Done!\n /ps to watch process")
+            except Exception as e:
+                self.bot.reply_to(message, 'Something wrong please try again!')
+                print(e)
 
         @self.bot.message_handler(commands=['logout'])
         def logout(message):
