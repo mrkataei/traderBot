@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 18, 2021 at 11:07 AM
+-- Generation Time: Sep 07, 2021 at 02:28 PM
 -- Server version: 10.4.20-MariaDB
 -- PHP Version: 8.0.9
 
@@ -74,7 +74,11 @@ CREATE TABLE `coins` (
 
 INSERT INTO `coins` (`id`, `coin`) VALUES
 (1, 'BTCUSDT'),
-(2, 'ETHUSDT');
+(2, 'ETHUSDT'),
+(3, 'ADAUSDT'),
+(4, 'DOGEUSDT'),
+(5, 'BCHUSDT'),
+(6, 'ETCUSDT');
 
 -- --------------------------------------------------------
 
@@ -185,7 +189,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `password`, `salt`, `role`, `question_id`, `question_answer`, `timestamp`) VALUES
-('kouroshataei', '1210507821', '93a898fa890e0a1d6370ce6715f241d08d83ffda7a7e4150feb91cff607683538d9ee7a45047a39354a21c9e9b1daf56b552d1966650062f23efa3a58a018a86', 89640, 'admin', 1, 'qoli', '2021-08-02 18:31:33');
+('kouroshataei', '1210507821', '93a898fa890e0a1d6370ce6715f241d08d83ffda7a7e4150feb91cff607683538d9ee7a45047a39354a21c9e9b1daf56b552d1966650062f23efa3a58a018a86', 89640, 'admin', 1, 'qoli', '2021-08-02 14:01:33');
 
 -- --------------------------------------------------------
 
@@ -224,7 +228,6 @@ CREATE TABLE `user_timeframe` (
 
 INSERT INTO `user_timeframe` (`id`, `user`, `timeframe_id`) VALUES
 (1, 'kouroshataei', 1);
-
 -- --------------------------------------------------------
 
 --
@@ -351,13 +354,13 @@ ALTER TABLE `analysis`
 -- AUTO_INCREMENT for table `coins`
 --
 ALTER TABLE `coins`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `recommendations`
 --
 ALTER TABLE `recommendations`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=142;
 
 --
 -- AUTO_INCREMENT for table `timeframes`
@@ -381,7 +384,7 @@ ALTER TABLE `user_analysis`
 -- AUTO_INCREMENT for table `user_timeframe`
 --
 ALTER TABLE `user_timeframe`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `watchlist`

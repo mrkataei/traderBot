@@ -1,21 +1,28 @@
-from Telegram.Client.tele import ClientBot
-# from Telegram.Admin.tele import AdminBot
 import threading
-from Analysis import stream
-# import sys
-# sys.stdout = open('output.txt', 'w')
+from Analysis.stream import StreamIchimoku
+from Telegram.Client.tele import ClientBot
+from Libraries.data_collector import generate_data
+from time import sleep
 
-# admin = AdminBot()
+generate_data('BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'DOGEUSDT', 'BCHUSDT', 'ETCUSDT')
 client = ClientBot()
+ichimoku_btcusdt = StreamIchimoku(symbol='BTCUSDT')
+ichimoku_ethusdt = StreamIchimoku(symbol='ETHUSDT')
+
 # client bot
 polling_thread = threading.Thread(target=client.bot_polling)
 polling_thread.daemon = True
 polling_thread.start()
 
-# admin bot
-# polling_thread2 = threading.Thread(target=admin.bot_polling)
-# polling_thread2.daemon = True
-# polling_thread2.start()
+btcusdt_thread = threading.Thread(target=ichimoku_btcusdt.run)
+btcusdt_thread.daemon = True
+btcusdt_thread.start()
+
+ethusdt_thread = threading.Thread(target=ichimoku_ethusdt.run)
+ethusdt_thread.daemon = True
+ethusdt_thread.start()
 
 if __name__ == '__main__':
-    stream.run()
+    while True:
+        print("Running...")
+        sleep(2000000)

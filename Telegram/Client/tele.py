@@ -358,7 +358,7 @@ class ClientBot(Telegram):
             try:
                 # fetch object
                 user = self.user_dict[message.chat.id]
-                for create in range(0, 2):
+                for create in range(0, 4):
                     functions.create_watchlist(connection, user.username, message.text)
                 user.watchlist = message.text
                 self.bot.reply_to(message, trans('C_good') + "\n" + trans('C_add_coins'))

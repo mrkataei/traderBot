@@ -14,14 +14,14 @@ def generate_data(*symbols: str):
     columns = ['date', 'open', 'high', 'low', 'close', 'volume', 'time2', 'QAV', 'trades',
                'TBAV', 'TQAV', 'Ignore']
     for symbol in symbols:
-        candles1day = client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_1DAY)
-        data1day = pd.DataFrame(candles1day, columns=columns)
-        candles1hour = client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_1HOUR)
-        data1hour = pd.DataFrame(candles1hour, columns=columns)
-        candles4hour = client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_4HOUR)
-        data4hour = pd.DataFrame(candles4hour, columns=columns)
-        candles30min = client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_30MINUTE)
-        data30min = pd.DataFrame(candles30min, columns=columns)
+        data30min = pd.DataFrame(client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_30MINUTE),
+                                 columns=columns)
+        data1hour = pd.DataFrame(client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_1HOUR),
+                                 columns=columns)
+        data4hour = pd.DataFrame(client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_4HOUR),
+                                 columns=columns)
+        data1day = pd.DataFrame(client.get_klines(symbol=symbol, interval=client.KLINE_INTERVAL_1DAY),
+                                columns=columns)
 
         # private functions
         # in future we will add new timezones for now Tehran

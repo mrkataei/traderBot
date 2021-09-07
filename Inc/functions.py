@@ -217,6 +217,18 @@ def get_coin_name(db_connection: MySQLConnection, coin_id: int):
         return "Something went wrong: {}".format(err)
 
 
+def get_coin_id(db_connection: MySQLConnection, coin_name: str):
+    cursor = db_connection.cursor()
+    try:
+        # check user exist
+        sql = f'SELECT id FROM coins WHERE coin="{coin_name}" '
+        cursor.execute(sql)
+        record = cursor.fetchall()
+        return record[0][0]
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
 def get_timeframe(db_connection: MySQLConnection, timeframe_id: int = -1):
     cursor = db_connection.cursor()
     try:

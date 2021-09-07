@@ -56,6 +56,7 @@ class AdminBot(Telegram):
                     connection = db.con_db()
                     chat_ids = np.array(functions.get_chat_ids(connection))
                     admin_broadcast(msg, chat_ids)
+                    self.bot.reply_to(call.message, "Done!\nyour message send to all")
                 else:
                     self.bot.reply_to(call.message, "Deleted, try again /broadcast")
                 user.temp = None

@@ -20,10 +20,8 @@ import numpy as np
 from Inc import db, functions
 from Telegram.Client.message import broadcast_messages
 
-connection = db.con_db()
 
-
-def get_ichimoku(data: pd.DataFrame, tenkan: int = 9, kijun: int = 26, senkou: int = 52):
+def _get_ichimoku(data: pd.DataFrame, tenkan, kijun, senkou):
     ichimoku = pd.DataFrame(data.ta.ichimoku(tenkan=tenkan, kijun=kijun, senkou=senkou)[0])
     ichimoku.columns = ['spanA', 'spanB', 'tenkensen', 'kijunsen', 'chiku']
 
@@ -36,8 +34,10 @@ def get_ichimoku(data: pd.DataFrame, tenkan: int = 9, kijun: int = 26, senkou: i
     return ichimoku, get_future_spans()
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int):
-    ichimoku_all = get_ichimoku(data)
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int,
+           tenkan: int = 9, kijun: int = 26, senkou: int = 52):
+    connection = db.con_db()
+    ichimoku_all = _get_ichimoku(data=data, tenkan=tenkan, kijun=kijun, senkou=senkou)
     ichimoku = ichimoku_all[0]
     future = ichimoku_all[1]
     ichimoku['close'] = data.close

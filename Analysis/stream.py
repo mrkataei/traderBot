@@ -17,22 +17,13 @@ for insert new signal :
         broadcast_message(*args)
 """
 import asyncio
-from binance import AsyncClient, BinanceSocketManager, Client
 import pandas as pd
-from Libraries import data_collector
-from Inc import db
 from Analysis import ichimoku
-
-connection = db.con_db()
-
-
-def init_statics():
-    # this method work with n parameters and return stored CSVs in Static with 4 timeframes
-    data_collector.generate_data("BTCUSDT", "ETHUSDT")
+from Interfaces.stream import Stream
 
 
 # for append new row in our CSVs , candle details from binance in bellow
-def append(data: pd.DataFrame, symbol: str, timeframe: str, candle):
+def _append(data: pd.DataFrame, symbol: str, timeframe: str, candle):
     """
         candle details
             {
@@ -71,120 +62,62 @@ def append(data: pd.DataFrame, symbol: str, timeframe: str, candle):
     return data
 
 
-# for now we have 2 coins and 2 parameters in future need loop for all coins
-# there is 4 functions for 4 timeframes after all used in main async
-async def stream_30min_candle(*symbols: str, socket: BinanceSocketManager):
-    count = 0
-    data0_30min = pd.read_csv(f'Static/{symbols[0]}-30min.csv')
-    data1_30min = pd.read_csv(f'Static/{symbols[1]}-30min.csv')
-    candle0_30min = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_30MINUTE)
-    candle1_30min = socket.kline_socket(symbol=symbols[1], interval=Client.KLINE_INTERVAL_30MINUTE)
-    async with candle0_30min, candle1_30min:
-        while True:
-            c_30m_data0 = await candle0_30min.recv()
-            c_30m_data1 = await candle1_30min.recv()
-            if c_30m_data0['k']['x']:
-                data0_30min = append(data0_30min, symbols[0], "30min", c_30m_data0)
-                ichimoku.signal(data=data0_30min, gain=0.003, cost=1, coin_id=1, timeframe_id=1)
-                count += 1
-            if c_30m_data1['k']['x']:
-                data1_30min = append(data1_30min, symbols[1], "30min", c_30m_data1)
-                ichimoku.signal(data=data1_30min, gain=0.003, cost=1, coin_id=2, timeframe_id=1)
-                count += 1
+class StreamIchimoku(Stream):
+    def __init__(self, symbol: str, cost: float = 1, gain: float = 0.003):
+        Stream.__init__(self, symbol=symbol)
+        self.cost = cost
+        self.gain = gain
 
-            # 30min sleep for new data
-            if count == 2:
-                count = 0
-                await asyncio.sleep(900)
+    async def stream_30min_candle(self):
+        data_30min = pd.read_csv(f'Static/{self.symbol}-30min.csv')
+        candle_30min = self.socket.kline_socket(symbol=self.symbol, interval='1m')
+        async with candle_30min:
+            while True:
+                c_30m_data = await candle_30min.recv()
+                if c_30m_data['k']['x']:
+                    data_30min = _append(data=data_30min, symbol=self.symbol, timeframe="30min", candle=c_30m_data)
+                    ichimoku.signal(data=data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                                    timeframe_id=1)
+                    await asyncio.sleep(58)
 
+    async def stream_1hour_candle(self):
+        data_1hour = pd.read_csv(f'Static/{self.symbol}-1hour.csv')
+        candle_1hour = self.socket.kline_socket(symbol=self.symbol, interval='1h')
+        async with candle_1hour:
+            while True:
+                c_1h_data = await candle_1hour.recv()
+                if c_1h_data['k']['x']:
+                    data_1hour = _append(data=data_1hour, symbol=self.symbol, timeframe="1hour", candle=c_1h_data)
+                    ichimoku.signal(data=data_1hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                                    timeframe_id=2)
+                    await asyncio.sleep(3595)
 
-async def stream_1hour_candle(*symbols: str, socket: BinanceSocketManager):
-    count = 0
-    data0_1hour = pd.read_csv(f'Static/{symbols[0]}-1hour.csv')
-    data1_1hour = pd.read_csv(f'Static/{symbols[1]}-1hour.csv')
-    candle0_1hour = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_1HOUR)
-    candle1_1hour = socket.kline_socket(symbol=symbols[1], interval=Client.KLINE_INTERVAL_1HOUR)
-    async with candle0_1hour, candle1_1hour:
-        while True:
-            c_1h_data0 = await candle0_1hour.recv()
-            c_1h_data1 = await candle1_1hour.recv()
-            if c_1h_data0['k']['x']:
-                data0_1hour = append(data0_1hour, symbols[0], "1hour", c_1h_data0)
-                ichimoku.signal(data=data0_1hour, gain=0.003, cost=1, coin_id=1, timeframe_id=2)
-                count += 1
+    async def stream_4hour_candle(self):
+        data_4hour = pd.read_csv(f'Static/{self.symbol}-4hour.csv')
+        candle_4hour = self.socket.kline_socket(symbol=self.symbol, interval='5m')
+        async with candle_4hour:
+            while True:
+                c_4h_data = await candle_4hour.recv()
+                if c_4h_data['k']['x']:
+                    data0_4hour = _append(data=data_4hour, symbol=self.symbol, timeframe="4hour", candle=c_4h_data)
+                    ichimoku.signal(data=data0_4hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                                    timeframe_id=3)
+                    await asyncio.sleep(14395)
 
-            if c_1h_data1['k']['x']:
-                data1_1hour = append(data1_1hour, symbols[1], "1hour", c_1h_data1)
-                ichimoku.signal(data=data1_1hour, gain=0.003, cost=1, coin_id=2, timeframe_id=2)
-                count += 1
+    async def stream_1day_candle(self):
+        data_1day = pd.read_csv(f'Static/{self.symbol}-1day.csv')
+        candle_1day = self.socket.kline_socket(symbol=self.symbol, interval='15m')
+        async with candle_1day:
+            while True:
+                c_1d_data = await candle_1day.recv()
+                if c_1d_data['k']['x']:
+                    data_1day = _append(data=data_1day, symbol=self.symbol, timeframe="1day", candle=c_1d_data)
+                    ichimoku.signal(data=data_1day, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                                    timeframe_id=4)
+                    await asyncio.sleep(86395)
 
-            # 1hour sleep for new data
-            if count == 2:
-                count = 0
-                await asyncio.sleep(2000)
+    def set_cost(self, cost: float):
+        self.cost = cost
 
-
-async def stream_4hour_candle(*symbols: str, socket: BinanceSocketManager):
-    count = 0
-    data0_4hour = pd.read_csv(f'Static/{symbols[0]}-4hour.csv')
-    data1_4hour = pd.read_csv(f'Static/{symbols[1]}-4hour.csv')
-    candle0_4hour = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_4HOUR)
-    candle1_4hour = socket.kline_socket(symbol=symbols[1], interval=Client.KLINE_INTERVAL_4HOUR)
-    async with candle0_4hour, candle1_4hour:
-        while True:
-            c_4h_data0 = await candle0_4hour.recv()
-            c_4h_data1 = await candle1_4hour.recv()
-            if c_4h_data0['k']['x']:
-                data0_4hour = append(data0_4hour, symbols[0], "4hour", c_4h_data0)
-                ichimoku.signal(data=data0_4hour, gain=0.003, cost=1, coin_id=1, timeframe_id=3)
-                count += 1
-
-            if c_4h_data1['k']['x']:
-                data1_4hour = append(data1_4hour, symbols[1], "15min", c_4h_data1)
-                ichimoku.signal(data=data1_4hour, gain=0.003, cost=1, coin_id=2, timeframe_id=3)
-                count += 1
-
-            # sleep 4hours for new data
-            if count == 2:
-                count = 0
-                await asyncio.sleep(12500)
-
-
-async def stream_1day_candle(*symbols: str, socket: BinanceSocketManager):
-    count = 0
-    data0_1day = pd.read_csv(f'Static/{symbols[0]}-1day.csv')
-    data1_1day = pd.read_csv(f'Static/{symbols[1]}-1day.csv')
-    candle0_1day = socket.kline_socket(symbol=symbols[0], interval=Client.KLINE_INTERVAL_1DAY)
-    candle1_1day = socket.kline_socket(symbol=symbols[1], interval=Client.KLINE_INTERVAL_1DAY)
-    async with candle0_1day, candle1_1day:
-        while True:
-            c_1d_data0 = await candle0_1day.recv()
-            c_1d_data1 = await candle1_1day.recv()
-            if c_1d_data0['k']['x']:
-                data0_1day = append(data0_1day, symbols[0], "1day", c_1d_data0)
-                ichimoku.signal(data=data0_1day, gain=0.003, cost=1, coin_id=1, timeframe_id=4)
-                count += 1
-            if c_1d_data1['k']['x']:
-                data1_1day = append(data1_1day, symbols[1], "1day", c_1d_data1)
-                ichimoku.signal(data=data1_1day, gain=0.003, cost=1, coin_id=2, timeframe_id=4)
-                count += 1
-            # sleep 24hour for new data
-            if count == 2:
-                count = 0
-                await asyncio.sleep(84000)
-
-
-async def stream():
-    # init statics for clean date
-    init_statics()
-    client = await AsyncClient.create()
-    bm = BinanceSocketManager(client)
-    await asyncio.gather(stream_30min_candle("BTCUSDT", "ETHUSDT", socket=bm),
-                         stream_1hour_candle("BTCUSDT", "ETHUSDT", socket=bm),
-                         stream_4hour_candle("BTCUSDT", "ETHUSDT", socket=bm),
-                         stream_1day_candle("BTCUSDT", "ETHUSDT", socket=bm))
-
-
-# use this in main
-def run():
-    asyncio.run(stream())
+    def set_gain(self, gain: float):
+        self.gain = gain
