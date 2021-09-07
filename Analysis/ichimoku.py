@@ -98,7 +98,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
                            target_price=target_price, risk=result[1], position=position,
                            timeframe_id=timeframe_id)
     #mojtaba
-    return [timeframe_id,coin_id,close,time.time,position]
+        return [timeframe_id,coin_id,close,time.time,position]
     # for transaction in future
     # users = functions.get_user_recommendation(connection, coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id)
     # for user in users:
