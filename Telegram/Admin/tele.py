@@ -10,6 +10,7 @@ from Account.clients import User
 import numpy as np
 import subprocess
 from Interfaces.telegram import Telegram
+from Telegram.Client.message import admin_broadcast
 
 # @aranadminbot -> address
 # API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
@@ -50,21 +51,16 @@ class AdminBot(Telegram):
                 self.bot.register_next_step_handler(call.message, callback=process_login_username)
             if "sure_question_" in call.data:
                 user = self.user_dict[call.message.chat.id]
-                message = user.temp
+                msg = user.temp
                 if str(call.data).split('_')[2] == "yes":
                     connection = db.con_db()
                     chat_ids = np.array(functions.get_chat_ids(connection))
-                    try:
-                        for chat_id in chat_ids:
-                            self.bot.send_message(chat_id=int(chat_id), text=message)
-                    except Exception as e:
-                        print(e)
+                    admin_broadcast(msg, chat_ids)
                 else:
                     self.bot.reply_to(call.message, "Deleted, try again /broadcast")
                 user.temp = None
 
             self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
-
 
         """
                 login handler

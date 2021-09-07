@@ -37,3 +37,16 @@ def broadcast_messages(connection: MySQLConnection, coin_id: int, analysis_id: i
         except Exception as e:
             print(e)
     del bot
+
+
+def admin_broadcast(message: str, chat_ids):
+    bot = telebot.TeleBot(API_KEY)
+    try:
+        for chat_id in chat_ids:
+            print(int(chat_id[0]))
+            bot.send_message(chat_id=int(chat_id[0]), text=message)
+    except Exception as e:
+        print(e)
+    del bot
+
+
