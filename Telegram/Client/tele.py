@@ -31,9 +31,9 @@ apihelper.ENABLE_MIDDLEWARE = True
 
 # API_KEY = config('API_KEY')
 # master bot already run on vps dont use this @arantraderbot -> address
-# API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
+API_KEY = '1936293973:AAFLKY0TCP9qEMjqPDrewsdzGisNSQmB0ds'
 # @testkourosh2bot -> address // use this bot for test your code
-API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+# API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 
 client = Client()
 connection = db.con_db()

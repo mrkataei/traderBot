@@ -13,9 +13,9 @@ from Interfaces.telegram import Telegram
 from Telegram.Client.message import admin_broadcast
 
 # @aranadminbot -> address
-# API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
+API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
 # test bot fro admin
-API_KEY = '1991184876:AAGfWUbxXEbnbWHeKrlh2knooi8lF1PSWKI'
+# API_KEY = '1991184876:AAGfWUbxXEbnbWHeKrlh2knooi8lF1PSWKI'
 
 
 class AdminBot(Telegram):
