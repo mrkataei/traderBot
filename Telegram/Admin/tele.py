@@ -10,7 +10,7 @@ from Account.clients import User
 import numpy as np
 import subprocess
 from Interfaces.telegram import Telegram
-from Telegram.Client.message import admin_broadcast
+from Telegram.Client.message import admin_broadcast, admin_send_message
 
 # @aranadminbot -> address
 API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
@@ -83,6 +83,28 @@ class AdminBot(Telegram):
                 for index, user in enumerate(users, start=1):
                     usernames += str(index) + '-' + str(user[0]) + ' ,'
                 self.bot.reply_to(message, usernames)
+
+        @self.bot.message_handler(commands=['message'])
+        def show_users(message):
+            if self.check_login(message):
+                self.bot.reply_to(message, "Enter username")
+                self.bot.register_next_step_handler(message, process_message_to_user_step1)
+
+        def process_message_to_user_step1(message):
+            self.bot.reply_to(message, "Enter your message")
+            user = self.user_dict[message.chat.id]
+            # id user in temp
+            user.temp = message.text
+            self.bot.register_next_step_handler(message, process_message_to_user_step2)
+
+        def process_message_to_user_step2(message):
+            user = self.user_dict[message.chat.id]
+            connection = db.con_db()
+            try:
+                chat_id = functions.get_user_chat_id(connection, user.temp)
+                admin_send_message(message=message.text, chat_id=chat_id)
+            except Exception as e:
+                self.bot.reply_to(message, e)
 
         @self.bot.message_handler(commands=['detail'])
         def show_users(message):

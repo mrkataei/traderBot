@@ -17,6 +17,8 @@ for insert new signal :
         broadcast_message(*args)
 """
 import asyncio
+import threading
+
 import pandas as pd
 from Analysis import ichimoku
 from Interfaces.stream import Stream
@@ -70,7 +72,7 @@ class StreamIchimoku(Stream):
 
     async def stream_30min_candle(self):
         data_30min = pd.read_csv(f'Static/{self.symbol}-30min.csv')
-        candle_30min = self.socket.kline_socket(symbol=self.symbol, interval='1m')
+        candle_30min = self.socket.kline_socket(symbol=self.symbol, interval='30m')
         async with candle_30min:
             while True:
                 c_30m_data = await candle_30min.recv()
@@ -78,7 +80,7 @@ class StreamIchimoku(Stream):
                     data_30min = _append(data=data_30min, symbol=self.symbol, timeframe="30min", candle=c_30m_data)
                     ichimoku.signal(data=data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                                     timeframe_id=1)
-                    await asyncio.sleep(58)
+                    await asyncio.sleep(1790)
 
     async def stream_1hour_candle(self):
         data_1hour = pd.read_csv(f'Static/{self.symbol}-1hour.csv')
@@ -90,11 +92,11 @@ class StreamIchimoku(Stream):
                     data_1hour = _append(data=data_1hour, symbol=self.symbol, timeframe="1hour", candle=c_1h_data)
                     ichimoku.signal(data=data_1hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                                     timeframe_id=2)
-                    await asyncio.sleep(3595)
+                    await asyncio.sleep(3590)
 
     async def stream_4hour_candle(self):
         data_4hour = pd.read_csv(f'Static/{self.symbol}-4hour.csv')
-        candle_4hour = self.socket.kline_socket(symbol=self.symbol, interval='5m')
+        candle_4hour = self.socket.kline_socket(symbol=self.symbol, interval='4h')
         async with candle_4hour:
             while True:
                 c_4h_data = await candle_4hour.recv()
@@ -102,11 +104,11 @@ class StreamIchimoku(Stream):
                     data0_4hour = _append(data=data_4hour, symbol=self.symbol, timeframe="4hour", candle=c_4h_data)
                     ichimoku.signal(data=data0_4hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                                     timeframe_id=3)
-                    await asyncio.sleep(14395)
+                    await asyncio.sleep(14390)
 
     async def stream_1day_candle(self):
         data_1day = pd.read_csv(f'Static/{self.symbol}-1day.csv')
-        candle_1day = self.socket.kline_socket(symbol=self.symbol, interval='15m')
+        candle_1day = self.socket.kline_socket(symbol=self.symbol, interval='1d')
         async with candle_1day:
             while True:
                 c_1d_data = await candle_1day.recv()
@@ -114,10 +116,18 @@ class StreamIchimoku(Stream):
                     data_1day = _append(data=data_1day, symbol=self.symbol, timeframe="1day", candle=c_1d_data)
                     ichimoku.signal(data=data_1day, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                                     timeframe_id=4)
-                    await asyncio.sleep(86395)
+                    await asyncio.sleep(86390)
 
     def set_cost(self, cost: float):
         self.cost = cost
 
     def set_gain(self, gain: float):
         self.gain = gain
+
+
+def run_ichimoku_threads(*symbols: str):
+    for symbol in symbols:
+        ichimoku_symbol = StreamIchimoku(symbol=symbol)
+        btcusdt_thread = threading.Thread(target=ichimoku_symbol.run)
+        btcusdt_thread.daemon = True
+        btcusdt_thread.start()

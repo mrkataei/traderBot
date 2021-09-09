@@ -50,3 +50,7 @@ def admin_broadcast(message: str, chat_ids):
     del bot
 
 
+def admin_send_message(message: str, chat_id):
+    bot = telebot.TeleBot(API_KEY)
+    bot.send_message(chat_id=int(chat_id), text=message)
+    del bot
