@@ -42,7 +42,6 @@ connection = db.con_db()
 class ClientBot(Telegram):
     def __init__(self):
         Telegram.__init__(self, API_KEY=API_KEY)
-        self.flag = False
 
     # def bot_actions(self):
     def bot_actions(self):
