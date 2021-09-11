@@ -52,10 +52,14 @@ class ClientBot(Telegram):
         # /start command enter by user
         @self.bot.message_handler(commands=['start'])
         def welcome(message):
-            if not self.check_login(message) and not self.flag:
+            if not self.check_login(message) :
                 # some action with delay to typing bot
                 self.bot.send_chat_action(chat_id=message.chat.id, action="typing")
                 sleep(1)
+                # create object from user and store in our dictionary with chat_id key value
+                user = User()
+                self.user_dict[message.chat.id] = user
+                user.session = True
                 # welcome message and instructions
                 self.bot.reply_to(message, trans('C_hello') + message.chat.first_name + "!\n" + trans('C_welcome'))
                 # the markup help us we have call back with inlinekeyboard when yours tap one of those
@@ -65,16 +69,12 @@ class ClientBot(Telegram):
                 step_kb.add(telebot.types.InlineKeyboardButton(trans('C_register'), callback_data='reg'))
                 step_kb.add(telebot.types.InlineKeyboardButton(trans('C_forget_password'), callback_data='forget'))
                 self.bot.send_message(chat_id=message.chat.id, text=trans('C_any_account'), reply_markup=step_kb)
-                self.flag = True
 
         # after callback @bot.callback_query_handler get function parameter ,this always true
         # and w8 to one case login and reg and .. happened . need to develop func in parameter
         @self.bot.callback_query_handler(func=lambda call: True)
         def query_handler(call):
             if call.data == "login":
-                # create object from user and store in our dictionary with chat_id key value
-                user = User()
-                self.user_dict[call.message.chat.id] = user
                 self.bot.reply_to(call.message, trans('C_enter_username'))
                 # handle next step message user enter after login
                 self.bot.register_next_step_handler(call.message, callback=self.process_login_username)

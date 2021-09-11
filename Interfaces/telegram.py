@@ -8,7 +8,6 @@ from Libraries.definitions import *
 
 class Telegram:
     def __init__(self, API_KEY: str):
-        self.flag = False
         self.API_KEY = API_KEY
         self.bot = None
         self.user_dict = {}
@@ -51,7 +50,7 @@ class Telegram:
                 print(self.user_dict)
             else:
                 self.bot.send_message(message.chat.id, res[1])
-                self.flag = False
+                user.session = False
                 # del self.user_dict[message.chat.id]
         except Exception as e:
             self.bot.reply_to(message, trans('C_please_start'))
