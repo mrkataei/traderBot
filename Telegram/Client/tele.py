@@ -52,7 +52,7 @@ class ClientBot(Telegram):
         # /start command enter by user
         @self.bot.message_handler(commands=['start'])
         def welcome(message):
-            if not self.check_login(message) :
+            if not self.check_login(message):
                 # some action with delay to typing bot
                 self.bot.send_chat_action(chat_id=message.chat.id, action="typing")
                 sleep(1)
@@ -64,10 +64,10 @@ class ClientBot(Telegram):
                 self.bot.reply_to(message, trans('C_hello') + message.chat.first_name + "!\n" + trans('C_welcome'))
                 # the markup help us we have call back with inlinekeyboard when yours tap one of those
                 # some callback data send and we receive with @bot.callback_query_handler
-                step_kb = telebot.types.InlineKeyboardMarkup()
-                step_kb.add(telebot.types.InlineKeyboardButton(trans('C_login'), callback_data='login'))
-                step_kb.add(telebot.types.InlineKeyboardButton(trans('C_register'), callback_data='reg'))
-                step_kb.add(telebot.types.InlineKeyboardButton(trans('C_forget_password'), callback_data='forget'))
+                step_kb = telebot.types.InlineKeyboardMarkup(row_width=2)
+                step_kb.add(telebot.types.InlineKeyboardButton(trans('C_login'), callback_data='login'),
+                            telebot.types.InlineKeyboardButton(trans('C_register'), callback_data='reg'),
+                            telebot.types.InlineKeyboardButton(trans('C_forget_password'), callback_data='forget'))
                 self.bot.send_message(chat_id=message.chat.id, text=trans('C_any_account'), reply_markup=step_kb)
 
         # after callback @bot.callback_query_handler get function parameter ,this always true
@@ -106,9 +106,18 @@ class ClientBot(Telegram):
                 # handle next step message user enter after forget password
                 self.bot.register_next_step_handler(call.message, callback=process_forget_username)
             if call.data == "watchlist":
-                coin_keyboard = telebot.types.InlineKeyboardMarkup()
+
+                coins = []
                 for index, coin in self.coins_list:
-                    coin_keyboard.add(telebot.types.InlineKeyboardButton(coin, callback_data=coin))
+                    coins.append(telebot.types.InlineKeyboardButton(coin, callback_data=coin))
+                final = []
+                for i in range(0, len(coins) - 2, 3):
+                    row = []
+                    for j in range(i, i+3):
+                        row.append(coins[j])
+                    final.append(row)
+                del coins
+                coin_keyboard = telebot.types.InlineKeyboardMarkup(final)
                 self.bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_coin'),
                                       reply_markup=coin_keyboard)
 
@@ -375,8 +384,8 @@ class ClientBot(Telegram):
                 if user.watchlist:
                     if functions.get_empty_coins_remain(connection, user.username, user.watchlist[0][2]) != 0:
                         watchlist = telebot.types.InlineKeyboardMarkup()
-                        watchlist.add(
-                            telebot.types.InlineKeyboardButton(user.watchlist[0][2], callback_data='watchlist'))
+                        watchlist.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2],
+                                                                         callback_data='watchlist'))
                         self.bot.send_message(chat_id=message.chat.id, text=trans('C_select_watchlist'),
                                               reply_markup=watchlist)
                     else:
