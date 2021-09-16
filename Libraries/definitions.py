@@ -86,8 +86,8 @@ TRANSLATIONS = {
         'fa': 'واچلیست شما پر است! 😓'
     },
     'C_welcome': {
-        'en': 'I am Aran , your trade assistance \n /help show commands',
-        'fa': 'من آران هستم ، دستیار خرید و فروش شما \n  نمایش دستورات بات /help '
+        'en': 'I am for Algowatch, your trade assistance \n /help show commands',
+        'fa': 'من الگوواچ هستم ، دستیار خرید و فروش شما \n  نمایش دستورات بات /help '
     },
     'C_hello': {
         'en': 'Hey!',
@@ -379,7 +379,7 @@ TRANSLATIONS = {
     },
     'L_something_wrong': {
         'en': 'Something are going wrong!Try with simple login /start',
-        'fa': 'مشکلی بوود آمده ! لطفا، ورود با نام کاربری را امتحان کنید /start'
+        'fa': 'مشکلی بجوود آمده ! لطفا، ورود با نام کاربری را امتحان کنید /start'
     },
     'R_username_exist': {
         'en': 'username already exist',
