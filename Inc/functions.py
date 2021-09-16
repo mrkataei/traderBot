@@ -6,7 +6,7 @@ soon this file must be cluster and to be multiple files
 
 import mysql.connector
 from mysql.connector import MySQLConnection
-import re
+# import re
 import hashlib
 import random
 
@@ -25,8 +25,8 @@ def chek_password(password: str, password2: str):
         result = (False, "password is too short")
     elif password != password2:
         result = (False, "passwords not match")
-    elif not re.fullmatch("^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$", password):
-        result = (False, "password must be content 0-9 digit and capital and lower char and include one of {@#$%^&+=} ")
+    # elif not re.fullmatch("^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$", password):
+    # result = (False, "password must be content 0-9 digit and capital and lower char and include one of {@#$%^&+=} ")
     else:
         result = (True, "Success")
     return result
@@ -53,9 +53,19 @@ def check_chat_id(db_connection: MySQLConnection, chat_id: str):
         cursor.execute(query)
         record = cursor.fetchall()
         if record:
-            return False
+            return record[0][0]
         else:
-            return True
+            return False
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def update_chat_id(db_connection: MySQLConnection, username: str, chat_id: str):
+    cursor = db_connection.cursor()
+    try:
+        sql = f'UPDATE users SET chat_id ="{chat_id}" WHERE username="{username}" LIMIT 1'
+        cursor.execute(sql)
+        db_connection.commit()
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
 
@@ -64,13 +74,10 @@ def get_user_with_chat_id(db_connection: MySQLConnection, chat_id: str):
     cursor = db_connection.cursor()
     try:
         # check user exist
-        if not check_chat_id(db_connection, chat_id):
-            query = f'SELECT username from users WHERE chat_id="{chat_id}" LIMIT 1'
-            cursor.execute(query)
-            record = cursor.fetchall()
-            return record[0][0]
-        else:
-            return False
+        query = f'SELECT username from users WHERE chat_id="{chat_id}" LIMIT 1'
+        cursor.execute(query)
+        record = cursor.fetchall()
+        return record[0][0]
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
 
@@ -343,7 +350,7 @@ def get_chat_id_with_analysis_id(db_connection: MySQLConnection, analysis_id: in
         return "Something went wrong: {}".format(err)
 
 
-def get_user_analysis(db_connection: MySQLConnection, username: str):
+def get_user_analysis_name(db_connection: MySQLConnection, username: str):
     cursor = db_connection.cursor()
     try:
         # check user exist
@@ -355,6 +362,21 @@ def get_user_analysis(db_connection: MySQLConnection, username: str):
                 record = get_analysis(db_connection, record[0][0])[0][0]
             else:
                 record = False
+            return record
+        else:
+            return False
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def get_user_analysis(db_connection: MySQLConnection, username: str):
+    cursor = db_connection.cursor()
+    try:
+        # check user exist
+        if not check_username(db_connection, username):
+            sql = f'SELECT * FROM user_analysis WHERE user="{username}"'
+            cursor.execute(sql)
+            record = cursor.fetchall()
             return record
         else:
             return False
@@ -473,6 +495,16 @@ def delete_watchlist(db_connection: MySQLConnection, username: str, name: str):
     cursor = db_connection.cursor()
     try:
         sql = f'DELETE from watchlist WHERE user="{username}" AND name="{name}"'
+        cursor.execute(sql)
+        db_connection.commit()
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def delete_analysis(db_connection: MySQLConnection, username: str, analysis_id: int):
+    cursor = db_connection.cursor()
+    try:
+        sql = f'DELETE from user_analysis WHERE user="{username}" AND analysis_id="{analysis_id}"'
         cursor.execute(sql)
         db_connection.commit()
     except mysql.connector.Error as err:

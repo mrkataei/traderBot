@@ -22,18 +22,60 @@ TRANSLATIONS = {
               '/frame - Change your timeframe \n'
               '/analysis - Add analysis  candle \n'
               '/candle - show your coins details \n'
+              '/recommendation - show you indicators recommendations \n'
               '/show - Show all details \n'
-              '/remove - Remove coins or watchlists \n'
+              '/remove - Remove coins ,watchlist or analysis \n'
               '/logout  - Logout from account\n',
         'fa': '/start - ورود یا ایجاد حساب کاربری'
               '\n/new - ایجاد واچلیست جدید '
               '\n/add - اضافه کردن رمزارز به واچلیست  '
               '\n/frame - عوض کردن تایم فریم  '
               '\n/candle - نمایش اطلاعات رمزارزها'
+              '\n/recommendation - نمایش پیشنهادات خرید و فروش اندیکاتورها'
               '\n/analysis - اضافه کردن آنالیز'
               '\n/show - نمایش اطلاعات حساب'
-              '\n/remove - حذف رمزارز یا واچلیست '
+              '\n/remove - حذف رمزارز ، واچلیست یا آنالیز '
               '\n/logout  - خروج از حساب کاربری',
+    },
+    'C_add_keyboard': {
+        'en': '➕ add coin',
+        'fa': '➕ اضافه کردن رمزارز'
+    },
+    'C_new_keyboard': {
+        'en': '🆕 new watchlist',
+        'fa': '🆕 واچلیست جدید'
+    },
+    'C_analysis_keyboard': {
+        'en': '📊 add analysis',
+        'fa': '📊 اضافه کردن آنالیز'
+    },
+    'C_candle_keyboard': {
+        'en': '🕯 show candle',
+        'fa': '🕯 نمایش کندل'
+    },
+    'C_show_keyboard': {
+        'en': '📺 show profile',
+        'fa': '📺 نمایش حساب کاربری'
+    },
+    'C_recommendation_keyboard': {
+        'en': '🧐 show recommendation',
+        'fa': '🧐 نمایش پیشنهادات'
+    },
+    'C_remove_keyboard': {
+        'en': '❌ delete option',
+        'fa': '❌ حذف آپشن ها'
+    },
+    'C_logout_keyboard': {
+        'en': '👋🏽 logout account',
+        'fa': '👋🏽 خروج از حساب کاربری'
+    },
+    'C_frame_keyboard': {
+        'en': '⏱ change timeframe',
+        'fa': '⏱ عوض کردن تایم فریم'
+    },
+    'C_help_keyboard': {
+        'en': '🙏🏽 help me',
+        'fa': '🙏🏽 کمکم کن'
     },
     'C_please_login': {
         'en': 'Please login to bot /start',
@@ -54,6 +96,10 @@ TRANSLATIONS = {
     'C_login': {
         'en': '🔑Login',
         'fa': '🔑ورود'
+    },
+    'C_login_chat_id': {
+        'en': '😈 Easy login',
+        'fa': '😈 ورود آسان'
     },
     'C_register': {
         'en': '🤩Sign up',
@@ -144,12 +190,8 @@ TRANSLATIONS = {
         'fa': '🔒رمز خود را وارد کنید'
     },
     'C_password_instruction': {
-        'en': '\n\n🔹your password must be at least 8 characters\n'
-              '🔹And a number and special character(@#$%^&+=)\n'
-              '🔹and lower/upper case at least',
-        'fa': '\n\nپسورد شما باید حداقل شامل 8 کارکتر باشد🔹\n'
-              '🔹باید شامل عدد و کارکترهای خاص(@#$%^&+=)\n'
-              '🔹باید حروف بزرگ و کوچک را نیز شامل شود'
+        'en': '\n\n🔹your password must be at least 8 characters',
+        'fa': '\n\nپسورد شما باید حداقل شامل 8 کارکتر باشد🔹'
     },
     'C_again': {
         'en': ' again',
@@ -223,6 +265,14 @@ TRANSLATIONS = {
         'en': '😏You already have analysis: ',
         'fa': '😏شما درحال حاضر آنالیز دارید'
     },
+    'C_set_analysis_first': {
+        'en': 'you dont have analysis\nSelect analysis first /analysis',
+        'fa': 'شما آنالیزی ندارید\n لطفا ابتدا آنالیز خود را انتخاب کنید /analysis'
+    },
+    'C_analysis': {
+        'en': 'analysis',
+        'fa': 'آنالیز'
+    },
     'C_select_option_delete': {
         'en': 'select option you want to delete',
         'fa': 'موردی که میخواهید پاک کنید انتخاب کنید'
@@ -246,6 +296,14 @@ TRANSLATIONS = {
     'C_login_again': {
         'en': 'For login /start bot ',
         'fa': 'برای ورود بات را استارت کنید /start'
+    },
+    'C_start': {
+        'en': 'Please /start bot',
+        'fa': 'لطفا بات را استارت کنید /start'
+    },
+    'C_what_can_i_do': {
+        'en': 'What can i do for you?',
+        'fa': 'چه کاری میتونم برات بکنم؟'
     },
     'C_unsuccessful_operation': {
         'en': 'Operation unsuccessful!',
@@ -318,6 +376,10 @@ TRANSLATIONS = {
     'L_invalid_login': {
         'en': 'Your username or password is incorrect🥵',
         'fa': 'نام کاربری یا رمزعبور شما صحیح نمیباشد'
+    },
+    'L_something_wrong': {
+        'en': 'Something are going wrong!Try with simple login /start',
+        'fa': 'مشکلی بوود آمده ! لطفا، ورود با نام کاربری را امتحان کنید /start'
     },
     'R_username_exist': {
         'en': 'username already exist',

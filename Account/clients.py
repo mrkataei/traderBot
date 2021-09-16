@@ -7,13 +7,14 @@ use for telegram bot to register and login and logout
 class User:
     def __init__(self):
         self.username = None
-        self.session = None
+        self.session = False
         self.watchlist = []
         self.temp_watch = None
         self.coin = None
         self.analysis = None
         self.timeframe = None
         self.temp = None
+        self.login = False
 
 
 class Register:
