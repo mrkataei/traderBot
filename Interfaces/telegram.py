@@ -50,10 +50,7 @@ class Telegram:
                 # our client deleted his/her account and chat id not updated
                 # this statement after login update his/her chat id
                 if not functions.check_chat_id(connection, message.chat.id):
-                    print(user.username)
-                    print(message.chat.id)
                     functions.update_chat_id(db_connection=connection, username=user.username, chat_id=message.chat.id)
-                del connection
                 print(self.user_dict)
             else:
                 self.bot.send_message(message.chat.id, res[1])
@@ -83,11 +80,9 @@ class Telegram:
             print(e)
 
     def process_login_username(self, message):
-        connection = db.con_db()
         try:
             user = self.user_dict[message.chat.id]
             user.username = message.text
-
             # get password with process_password and register_next_step_handler
             # to handle next enter user's message
             msg = self.bot.reply_to(message, trans('C_enter_password'))
@@ -102,9 +97,6 @@ class Telegram:
         if message.chat.id not in self.user_dict:
             self.bot.reply_to(message, trans('C_start'))
             return False
-        # elif not self.user_dict[message.chat.id].session:
-        #     self.bot.reply_to(message, trans('C_please_login'))
-        #     return False
         elif self.user_dict[message.chat.id].login:
             return True
         else:
@@ -112,7 +104,7 @@ class Telegram:
             return False
 
     def keyboard(self, message):
-        key_markup = telebot.types.ReplyKeyboardMarkup(row_width=4)
+        key_markup = telebot.types.ReplyKeyboardMarkup(row_width=3)
         key_add = telebot.types.KeyboardButton(trans('C_add_keyboard'))
         key_new = telebot.types.KeyboardButton(trans('C_new_keyboard'))
         key_frame = telebot.types.KeyboardButton(trans('C_frame_keyboard'))

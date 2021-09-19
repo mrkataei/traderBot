@@ -124,6 +124,7 @@ class ClientBot(Telegram):
                     username = functions.get_user_with_chat_id(connection, call.message.chat.id)
                     self.bot.reply_to(call.message,
                                       trans('C_already_have_account') + f" {username} \n" + trans('C_please_start'))
+                    self.user_dict[call.message.chat.id].session = False
             elif "security_question_" in call.data:
                 # in other keyboard we need calls back from user choose which one question
                 security_question = str(call.data).split('_')
