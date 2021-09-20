@@ -1,14 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.2
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 19, 2021 at 11:30 AM
--- Server version: 10.4.10-MariaDB
--- PHP Version: 7.3.12
+-- Generation Time: Sep 20, 2021 at 12:17 PM
+-- Server version: 10.4.21-MariaDB
+-- PHP Version: 8.0.10
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -53,8 +52,15 @@ CREATE TABLE `analysis_setting` (
   `timeframe_id` int(11) NOT NULL,
   `analysis_id` int(11) NOT NULL,
   `analysis_setting` text NOT NULL,
-  `indicator_setting_id` int(10) NOT NULL
+  `indicator_setting_id` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `analysis_setting`
+--
+
+INSERT INTO `analysis_setting` (`id`, `coin_id`, `timeframe_id`, `analysis_id`, `analysis_setting`, `indicator_setting_id`) VALUES
+(2, 1, 1, 2, 'delay:24,safeline:25,histline:50', '1,4');
 
 -- --------------------------------------------------------
 
@@ -114,7 +120,10 @@ CREATE TABLE `indicators` (
 --
 
 INSERT INTO `indicators` (`id`, `name`) VALUES
-(1, 'MACD');
+(1, 'MACD'),
+(2, 'stoch'),
+(3, 'RSI'),
+(4, 'ichimoku');
 
 -- --------------------------------------------------------
 
@@ -127,6 +136,14 @@ CREATE TABLE `indicators_settings` (
   `settings` text NOT NULL,
   `id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `indicators_settings`
+--
+
+INSERT INTO `indicators_settings` (`indicator_id`, `settings`, `id`) VALUES
+(1, 'window_slow:10,window_sign:21,window_fast:20', 3),
+(4, 'tenkan:9,kijun:26,senkou:52', 4);
 
 -- --------------------------------------------------------
 
@@ -294,12 +311,6 @@ CREATE TABLE `watchlist` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
--- Dumping data for table `watchlist`
---
-
-
-
---
 -- Indexes for dumped tables
 --
 
@@ -315,7 +326,7 @@ ALTER TABLE `analysis`
 --
 ALTER TABLE `analysis_setting`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `indicator_setting_id_as` (`indicator_setting_id`),
+  ADD UNIQUE KEY `coin_id_2` (`coin_id`,`timeframe_id`,`analysis_id`),
   ADD KEY `coin_id_as` (`coin_id`),
   ADD KEY `timeframe_id_as` (`timeframe_id`),
   ADD KEY `analysis_id_as` (`analysis_id`);
@@ -439,13 +450,13 @@ ALTER TABLE `coins`
 -- AUTO_INCREMENT for table `indicators`
 --
 ALTER TABLE `indicators`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `indicators_settings`
 --
 ALTER TABLE `indicators_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `recommendations`
@@ -493,7 +504,6 @@ ALTER TABLE `watchlist`
 ALTER TABLE `analysis_setting`
   ADD CONSTRAINT `analysis_id_as` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`),
   ADD CONSTRAINT `coin_id_as` FOREIGN KEY (`coin_id`) REFERENCES `coins` (`id`),
-  ADD CONSTRAINT `indicator_setting_id_as` FOREIGN KEY (`indicator_setting_id`) REFERENCES `indicators_settings` (`id`),
   ADD CONSTRAINT `timeframe_id_as` FOREIGN KEY (`timeframe_id`) REFERENCES `timeframes` (`id`);
 
 --
