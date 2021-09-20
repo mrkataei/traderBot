@@ -47,8 +47,8 @@ def append(data: pd.DataFrame, symbol: str, timeframe: str, candle):
 class Stream:
     def __init__(self, symbol: str):
         self.symbol = symbol
-        __connection = db.con_db()
-        self.coin_id = functions.get_coin_id(__connection, symbol)
+        self.connection = db.con_db()
+        self.coin_id = functions.get_coin_id(self.connection, symbol)
         self.client = None
         self.socket = None
         self.data_30min = pd.read_csv(f'Static/{self.symbol}-30min.csv')
@@ -84,6 +84,11 @@ class Stream:
                              self.stream_1hour_candle(),
                              self.stream_4hour_candle(),
                              self.stream_1day_candle())
+
+    def get_setting_analysis(self, analysis_id: int, timeframe_id: int):
+        settings = functions.get_analysis_setting(db_connection=self.connection, coin_id=self.coin_id,
+                                                  timeframe_id=timeframe_id, analysis_id=analysis_id)
+        return settings
 
     def run(self):
         asyncio.run(self.stream())

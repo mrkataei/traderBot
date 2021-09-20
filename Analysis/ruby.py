@@ -16,8 +16,13 @@ def cross_under(x, y):
     return True if x[0] > y > x[1] else False
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, window_slow: int,
-           window_fast: int, window_sign: int, delay: int, safeline: int ,histline: float):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, settings):
+    delay = settings['analysis_setting']['delay']
+    safeline = settings['analysis_setting']['safeline']
+    histline = settings['analysis_setting']['histline']
+    window_slow = settings['indicators_setting']['MACD']['window_slow']
+    window_sign = settings['indicators_setting']['MACD']['window_sign']
+    window_fast = settings['indicators_setting']['MACD']['window_fast']
     connection = db.con_db()
     # create macd dataframe macd has 3 column original macd , histogram  and signal
     macd_df = pd.DataFrame(data.ta.macd(window_slow=window_slow, window_fast=window_fast, window_sign=window_sign))

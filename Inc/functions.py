@@ -656,3 +656,56 @@ def get_chat_ids(db_connection: MySQLConnection):
         return record
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
+
+
+def get_indicator_setting(db_connection: MySQLConnection, indicator_id: int):
+    cursor = db_connection.cursor()
+    try:
+        query = f'SELECT settings from indicators_settings WHERE indicator_id = "{indicator_id}"'
+        cursor.execute(query)
+        record = cursor.fetchall()
+        if record:
+            parameters = record[0][0].split(',')
+            record = dict()
+            for parameter in parameters:
+                parameter = parameter.split(':')
+                record[parameter[0]] = parameter[1]
+        return record
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def get_analysis_setting(db_connection: MySQLConnection, coin_id: int, timeframe_id: int, analysis_id: int):
+    cursor = db_connection.cursor()
+    try:
+        query = f'SELECT analysis_setting , indicator_setting_id from analysis_setting WHERE coin_id = "{coin_id}" and ' \
+                f'timeframe_id = "{timeframe_id}" and analysis_id = "{analysis_id}"'
+        cursor.execute(query)
+        record = cursor.fetchall()
+        if record:
+            settings = record[0]
+            record = dict()
+            record['analysis_setting'] = {}
+            args = settings[0].split(',')
+            for arg in args:
+                arg = arg.split(':')
+                record['analysis_setting'][arg[0]] = arg[1]
+            record['indicators_setting'] = {}
+            indicators = settings[1].split(',')
+            for indicator in indicators:
+                record['indicators_setting'][get_indicator_name(db_connection, indicator)] = \
+                    get_indicator_setting(db_connection, indicator)
+        return record
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def get_indicator_name(db_connection: MySQLConnection, indicator_id: int):
+    cursor = db_connection.cursor()
+    try:
+        query = f'SELECT name from indicators WHERE id = "{indicator_id}"'
+        cursor.execute(query)
+        record = cursor.fetchall()[0][0]
+        return record
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)

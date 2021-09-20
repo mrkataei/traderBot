@@ -38,6 +38,9 @@ class StreamIchimoku(Stream):
                                              timeframe="30min", candle=c_30m_data)
                     ichimoku.signal(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                                     timeframe_id=1)
+                    # setting = self.get_setting_analysis(analysis_id=2, timeframe_id=1)
+                    # ruby.signal(data=self.data_1hour, gain=self.gain, coin_id=self.coin_id, cost=self.cost,
+                    #             timeframe_id=1, settings=setting)
                     await asyncio.sleep(1790)
 
     async def stream_1hour_candle(self):
