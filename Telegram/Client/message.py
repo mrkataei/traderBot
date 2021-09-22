@@ -11,9 +11,9 @@ from Libraries.definitions import *
 
 # API_KEY = config('API_KEY')
 # master bot already run on vps dont use this @algowatchbot -> address
-API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
+# API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
 # @testkourosh2bot -> address // use this bot for test your code
-# API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 
 
 def broadcast_messages(connection: MySQLConnection, coin_id: int, analysis_id: int, timeframe_id: int,

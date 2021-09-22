@@ -38,33 +38,37 @@ valid_coins_and_times = {
 }
 
 
-def gold_signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict):
     if coin_id in valid_coins_and_times['coins'] \
             and timeframe_id in valid_coins_and_times['coins'][coin_id]['timeframes']:
         connection = db.con_db()
         # macd
-        slow = setting['indicators_settings']['MACD']['slow']
-        sign = setting['indicators_settings']['MACD']['sign']
-        fast = setting['indicators_settings']['MACD']['fast']
-        macd_source = setting['indicators_settings']['MACD']['source']
+        slow = setting['indicators_setting']['MACD']['slow']
+        sign = setting['indicators_setting']['MACD']['signal']
+        fast = setting['indicators_setting']['MACD']['fast']
+        macd_source = setting['indicators_setting']['MACD']['source']
+        macd_source = get_source(data=data, source=macd_source)
+        print(macd_source)
 
         # rsi
-        rsi_source = setting['indicators_settings']['RSI']['source']
-        rsi_length = setting['indicators_settings']['RSI']['length']
+        rsi_source = setting['indicators_setting']['RSI']['source']
+        rsi_length = setting['indicators_setting']['RSI']['length']
         rsi_source = get_source(data=data, source=rsi_source)
+        print(rsi_source)
 
         # stoch
-        stoch_k = setting['indicators_settings']['stoch']['k']
-        stoch_d = setting['indicators_settings']['stoch']['d']
-        stoch_smooth = setting['indicators_settings']['stoch']['smooth']
+        stoch_k = setting['indicators_setting']['stoch']['k']
+        stoch_d = setting['indicators_setting']['stoch']['d']
+        stoch_smooth = setting['indicators_setting']['stoch']['smooth']
 
         # stoch_rsi
-        stoch_rsi_rsi_length = setting['indicators_settings']['stochrsi']['rsi_length']
-        stoch_rsi_length = setting['indicators_settings']['stochrsi']['length']
-        stoch_rsi_k = setting['indicators_settings']['stochrsi']['k']
-        stoch_rsi_d = setting['indicators_settings']['stochrsi']['d']
-        stoch_rsi_source = setting['indicators_settings']['stochrsi']['source']
+        stoch_rsi_rsi_length = setting['indicators_setting']['stochrsi']['rsi_length']
+        stoch_rsi_length = setting['indicators_setting']['stochrsi']['length']
+        stoch_rsi_k = setting['indicators_setting']['stochrsi']['k']
+        stoch_rsi_d = setting['indicators_setting']['stochrsi']['d']
+        stoch_rsi_source = setting['indicators_setting']['stochrsi']['source']
         stoch_rsi_source = get_source(data=data, source=stoch_rsi_source)
+        print(stoch_rsi_source)
 
         # signal parameters
         stoch_k_oversell = setting['analysis_setting']['stoch_k_oversell']
@@ -75,19 +79,16 @@ def gold_signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, time
         rsi_overbuy = setting['analysis_setting']['rsi_overbuy']
 
         # macd dataframe
-        macd_source = get_source(data=data, source=macd_source)
         macd_df = ta.macd(close=macd_source, slow=slow, fast=fast, signal=sign)
         close = np.array(data.tail(1)["close"])[0]
         last_macd = np.array(macd_df.tail(2))
 
         # RSI series
-        rsi_source = get_source(data=data, source=rsi_source)
         rsi_sr = ta.rsi(close=rsi_source, length=rsi_length)
         last_rsi = np.array(rsi_sr.tail(1))
 
         # STOCHASTIC data
-        stoch_df = ta.stoch(high=data['high'], low=data['low'], close=data['close'],
-                            k=stoch_k, d=stoch_d, smooth_k=stoch_smooth)
+        stoch_df = data.ta.stoch(k=stoch_k, d=stoch_d, smooth_k=stoch_smooth)
         last_stoch = np.array(stoch_df.tail(1))
 
         # STOCHASTIC RSI dataframe
@@ -127,7 +128,7 @@ def gold_signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, time
                                          coin_id=coin_id, timeframe_id=timeframe_id, position=position,
                                          target_price=target_price, current_price=close,
                                          cost_price=cost, risk=result[1])
-            broadcast_messages(connection=connection, analysis_id=2,
+            broadcast_messages(connection=connection, analysis_id=3,
                                coin_id=coin_id, current_price=close,
                                target_price=target_price, risk=result[1], position=position,
                                timeframe_id=timeframe_id)
@@ -154,7 +155,7 @@ def gold_signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, time
                                          coin_id=coin_id, timeframe_id=timeframe_id, position=position,
                                          target_price=target_price, current_price=close,
                                          cost_price=cost, risk=result[1])
-            broadcast_messages(connection=connection, analysis_id=2,
+            broadcast_messages(connection=connection, analysis_id=3,
                                coin_id=coin_id, current_price=close,
                                target_price=target_price, risk=result[1], position=position,
                                timeframe_id=timeframe_id)

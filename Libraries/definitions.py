@@ -158,7 +158,7 @@ TRANSLATIONS = {
         'fa': 'الان'
     },
     'C_working_for_you': {
-        'en': 'is working for you',
+        'en': ' is working for you',
         'fa': 'برای تو کار میکند'
     },
     'C_select_watchlist': {

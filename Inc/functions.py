@@ -670,10 +670,9 @@ def get_indicator_setting(db_connection: MySQLConnection, indicator_setting_id: 
             for parameter in parameters:
                 parameter = parameter.split(':')
                 try:
-                    record[parameter[0]] = float(parameter[1])
+                    record[parameter[0]] = int(parameter[1])
                 except Exception as e:
                     record[parameter[0]] = parameter[1]
-                    print(e)
         return record
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
@@ -695,10 +694,9 @@ def get_analysis_setting(db_connection: MySQLConnection, coin_id: int, timeframe
                 for arg in args:
                     arg = arg.split(':')
                     try:
-                        record['analysis_setting'][arg[0]] = float(arg[1])
+                        record['analysis_setting'][arg[0]] = int(arg[1])
                     except Exception as e:
                         record['analysis_setting'][arg[0]] = arg[1]
-                        print(e)
             record['indicators_setting'] = {}
             indicators = settings[1].split(',')
             for indicator in indicators:

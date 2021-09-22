@@ -21,7 +21,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     safe_line = settings['analysis_setting']['safe_line']
     hist_line = settings['analysis_setting']['hist_line']
     slow = settings['indicators_setting']['MACD']['slow']
-    sign = settings['indicators_setting']['MACD']['sign']
+    sign = settings['indicators_setting']['MACD']['signal']
     fast = settings['indicators_setting']['MACD']['fast']
     connection = db.con_db()
     # create macd dataframe macd has 3 column original macd , histogram  and signal
