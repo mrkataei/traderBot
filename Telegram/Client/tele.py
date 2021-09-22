@@ -245,7 +245,7 @@ class ClientBot(Telegram):
                                                                                                         anal[2])[0][0],
                                                                                  callback_data="analysis_delete_" +
                                                                                                str(anal[2])))
-                    self.bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_coin'),
+                    self.bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_analysis'),
                                           reply_markup=analysis_keyboard)
                 else:
                     self.bot.reply_to(call.message, trans('C_set_analysis_first'))

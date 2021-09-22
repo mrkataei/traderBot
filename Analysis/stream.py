@@ -34,14 +34,15 @@ class StreamIchimoku(Stream):
             while True:
                 c_30m_data = await candle_30min.recv()
                 if c_30m_data['k']['x']:
+                    setting_ichimoku = self.get_setting_analysis(analysis_id=1, timeframe_id=1)
                     self.data_30min = append(data=self.data_30min.tail(100), symbol=self.symbol,
                                              timeframe="30min", candle=c_30m_data)
                     ichimoku.signal(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                    timeframe_id=1)
+                                    timeframe_id=1, setting=setting_ichimoku)
                     # setting = self.get_setting_analysis(analysis_id=2, timeframe_id=1)
                     # ruby.signal(data=self.data_1hour, gain=self.gain, coin_id=self.coin_id, cost=self.cost,
                     #             timeframe_id=1, settings=setting)
-                    await asyncio.sleep(1790)
+                    await asyncio.sleep(58)
 
     async def stream_1hour_candle(self):
         candle_1hour = self.socket.kline_socket(symbol=self.symbol, interval='1h')
@@ -49,10 +50,11 @@ class StreamIchimoku(Stream):
             while True:
                 c_1h_data = await candle_1hour.recv()
                 if c_1h_data['k']['x']:
+                    setting_ichimoku = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
                     self.data_1hour = append(data=self.data_1hour.tail(100), symbol=self.symbol,
                                              timeframe="1hour", candle=c_1h_data)
                     ichimoku.signal(data=self.data_1hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                    timeframe_id=2)
+                                    timeframe_id=2, setting=setting_ichimoku)
                     await asyncio.sleep(3590)
 
     async def stream_4hour_candle(self):
@@ -61,10 +63,11 @@ class StreamIchimoku(Stream):
             while True:
                 c_4h_data = await candle_4hour.recv()
                 if c_4h_data['k']['x']:
+                    setting_ichimoku = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
                     self.data_4hour = append(data=self.data_4hour.tail(100), symbol=self.symbol,
                                              timeframe="4hour", candle=c_4h_data)
                     ichimoku.signal(data=self.data_4hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                    timeframe_id=3)
+                                    timeframe_id=3, setting=setting_ichimoku)
                     await asyncio.sleep(14390)
 
     async def stream_1day_candle(self):
@@ -73,10 +76,11 @@ class StreamIchimoku(Stream):
             while True:
                 c_1d_data = await candle_1day.recv()
                 if c_1d_data['k']['x']:
+                    setting_ichimoku = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
                     self.data_1day = append(data=self.data_1day.tail(100), symbol=self.symbol,
                                             timeframe="1day", candle=c_1d_data)
                     ichimoku.signal(data=self.data_1day, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                    timeframe_id=4)
+                                    timeframe_id=4, setting=setting_ichimoku)
                     await asyncio.sleep(86390)
 
     def set_cost(self, cost: float):

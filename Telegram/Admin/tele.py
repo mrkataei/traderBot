@@ -136,7 +136,7 @@ class AdminBot(Telegram):
         @self.bot.message_handler(commands=['ps'])
         def show_users(message):
             if self.check_login(message):
-                result = subprocess.check_output('ps aux --sort -rss | grep main.py | head -n 1', shell=True)
+                result = subprocess.check_output('ps aux --sort -rss  | head -n 5', shell=True)
                 self.bot.reply_to(message, result)
 
         @self.bot.message_handler(commands=['broadcast'])

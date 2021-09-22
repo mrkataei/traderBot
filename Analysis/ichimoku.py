@@ -34,8 +34,10 @@ def _get_ichimoku(data: pd.DataFrame, tenkan, kijun, senkou):
     return ichimoku, get_future_spans()
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int,
-           tenkan: int = 9, kijun: int = 26, senkou: int = 52):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict):
+    tenkan = setting['indicators_setting']['ichimoku']['tenkan']
+    kijun = setting['indicators_setting']['ichimoku']['kijun']
+    senkou = setting['indicators_setting']['ichimoku']['senkou']
     connection = db.con_db()
     ichimoku_all = _get_ichimoku(data=data, tenkan=tenkan, kijun=kijun, senkou=senkou)
     ichimoku = ichimoku_all[0]

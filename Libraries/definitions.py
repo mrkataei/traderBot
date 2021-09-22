@@ -259,7 +259,7 @@ TRANSLATIONS = {
     },
     'C_select_analysis': {
         'en': '📊️Select your analysis',
-        'fa': '📊️آنالیز خود را وارد کنید'
+        'fa': '📊️آنالیز خود را انتخاب کنید'
     },
     'C_already_have_analysis': {
         'en': '😏You already have analysis: ',

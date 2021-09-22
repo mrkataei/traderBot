@@ -35,11 +35,11 @@ def append(data: pd.DataFrame, symbol: str, timeframe: str, candle):
     """
     time = pd.to_datetime(candle['k']['T'], unit='ms', yearfirst=True).tz_localize('UTC').tz_convert('Asia/Tehran')
     data = data.append({'date': time,
-                        'open': candle['k']['o'],
-                        'high': candle['k']['h'], 'low': candle['k']['l'],
-                        'close': candle['k']['c'], 'volume': candle['k']['v'],
-                        'QAV': candle['k']['q'], 'trades': candle['k']['n'],
-                        'TBAV': candle['k']['V'], 'TQAV': candle['k']['Q']}, ignore_index=True)
+                        'open': float(candle['k']['o']),
+                        'high': float(candle['k']['h']), 'low': float(candle['k']['l']),
+                        'close': float(candle['k']['c']), 'volume': float(candle['k']['v']),
+                        'QAV': float(candle['k']['q']), 'trades': float(candle['k']['n']),
+                        'TBAV': float(candle['k']['V']), 'TQAV': float(candle['k']['Q'])}, ignore_index=True)
     data.to_csv(path_or_buf=f'Static/{symbol}-{timeframe}.csv', index=False)
     return data
 
