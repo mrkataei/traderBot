@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 20, 2021 at 12:17 PM
+-- Generation Time: Sep 22, 2021 at 04:10 PM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -37,8 +37,9 @@ CREATE TABLE `analysis` (
 --
 
 INSERT INTO `analysis` (`id`, `name`) VALUES
-(2, 'gold'),
-(1, 'ichimoku');
+(3, 'diamond'),
+(1, 'emerald'),
+(2, 'ruby');
 
 -- --------------------------------------------------------
 
@@ -60,7 +61,36 @@ CREATE TABLE `analysis_setting` (
 --
 
 INSERT INTO `analysis_setting` (`id`, `coin_id`, `timeframe_id`, `analysis_id`, `analysis_setting`, `indicator_setting_id`) VALUES
-(2, 1, 1, 2, 'delay:24,safeline:25,histline:50', '1,4');
+(1, 1, 1, 1, '', '1'),
+(2, 1, 2, 1, '', '1'),
+(3, 1, 3, 1, '', '1'),
+(4, 1, 4, 1, '', '1'),
+(5, 2, 1, 1, '', '1'),
+(6, 2, 2, 1, '', '1'),
+(7, 2, 3, 1, '', '1'),
+(8, 2, 4, 1, '', '1'),
+(9, 3, 1, 1, '', '1'),
+(10, 3, 2, 1, '', '1'),
+(11, 3, 3, 1, '', '1'),
+(12, 3, 4, 1, '', '1'),
+(13, 4, 1, 1, '', '1'),
+(14, 4, 2, 1, '', '1'),
+(15, 4, 3, 1, '', '1'),
+(16, 4, 4, 1, '', '1'),
+(17, 5, 1, 1, '', '1'),
+(18, 5, 2, 1, '', '1'),
+(19, 5, 3, 1, '', '1'),
+(20, 5, 4, 1, '', '1'),
+(21, 6, 1, 1, '', '1'),
+(22, 6, 2, 1, '', '1'),
+(23, 6, 3, 1, '', '1'),
+(24, 6, 4, 1, '', '1'),
+(26, 1, 3, 3, 'stoch_k_oversell:24,stoch_k_overbuy:75,stoch_rsi_k_overbuy:74,stoch_rsi_k_oversell:20,\r\nrsi_oversell:37,rsi_overbuy:64', '2,14,19,10'),
+(27, 2, 3, 3, 'stoch_k_oversell:21,stoch_k_overbuy:83,stoch_rsi_k_overbuy:81,stoch_rsi_k_oversell:10,rsi_oversell:37,rsi_overbuy:80', '11,20,3,15'),
+(28, 5, 3, 3, 'stoch_k_oversell:17,stoch_k_overbuy:93,stoch_rsi_k_overbuy:69,stoch_rsi_k_oversell:8,rsi_oversell:36,rsi_overbuy:85', '12,16,21,4'),
+(29, 3, 3, 3, 'stoch_k_oversell:37,stoch_k_overbuy:91,stoch_rsi_k_overbuy:85,stoch_rsi_k_oversell:17,rsi_oversell:50,rsi_overbuy:58', '13,17,22,7'),
+(30, 6, 3, 3, 'stoch_k_oversell:10,stoch_k_overbuy:91,stoch_rsi_k_overbuy:55,stoch_rsi_k_oversell:84,rsi_oversell:81,rsi_overbuy:88', '10,14,24,8'),
+(31, 4, 1, 3, 'stoch_k_oversell:20,stoch_k_overbuy:92,stoch_rsi_k_overbuy:96,stoch_rsi_k_oversell:18,rsi_oversell:29,rsi_overbuy:62', '10,18,23,9');
 
 -- --------------------------------------------------------
 
@@ -123,7 +153,8 @@ INSERT INTO `indicators` (`id`, `name`) VALUES
 (1, 'MACD'),
 (2, 'stoch'),
 (3, 'RSI'),
-(4, 'ichimoku');
+(4, 'ichimoku'),
+(5, 'stochrsi');
 
 -- --------------------------------------------------------
 
@@ -142,8 +173,28 @@ CREATE TABLE `indicators_settings` (
 --
 
 INSERT INTO `indicators_settings` (`indicator_id`, `settings`, `id`) VALUES
-(1, 'window_slow:10,window_sign:21,window_fast:20', 3),
-(4, 'tenkan:9,kijun:26,senkou:52', 4);
+(4, 'tenkan:9,kijun:26,senkou:52', 1),
+(1, 'slow:23,sign:20,fast:5,source:close', 2),
+(1, 'fast:6,slow:14,signal:20,source:hlc3', 3),
+(1, 'fast:9,slow:15,signal:20,source:close', 4),
+(1, 'fast:12,slow:18,signal:20,source:hlc3', 7),
+(1, 'fast:11,slow:36,signal:20,source:close', 8),
+(1, 'fast:13,slow:18,signal:20,source:ohlc4', 9),
+(3, 'source:close,length:5', 10),
+(3, 'source:close,length:4', 11),
+(3, 'source:close,length:7', 12),
+(3, 'source:close,length:3', 13),
+(2, 'k:18,d:3,smooth:3', 14),
+(2, 'k:10,d:3,smooth:2', 15),
+(2, 'k:20,d:3,smooth:3', 16),
+(2, 'k:22,d:3,smooth:3', 17),
+(2, 'k:23,d:3,smooth:3', 18),
+(5, 'rsi_length:24,length:15,k:3,d:3,source:close', 19),
+(5, 'rsi_length:11,length:17,k:3,d:3,source:close', 20),
+(5, 'rsi_length:6,length:21,k:4,d:3,source:hlc3', 21),
+(5, 'rsi_length:14,length:14,k:4,d:2,source:ohlc4', 22),
+(5, 'rsi_length:12,length:20,k:5,d:3,source:ohlc4', 23),
+(5, 'rsi_length:16,length:23,k:3,d:3,source:high', 24);
 
 -- --------------------------------------------------------
 
@@ -164,7 +215,6 @@ CREATE TABLE `recommendations` (
   `id` int(12) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- --------------------------------------------------------
 
 --
 -- Table structure for table `score_analysis`
@@ -274,8 +324,8 @@ CREATE TABLE `user_analysis` (
 --
 
 INSERT INTO `user_analysis` (`id`, `user`, `analysis_id`) VALUES
-(10, 'kouroshataei', 1),
-(13, 'arman', 1);
+(13, 'arman', 1),
+(16, 'kouroshataei', 1);
 
 -- --------------------------------------------------------
 
@@ -309,6 +359,16 @@ CREATE TABLE `watchlist` (
   `name` char(40) COLLATE utf8_bin DEFAULT NULL,
   `id` int(12) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Dumping data for table `watchlist`
+--
+
+INSERT INTO `watchlist` (`user`, `coin_id`, `name`, `id`) VALUES
+('kouroshataei', 1, 'kou', 50),
+('kouroshataei', 2, 'kou', 51),
+('kouroshataei', 3, 'kou', 52),
+('kouroshataei', 6, 'kou', 53);
 
 --
 -- Indexes for dumped tables
@@ -432,13 +492,13 @@ ALTER TABLE `watchlist`
 -- AUTO_INCREMENT for table `analysis`
 --
 ALTER TABLE `analysis`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `analysis_setting`
 --
 ALTER TABLE `analysis_setting`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `coins`
@@ -450,19 +510,19 @@ ALTER TABLE `coins`
 -- AUTO_INCREMENT for table `indicators`
 --
 ALTER TABLE `indicators`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `indicators_settings`
 --
 ALTER TABLE `indicators_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `recommendations`
 --
 ALTER TABLE `recommendations`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT for table `timeframes`
@@ -480,7 +540,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `user_analysis`
 --
 ALTER TABLE `user_analysis`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `user_timeframe`
@@ -492,7 +552,7 @@ ALTER TABLE `user_timeframe`
 -- AUTO_INCREMENT for table `watchlist`
 --
 ALTER TABLE `watchlist`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- Constraints for dumped tables

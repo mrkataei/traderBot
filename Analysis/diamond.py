@@ -32,7 +32,8 @@ valid_coins_and_times = {
             2: {'timeframes': {3}},
             3: {'timeframes': {3}},
             4: {'timeframes': {1}},
-            5: {'timeframes': {3}}
+            5: {'timeframes': {3}},
+            6: {'timeframes': {3}}
         }
 }
 
