@@ -178,8 +178,10 @@ class ClientBot(Telegram):
                 user = self.user_dict[call.message.chat.id]
                 analysis_id = self.analysis_list[np.where(self.analysis_list[:, 1] == call.data)][0][0]
                 functions.set_user_analysis(connection, user.username, int(analysis_id))
+                description = functions.get_description_analysis(connection, int(analysis_id))
                 self.bot.reply_to(call.message,
-                                  trans('C_done') + "\n" + trans('C_now') + call.data + trans('C_working_for_you'))
+                                  trans('C_done') + "\n" + trans('C_now') + call.data + trans('C_working_for_you')
+                                  + "\n" + "description:\n" + description)
             elif call.data == "remove_watchlist":
                 user = self.user_dict[call.message.chat.id]
                 user.watchlist = functions.get_user_watchlist(connection, user.username)

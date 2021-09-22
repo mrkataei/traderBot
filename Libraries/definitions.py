@@ -100,7 +100,7 @@ TRANSLATIONS = {
         'fa': 'واچلیست شما پر است! 😓'
     },
     'C_welcome': {
-        'en': 'I am for Algowatch, your trade assistance \n /help show commands',
+        'en': 'I am Algowatch, your trade assistance \n /help show commands',
         'fa': 'من الگوواچ هستم ، دستیار خرید و فروش شما \n  نمایش دستورات بات /help '
     },
     'C_hello': {

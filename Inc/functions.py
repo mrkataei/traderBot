@@ -299,7 +299,7 @@ def get_analysis(db_connection: MySQLConnection, analysis_id: int = -1):
     try:
         # check user exist
         if analysis_id < 0:
-            query = 'SELECT * from analysis'
+            query = 'SELECT id , name from analysis'
         else:
             query = f'SELECT name from analysis WHERE id="{analysis_id}"'
 
@@ -487,6 +487,17 @@ def set_null_coin_user(db_connection: MySQLConnection, username: str, coin_id: i
         sql = f'UPDATE watchlist SET coin_id=NULL WHERE user="{username}" AND coin_id="{coin_id}"'
         cursor.execute(sql)
         db_connection.commit()
+    except mysql.connector.Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def get_description_analysis(db_connection: MySQLConnection, analysis_id: int):
+    cursor = db_connection.cursor()
+    try:
+        sql = f'SELECT description FROM analysis WHERE id="{analysis_id}"'
+        cursor.execute(sql)
+        record = cursor.fetchall()
+        return record[0][0]
     except mysql.connector.Error as err:
         return "Something went wrong: {}".format(err)
 
