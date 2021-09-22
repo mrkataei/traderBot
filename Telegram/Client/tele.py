@@ -39,7 +39,7 @@ connection = db.con_db()
 
 class ClientBot(Telegram):
     def __init__(self):
-        Telegram.__init__(self,API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo')
+        Telegram.__init__(self)
 
     # def bot_actions(self):
     def bot_actions(self):
@@ -570,6 +570,15 @@ class ClientBot(Telegram):
         def help_me(message):
             try:
                 self.bot.reply_to(message, trans('C_help'))
+
+            except Exception as e:
+                self.bot.reply_to(message, trans('C_unsuccessful_operation'))
+                print(e)
+
+        @self.bot.message_handler(commands=['guide'])
+        def help_me(message):
+            try:
+                self.bot.reply_to(message, trans('C_guide'))
 
             except Exception as e:
                 self.bot.reply_to(message, trans('C_unsuccessful_operation'))
