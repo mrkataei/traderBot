@@ -16,37 +16,35 @@ def cross_under(x, y):
     return True if x[0] > y > x[1] else False
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, settings):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, settings: dict):
     delay = settings['analysis_setting']['delay']
-    safeline = settings['analysis_setting']['safeline']
-    histline = settings['analysis_setting']['histline']
-    window_slow = settings['indicators_setting']['MACD']['window_slow']
-    window_sign = settings['indicators_setting']['MACD']['window_sign']
-    window_fast = settings['indicators_setting']['MACD']['window_fast']
+    safe_line = settings['analysis_setting']['safe_line']
+    hist_line = settings['analysis_setting']['hist_line']
+    slow = settings['indicators_setting']['MACD']['slow']
+    sign = settings['indicators_setting']['MACD']['sign']
+    fast = settings['indicators_setting']['MACD']['fast']
     connection = db.con_db()
     # create macd dataframe macd has 3 column original macd , histogram  and signal
-    macd_df = pd.DataFrame(data.ta.macd(window_slow=window_slow, window_fast=window_fast, window_sign=window_sign))
+    macd_df = ta.macd(close=data['close'], slow=slow, fast=fast, signal=sign)
     macd_df.columns = ["macd", "histogram", "signal"]
     # add price of coin to the macd_df
     macd_df["close"] = data.close
 
-    safe_line = safeline / 100.0
+    safe_line = safe_line / 100.0
 
     last_macd = np.array(macd_df.tail(2))
     close = float(last_macd[1, 3])
     try:
         query = functions.get_recommendations(connection, coin_id=coin_id, analysis_id=2, timeframe=timeframe_id)
         old_position = query[0][2]
-        old_risk = query[0][7]
         old_price = query[0][4]
         # when no rows in database
     except Exception as e:
         old_position = 'sell'
-        old_risk = 'low'
         old_price = 0
         print(e)
 
-    if cross_over(last_macd[:, 1], histline) and \
+    if cross_over(last_macd[:, 1], hist_line) and \
             last_macd[1, 0] < - safe_line and old_position == "sell":
         result = True, "medium"
         target_price = close * gain + close if result[0] else -close * gain + close
