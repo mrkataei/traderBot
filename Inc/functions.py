@@ -4,11 +4,25 @@ all functions about queries from database define here, for now
 soon this file must be cluster and to be multiple files
 """
 
-import mysql.connector
-from mysql.connector import MySQLConnection
+from mysql.connector import MySQLConnection, Error
 # import re
 import hashlib
 import random
+from Inc.db import con_db
+
+_connection = con_db()
+_cursor = _connection.cursor()
+
+
+def set_connection(connection: MySQLConnection):
+    global _connection
+    _connection = connection
+    global _cursor
+    _cursor = connection.cursor()
+
+
+def get_connection_and_cursor():
+    return _connection, _cursor
 
 
 def hash_pass(password: str, salt: int = random.randrange(124, 92452, 2)):
@@ -32,649 +46,538 @@ def chek_password(password: str, password2: str):
     return result
 
 
-def check_username(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def check_username(username: str):
     try:
-        query = f'SELECT * from users WHERE username="{username}" LIMIT 1'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT * from users WHERE username= '{username}' LIMIT 1".format(username=username)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         if record:
             return False
         else:
             return True
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def check_chat_id(db_connection: MySQLConnection, chat_id: str):
-    cursor = db_connection.cursor()
+def check_chat_id(chat_id: str):
     try:
-        query = f'SELECT * from users WHERE chat_id="{chat_id}"'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT * from users WHERE chat_id= '{chat_id}' ".format(chat_id=chat_id)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         if record:
             return record[0][0]
         else:
             return False
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def update_chat_id(db_connection: MySQLConnection, username: str, chat_id: str):
-    cursor = db_connection.cursor()
+def update_chat_id(username: str, chat_id: str):
     try:
-        sql = f'UPDATE users SET chat_id ="{chat_id}" WHERE username="{username}" LIMIT 1'
-        cursor.execute(sql)
-        db_connection.commit()
-    except mysql.connector.Error as err:
+        sql = "UPDATE users SET chat_id = '{chat_id}' WHERE username= '{username}'".format(chat_id=chat_id,
+                                                                                           username=username)
+        _cursor.execute(sql)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_with_chat_id(db_connection: MySQLConnection, chat_id: str):
-    cursor = db_connection.cursor()
+def get_user_with_chat_id(chat_id: str):
     try:
-        # check user exist
-        query = f'SELECT username from users WHERE chat_id="{chat_id}" LIMIT 1'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT username from users WHERE chat_id='{chat_id}' ".format(chat_id=chat_id)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record[0][0]
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-# this is for telebot no for register
-def get_security_questions(db_connection: MySQLConnection, question_id: int = -1):
-    cursor = db_connection.cursor()
+def get_security_questions(question_id: int = -1):
     try:
         # question_id is optional by default is negative and return all questions
         # else return specific question
         if question_id > 0:
-            query = f'SELECT * from secrity_question WHERE id="{question_id}" LIMIT 1'
+            query = "SELECT * from secrity_question WHERE id= '{question_id}'".format(question_id=question_id)
         else:
-            query = 'SELECT * from secrity_question '
-        cursor.execute(query)
-        record = cursor.fetchall()
+            query = "SELECT * from secrity_question"
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
 # return question_id from users table
-def get_user_security_id(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def get_user_security_id(username: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            query = f'SELECT question_id from users WHERE username="{username}" LIMIT 1'
-            cursor.execute(query)
-            record = cursor.fetchall()
-            return record[0][0]
-        else:
-            return False
-    except mysql.connector.Error as err:
+        query = "SELECT question_id from users WHERE username= '{username}'".format(username=username)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
+        return record[0][0]
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_watchlist(db_connection: MySQLConnection, username: str, name: str = None):
-    cursor = db_connection.cursor()
+def get_user_watchlist(username: str, name: str = None):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            if not name:
-                query = f'SELECT * from watchlist WHERE user="{username}"'
-            else:
-                query = f'SELECT * from watchlist WHERE user="{username}"  AND name="{name}"'
-            cursor.execute(query)
-            record = cursor.fetchall()
-            return record
+        if not name:
+            query = "SELECT * from watchlist WHERE user= '{username}' ".format(username=username)
         else:
-            return False
-    except mysql.connector.Error as err:
+            query = "SELECT * from watchlist WHERE user= '{username}'  " \
+                    "AND name= '{name}' ".format(username=username, name=name)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
+        return record
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_coins(db_connection: MySQLConnection, username: str, watchlist: str = None):
-    cursor = db_connection.cursor()
+def get_user_coins(username: str, watchlist: str = None):
     coins = []
     try:
         if watchlist:
-            query = f'SELECT coin_id from watchlist WHERE user="{username}"  AND name="{watchlist}"'
+            query = "SELECT coin_id from watchlist WHERE user= '{username}'  " \
+                    "AND name= '{watchlist}' ".format(username=username, watchlist=watchlist)
 
         else:
-            query = f'SELECT coin_id from watchlist WHERE user="{username}"'
+            query = "SELECT coin_id from watchlist WHERE user= '{username}' ".format(username=username)
 
-        cursor.execute(query)
-        record = cursor.fetchall()
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         for coin in record:
             if coin[0]:
-                coins.append(get_coin_name(db_connection, coin[0]))
+                coins.append(get_coin_name(coin[0]))
         return coins
 
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def create_watchlist(db_connection: MySQLConnection, username: str, name: str):
-    cursor = db_connection.cursor()
+def create_watchlist(username: str, name: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = "INSERT INTO watchlist (user ,name ) VALUES (%s, %s )"
-            val = (username, name)
-            cursor.execute(sql, val)
-            db_connection.commit()
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "INSERT INTO watchlist (user ,name ) VALUES (%s, %s )"
+        val = (username, name)
+        _cursor.execute(sql, val)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_coin(db_connection: MySQLConnection, username: str, coin_id: int, watchlist_name: str):
-    cursor = db_connection.cursor()
+def set_coin(username: str, coin_id: int, watchlist_name: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = f'UPDATE watchlist SET coin_id ="{coin_id}" WHERE user="{username}" AND name="{watchlist_name}" ' \
-                  'AND  coin_id IS NULL LIMIT 1'
-            cursor.execute(sql)
-            db_connection.commit()
-            return True, ""
-        else:
-            return False, ""
-    except mysql.connector.Error as err:
+        sql = "UPDATE watchlist SET coin_id ='{coin_id}' WHERE user='{username}' AND name='{watchlist_name}' AND  " \
+              "coin_id IS NULL LIMIT 1".format(username=username, coin_id=coin_id, watchlist_name=watchlist_name)
+        _cursor.execute(sql)
+        _connection.commit()
+        return True, ""
+    except Error as err:
         return False, "Something went wrong: {}".format(err)
 
 
-def get_empty_coins_remain(db_connection: MySQLConnection, username: str, watchlist_name: str):
-    cursor = db_connection.cursor()
+def get_empty_coins_remain(username: str, watchlist_name: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = f'SELECT coin_id FROM watchlist WHERE user="{username}" ' \
-                  f'AND name="{watchlist_name}"  AND coin_id IS NULL '
-            cursor.execute(sql)
-            record = cursor.fetchall()
-            return len(record)
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "SELECT coin_id FROM watchlist WHERE user= '{username}' AND name= '{watchlist_name}' AND " \
+              "coin_id IS NULL ".format(username=username, watchlist_name=watchlist_name)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
+        return len(record)
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_coins(db_connection: MySQLConnection):
-    cursor = db_connection.cursor()
+def get_coins():
     try:
         query = 'SELECT * from coins'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_coin_name(db_connection: MySQLConnection, coin_id: int):
-    cursor = db_connection.cursor()
+def get_coin_name(coin_id: int):
     try:
-        # check user exist
-        sql = f'SELECT coin FROM coins WHERE id="{coin_id}" '
-        cursor.execute(sql)
-        record = cursor.fetchall()
+        sql = "SELECT coin FROM coins WHERE id='{coin_id}'".format(coin_id=coin_id)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
         return record[0][0]
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_coin_id(db_connection: MySQLConnection, coin_name: str):
-    cursor = db_connection.cursor()
+def get_coin_id(coin_name: str):
     try:
-        # check user exist
-        sql = f'SELECT id FROM coins WHERE coin="{coin_name}" '
-        cursor.execute(sql)
-        record = cursor.fetchall()
+        sql = "SELECT id FROM coins WHERE coin='{coin_name}'".format(coin_name=coin_name)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
         return record[0][0]
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_timeframe(db_connection: MySQLConnection, timeframe_id: int = -1):
-    cursor = db_connection.cursor()
+def get_timeframe(timeframe_id: int = -1):
     try:
         if timeframe_id < 0:
             query = 'SELECT * from timeframes'
         else:
-            query = f'SELECT timeframe from timeframes WHERE id="{timeframe_id}"'
+            query = "SELECT timeframe from timeframes WHERE id='{timeframe_id}'".format(timeframe_id=timeframe_id)
 
-        cursor.execute(query)
-        record = cursor.fetchall()
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
 
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def update_timeframe(db_connection: MySQLConnection, username: str, timeframe_id: int):
-    cursor = db_connection.cursor()
+def update_timeframe(username: str, timeframe_id: int):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = f'UPDATE user_timeframe SET timeframe_id ="{timeframe_id}"' \
-                  f' WHERE user="{username}" LIMIT 1'
-            cursor.execute(sql)
-            db_connection.commit()
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "UPDATE user_timeframe SET timeframe_id ='{timeframe_id}' WHERE " \
+              "user='{username}' LIMIT 1".format(username=username, timeframe_id=timeframe_id)
+        _cursor.execute(sql)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_timeframe(db_connection: MySQLConnection, username: str, timeframe_id: int):
-    cursor = db_connection.cursor()
+def set_timeframe(username: str, timeframe_id: int):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = "INSERT INTO user_timeframe (user ,timeframe_id ) VALUES (%s, %s )"
-            val = (username, timeframe_id)
-            cursor.execute(sql, val)
-            db_connection.commit()
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "INSERT INTO user_timeframe (user ,timeframe_id ) VALUES (%s, %s )"
+        val = (username, timeframe_id)
+        _cursor.execute(sql, val)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_timeframe(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def get_user_timeframe(username: str):
     try:
-        sql = f'SELECT timeframe_id FROM user_timeframe WHERE user="{username}"'
-        cursor.execute(sql)
-        record = cursor.fetchall()
-        record = get_timeframe(db_connection, record[0][0])
+        sql = "SELECT timeframe_id FROM user_timeframe WHERE user='{username}'".format(username=username)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
+        record = get_timeframe(record[0][0])
         return record[0][0]
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_analysis(db_connection: MySQLConnection, analysis_id: int = -1):
-    cursor = db_connection.cursor()
+def get_analysis(analysis_id: int = -1):
     try:
-        # check user exist
         if analysis_id < 0:
-            query = 'SELECT id , name from analysis'
+            query = "SELECT id , name from analysis"
         else:
-            query = f'SELECT name from analysis WHERE id="{analysis_id}"'
+            query = "SELECT name from analysis WHERE id='{analysis_id}'".format(analysis_id=analysis_id)
 
-        cursor.execute(query)
-        record = cursor.fetchall()
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_chat_id(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def get_user_chat_id(username: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = f'SELECT chat_id FROM users WHERE username="{username}"'
-            cursor.execute(sql)
-            record = cursor.fetchall()
-            return record[0][0]
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "SELECT chat_id FROM users WHERE username='{username}'".format(username=username)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
+        return record[0][0]
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_users_analysis_with_analysis_id(db_connection: MySQLConnection, analysis_id: int):
-    cursor = db_connection.cursor()
+def get_users_analysis_with_analysis_id(analysis_id: int):
     try:
-        sql = f'SELECT user FROM user_analysis WHERE analysis_id="{analysis_id}"'
-        cursor.execute(sql)
-        record = cursor.fetchall()
+        sql = "SELECT user FROM user_analysis WHERE analysis_id='{analysis_id}'".format(analysis_id=analysis_id)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_chat_id_with_analysis_id(db_connection: MySQLConnection, analysis_id: int):
-    cursor = db_connection.cursor()
+def get_chat_id_with_analysis_id(analysis_id: int):
     chat_id = []
     try:
-        sql = f'SELECT user FROM user_analysis WHERE analysis_id="{analysis_id}"'
-        cursor.execute(sql)
-        record = cursor.fetchall()
+        sql = "SELECT user FROM user_analysis WHERE analysis_id='{analysis_id}'".format(analysis_id=analysis_id)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
         for user in record:
-            chat_id.append(int(get_user_chat_id(db_connection, user[0])))
+            chat_id.append(int(get_user_chat_id(user[0])))
         return chat_id
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_analysis_name(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def get_user_analysis_name(username: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = f'SELECT analysis_id FROM user_analysis WHERE user="{username}"'
-            cursor.execute(sql)
-            record = cursor.fetchall()
-            if record:
-                record = get_analysis(db_connection, record[0][0])[0][0]
-            else:
-                record = False
-            return record
+        sql = "SELECT analysis_id FROM user_analysis WHERE user='{username}'".format(username=username)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
+        if record:
+            record = get_analysis(record[0][0])[0][0]
         else:
-            return False
-    except mysql.connector.Error as err:
+            record = False
+        return record
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_analysis(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def get_user_analysis(username: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = f'SELECT * FROM user_analysis WHERE user="{username}"'
-            cursor.execute(sql)
-            record = cursor.fetchall()
-            return record
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "SELECT * FROM user_analysis WHERE user='{username}'".format(username=username)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
+        return record
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_user_analysis(db_connection: MySQLConnection, username: str, analysis_id: int):
-    cursor = db_connection.cursor()
+def set_user_analysis(username: str, analysis_id: int):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = "INSERT INTO user_analysis (user ,analysis_id ) VALUES (%s, %s )"
-            val = (username, analysis_id)
-            cursor.execute(sql, val)
-            db_connection.commit()
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "INSERT INTO user_analysis (user ,analysis_id ) VALUES (%s, %s )"
+        val = (username, analysis_id)
+        _cursor.execute(sql, val)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_amount_bank_user(db_connection: MySQLConnection, username: str, amount: float):
-    cursor = db_connection.cursor()
+def set_amount_bank_user(username: str, amount: float):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = "INSERT INTO bank (user ,amount ) VALUES (%s, %s )"
-            val = (username, amount)
-            cursor.execute(sql, val)
-            db_connection.commit()
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "INSERT INTO bank (user ,amount ) VALUES (%s, %s )"
+        val = (username, amount)
+        _cursor.execute(sql, val)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def update_amount_user(db_connection: MySQLConnection, username: str, amount: float):
-    cursor = db_connection.cursor()
+def update_amount_user(username: str, amount: float):
     try:
-        sql = f'UPDATE bank SET amount="{amount}" WHERE user="{username}" '
-        cursor.execute(sql)
-        db_connection.commit()
-    except mysql.connector.Error as err:
+        sql = "UPDATE bank SET amount='{amount}' WHERE user='{username}'".format(amount=amount, username=username)
+        _cursor.execute(sql)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_amount_bank_user(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def get_amount_bank_user(username: str):
     try:
-        # check user exist
-        if not check_username(db_connection, username):
-            sql = f'SELECT amount FROM bank WHERE user="{username}"'
-            cursor.execute(sql)
-            record = cursor.fetchall()
-            return record[0][0]
-        else:
-            return False
-    except mysql.connector.Error as err:
+        sql = "SELECT amount FROM bank WHERE user='{username}'".format(username=username)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
+        return record[0][0]
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
 # get last signal inserted in database
-def get_recommendations(db_connection: MySQLConnection, analysis_id: int = None, timeframe: id = None,
-                        coin_id: int = None):
-    cursor = db_connection.cursor()
+def get_recommendations(analysis_id: int = None, timeframe: id = None, coin_id: int = None):
     try:
         if analysis_id and timeframe and coin_id:
-            sql = f'SELECT * FROM recommendations WHERE coin_id="{coin_id}" ' \
-                  f'AND  analysis_id="{analysis_id}" AND timeframe_id={timeframe} order by timestmp DESC LIMIT 1'
+            sql = "SELECT * FROM recommendations WHERE coin_id='{coin_id}' AND  analysis_id='{analysis_id}' AND " \
+                  "timeframe_id='{timeframe}' order by timestmp DESC LIMIT 1".format(coin_id=coin_id,
+                                                                                     analysis_id=analysis_id,
+                                                                                     timeframe=timeframe)
         else:
-            sql = f'SELECT * FROM recommendations order by timestmp DESC LIMIT 1'
-        cursor.execute(sql)
-        record = cursor.fetchall()
+            sql = "SELECT * FROM recommendations order by timestmp DESC LIMIT 1"
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_recommendation(db_connection: MySQLConnection, analysis_id: int
-                       , coin_id: int, timeframe_id: int, position: str,
-                       target_price: float, current_price: float, cost_price: float, risk: str):
-    cursor = db_connection.cursor()
+def set_recommendation(analysis_id: int, coin_id: int, timeframe_id: int, position: str, target_price: float,
+                       current_price: float, cost_price: float, risk: str):
     try:
         sql = "INSERT INTO recommendations (coin_id, analysis_id, position, target_price," \
               " current_price, timeframe_id, cost_price, risk) VALUES (%s, %s , %s ,%s, %s , %s ,%s ,%s)"
         val = (coin_id, analysis_id, position, target_price, current_price, timeframe_id, cost_price, risk)
-        cursor.execute(sql, val)
-        db_connection.commit()
-    except mysql.connector.Error as err:
+        _cursor.execute(sql, val)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_score(db_connection: MySQLConnection, username: str, score: int, recom_id=int, is_used: int = 0):
-    cursor = db_connection.cursor()
+def set_score(username: str, score: int, recom_id=int, is_used: int = 0):
     try:
         sql = "INSERT INTO score_analysis (recom_id, score, user, is_used) VALUES (%s, %s , %s ,%s)"
         val = (recom_id, score, username, is_used)
-        cursor.execute(sql, val)
-        db_connection.commit()
-    except mysql.connector.Error as err:
+        _cursor.execute(sql, val)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_null_coin_user(db_connection: MySQLConnection, username: str, coin_id: int):
-    cursor = db_connection.cursor()
+def set_null_coin_user(username: str, coin_id: int):
     try:
-        sql = f'UPDATE watchlist SET coin_id=NULL WHERE user="{username}" AND coin_id="{coin_id}"'
-        cursor.execute(sql)
-        db_connection.commit()
-    except mysql.connector.Error as err:
+        sql = "UPDATE watchlist SET coin_id=NULL WHERE user='{username}' " \
+              "AND coin_id='{coin_id}'".format(username=username, coin_id=coin_id)
+        _cursor.execute(sql)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_description_analysis(db_connection: MySQLConnection, analysis_id: int):
-    cursor = db_connection.cursor()
+def get_description_analysis(analysis_id: int):
     try:
-        sql = f'SELECT description FROM analysis WHERE id="{analysis_id}"'
-        cursor.execute(sql)
-        record = cursor.fetchall()
+        sql = "SELECT description FROM analysis WHERE id='{analysis_id}'".format(analysis_id=analysis_id)
+        _cursor.execute(sql)
+        record = _cursor.fetchall()
         return record[0][0]
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def delete_watchlist(db_connection: MySQLConnection, username: str, name: str):
-    cursor = db_connection.cursor()
+def delete_watchlist(username: str, name: str):
     try:
-        sql = f'DELETE from watchlist WHERE user="{username}" AND name="{name}"'
-        cursor.execute(sql)
-        db_connection.commit()
-    except mysql.connector.Error as err:
+        sql = "DELETE from watchlist WHERE user='{username}' AND name='{name}'".format(username=username, name=name)
+        _cursor.execute(sql)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def delete_analysis(db_connection: MySQLConnection, username: str, analysis_id: int):
-    cursor = db_connection.cursor()
+def delete_analysis(username: str, analysis_id: int):
     try:
-        sql = f'DELETE from user_analysis WHERE user="{username}" AND analysis_id="{analysis_id}"'
-        cursor.execute(sql)
-        db_connection.commit()
-    except mysql.connector.Error as err:
+        sql = "DELETE from user_analysis WHERE user='{username}' " \
+              "AND analysis_id='{analysis_id}'".format(username=username, analysis_id=analysis_id)
+        _cursor.execute(sql)
+        _connection.commit()
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def pay_transaction(db_connection: MySQLConnection, cost_price: float, username: str, detail: str = "some signal send"):
-    cursor = db_connection.cursor()
+def pay_transaction(cost_price: float, username: str, detail: str = "some signal send"):
     try:
-        amount = float(get_amount_bank_user(db_connection, username)) - cost_price
+        amount = float(get_amount_bank_user(username)) - cost_price
         if float(amount) >= 0:
-            update_amount_user(db_connection, username, amount)
+            update_amount_user(username, amount)
             sql = "INSERT INTO transactions (user, operation, amount, detail) VALUES (%s, %s ,%s ,%s )"
             val = (username, "deposit", cost_price, detail)
-            cursor.execute(sql, val)
-            db_connection.commit()
+            _cursor.execute(sql, val)
+            _connection.commit()
         else:
             return False
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def charge_account(db_connection: MySQLConnection, amount: float, username: str, detail: str = "charge account"):
-    cursor = db_connection.cursor()
+def charge_account(amount: float, username: str, detail: str = "charge account"):
     try:
-        amount = float(get_amount_bank_user(db_connection, username)) + amount
-        update_amount_user(db_connection, username, amount)
+        amount = float(get_amount_bank_user(username)) + amount
+        update_amount_user(username, amount)
         sql = "INSERT INTO transactions (user, operation, amount, detail) VALUES (%s, %s ,%s ,%s )"
         val = (username, "withdrawal", amount, detail)
-        cursor.execute(sql, val)
-        db_connection.commit()
+        _cursor.execute(sql, val)
+        _connection.commit()
 
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_all_user_watchlist(db_connection: MySQLConnection):
-    cursor = db_connection.cursor()
+def get_all_user_watchlist():
     try:
-        query = f'SELECT * from watchlist'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT * from watchlist"
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_all_user_analysis(db_connection: MySQLConnection):
-    cursor = db_connection.cursor()
+def get_all_user_analysis():
     try:
-        query = f'SELECT * from watchlist'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT * from watchlist"
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_all_user_timeframe(db_connection: MySQLConnection):
-    cursor = db_connection.cursor()
+def get_all_user_timeframe():
     try:
-        query = f'SELECT * from watchlist'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT * from watchlist"
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_recommendation(db_connection: MySQLConnection, coin_id: int = None, analysis_id: int = None,
-                            timeframe_id: int = None):
-    cursor = db_connection.cursor()
+def get_user_recommendation(coin_id: int = None, analysis_id: int = None, timeframe_id: int = None):
     try:
         if coin_id and analysis_id and timeframe_id:
-            query = f'SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ,' \
-                    f'user_analysis.analysis_id  FROM watchlist ' \
-                    f'INNER JOIN user_timeframe ON watchlist.user = user_timeframe.user ' \
-                    f'INNER JOIN user_analysis ON user_timeframe.user = user_analysis.user ' \
-                    f'WHERE coin_id ="{coin_id}" AND analysis_id="{analysis_id}" AND timeframe_id="{timeframe_id}"'
+            query = "SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ," \
+                    "user_analysis.analysis_id  FROM watchlist INNER JOIN user_timeframe " \
+                    "ON watchlist.user = user_timeframe.user INNER JOIN user_analysis " \
+                    "ON user_timeframe.user = user_analysis.user " \
+                    "WHERE coin_id ='{coin_id}' AND analysis_id='{analysis_id}' " \
+                    "AND timeframe_id='{timeframe_id}'".format(coin_id=coin_id, analysis_id=analysis_id,
+                                                             timeframe_id=timeframe_id)
         else:
-            query = f'SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ,' \
-                    f'user_analysis.analysis_id  FROM watchlist ' \
-                    f'INNER JOIN user_timeframe ON watchlist.user = user_timeframe.user ' \
-                    f'INNER JOIN user_analysis ON user_timeframe.user = user_analysis.user '
-        cursor.execute(query)
-        record = cursor.fetchall()
+            query = "SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ," \
+                    "user_analysis.analysis_id  FROM watchlist INNER JOIN user_timeframe " \
+                    "ON watchlist.user = user_timeframe.user INNER JOIN user_analysis " \
+                    "ON user_timeframe.user = user_analysis.user "
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_admins(db_connection: MySQLConnection):
-    cursor = db_connection.cursor()
-    admin = 'admin'
+def get_admins():
     try:
-        query = f'SELECT username from users WHERE role="{admin}"'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT username from users WHERE role='admin'"
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_usernames(db_connection: MySQLConnection):
-    cursor = db_connection.cursor()
+def get_usernames():
     try:
-        query = f'SELECT username from users'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT username from users"
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_user_details(db_connection: MySQLConnection, username: str):
-    cursor = db_connection.cursor()
+def get_user_details(username: str):
     try:
-
-        query = f'SELECT users.username , users.timestamp , users.role , bank.amount , user_timeframe.timeframe_id ,' \
-                f'user_analysis.analysis_id FROM users ' \
-                f'LEFT JOIN bank ON users.username = bank.user ' \
-                f'LEFT JOIN user_timeframe ON users.username = user_timeframe.user  ' \
-                f'LEFT JOIN user_analysis ON user_timeframe.user = user_analysis.user ' \
-                f'WHERE username="{username}"'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT users.username , users.timestamp , users.role , bank.amount , user_timeframe.timeframe_id ," \
+                "user_analysis.analysis_id FROM users LEFT JOIN bank ON users.username = bank.user " \
+                "LEFT JOIN user_timeframe ON users.username = user_timeframe.user LEFT JOIN user_analysis " \
+                "ON user_timeframe.user = user_analysis.user WHERE username='{username}'".format(username=username)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def set_accuracy(db_connection: MySQLConnection, recom_id: int, validity: int):
-    cursor = db_connection.cursor()
+def get_chat_ids():
     try:
-        sql = "INSERT INTO accuracy (recom_id, validity) VALUES (%s, %s )"
-        val = (recom_id, validity)
-        cursor.execute(sql, val)
-        db_connection.commit()
-    except mysql.connector.Error as err:
-        return "Something went wrong: {}".format(err)
-
-
-def get_chat_ids(db_connection: MySQLConnection):
-    cursor = db_connection.cursor()
-    try:
-        query = f'SELECT chat_id from users'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT chat_id from users"
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_indicator_setting(db_connection: MySQLConnection, indicator_setting_id: int):
-    cursor = db_connection.cursor()
+def get_indicator_setting(indicator_setting_id: int):
     try:
-        query = f'SELECT settings from indicators_settings WHERE id = "{indicator_setting_id}"'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT settings from indicators_settings " \
+                "WHERE id = '{indicator_setting_id}'".format(indicator_setting_id=indicator_setting_id)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         if record:
             parameters = record[0][0].split(',')
             record = dict()
@@ -682,20 +585,21 @@ def get_indicator_setting(db_connection: MySQLConnection, indicator_setting_id: 
                 parameter = parameter.split(':')
                 try:
                     record[parameter[0]] = int(parameter[1])
-                except Exception as e:
+                except Exception:
                     record[parameter[0]] = parameter[1]
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_analysis_setting(db_connection: MySQLConnection, coin_id: int, timeframe_id: int, analysis_id: int):
-    cursor = db_connection.cursor()
+def get_analysis_setting(coin_id: int, timeframe_id: int, analysis_id: int):
     try:
-        query = f'SELECT analysis_setting , indicator_setting_id from analysis_setting WHERE coin_id = "{coin_id}" and ' \
-                f'timeframe_id = "{timeframe_id}" and analysis_id = "{analysis_id}"'
-        cursor.execute(query)
-        record = cursor.fetchall()
+        query = "SELECT analysis_setting , indicator_setting_id from analysis_setting WHERE coin_id = '{coin_id}' " \
+                "AND timeframe_id = '{timeframe_id}' and analysis_id ='{analysis_id}'".format(coin_id=coin_id,
+                                                                                              timeframe_id=timeframe_id,
+                                                                                              analysis_id=analysis_id)
+        _cursor.execute(query)
+        record = _cursor.fetchall()
         if record:
             settings = record[0]
             record = dict()
@@ -706,36 +610,35 @@ def get_analysis_setting(db_connection: MySQLConnection, coin_id: int, timeframe
                     arg = arg.split(':')
                     try:
                         record['analysis_setting'][arg[0]] = int(arg[1])
-                    except Exception as e:
+                    except Exception:
                         record['analysis_setting'][arg[0]] = arg[1]
             record['indicators_setting'] = {}
             indicators = settings[1].split(',')
             for indicator in indicators:
-                record['indicators_setting'][get_indicator_name_from_indicators_settings(db_connection, indicator)] = \
-                    get_indicator_setting(db_connection, indicator)
+                record['indicators_setting'][get_indicator_name_from_indicators_settings(indicator)] = \
+                    get_indicator_setting(indicator)
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_indicator_name_from_indicators_settings(db_connection: MySQLConnection, indicator_setting_id: int):
-    cursor = db_connection.cursor()
+def get_indicator_name_from_indicators_settings(indicator_setting_id: int):
     try:
-        query = f'SELECT indicator_id from indicators_settings WHERE id = "{indicator_setting_id}"'
-        cursor.execute(query)
-        record = int(cursor.fetchall()[0][0])
-        record = get_indicator_name(db_connection, record)
+        query = "SELECT indicator_id from indicators_settings " \
+                "WHERE id = '{indicator_setting_id}'".format(indicator_setting_id=indicator_setting_id)
+        _cursor.execute(query)
+        record = int(_cursor.fetchall()[0][0])
+        record = get_indicator_name(record)
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)
 
 
-def get_indicator_name(db_connection: MySQLConnection, indicator_id: int):
-    cursor = db_connection.cursor()
+def get_indicator_name(indicator_id: int):
     try:
-        query = f'SELECT name from indicators WHERE id = "{indicator_id}"'
-        cursor.execute(query)
-        record = cursor.fetchall()[0][0]
+        query = "SELECT name from indicators WHERE id = '{indicator_id}'".format(indicator_id=indicator_id)
+        _cursor.execute(query)
+        record = _cursor.fetchall()[0][0]
         return record
-    except mysql.connector.Error as err:
+    except Error as err:
         return "Something went wrong: {}".format(err)

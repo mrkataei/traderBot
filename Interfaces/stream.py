@@ -48,7 +48,7 @@ class Stream:
     def __init__(self, symbol: str):
         self.symbol = symbol
         self.connection = db.con_db()
-        self.coin_id = functions.get_coin_id(self.connection, symbol)
+        self.coin_id = functions.get_coin_id(symbol)
         self.client = None
         self.socket = None
         self.data_30min = pd.read_csv(f'Static/{self.symbol}-30min.csv')
@@ -86,8 +86,8 @@ class Stream:
                              self.stream_1day_candle())
 
     def get_setting_analysis(self, analysis_id: int, timeframe_id: int):
-        settings = functions.get_analysis_setting(db_connection=self.connection, coin_id=self.coin_id,
-                                                  timeframe_id=timeframe_id, analysis_id=analysis_id)
+        settings = functions.get_analysis_setting(coin_id=self.coin_id, timeframe_id=timeframe_id,
+                                                  analysis_id=analysis_id)
         return settings
 
     def run(self):

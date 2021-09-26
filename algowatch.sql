@@ -175,7 +175,7 @@ CREATE TABLE `indicators_settings` (
 
 INSERT INTO `indicators_settings` (`indicator_id`, `settings`, `id`) VALUES
 (4, 'tenkan:9,kijun:26,senkou:52', 1),
-(1, 'slow:23,sign:20,fast:5,source:close', 2),
+(1, 'slow:23,signal:20,fast:5,source:close', 2),
 (1, 'fast:6,slow:14,signal:20,source:hlc3', 3),
 (1, 'fast:9,slow:15,signal:20,source:close', 4),
 (1, 'fast:12,slow:18,signal:20,source:hlc3', 7),

@@ -123,7 +123,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
 
         # check last signal of analysis on db
         try:
-            query = functions.get_recommendations(connection, coin_id=coin_id, analysis_id=3, timeframe=timeframe_id)
+            query = functions.get_recommendations(analysis_id=3, timeframe=timeframe_id, coin_id=coin_id)
             old_position = query[0][2]
             old_price = query[0][4]
             # when no rows in database
@@ -156,14 +156,11 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
             # add signal to database
             target_price = close * gain + close if result[0] else -close * gain + close
             position = 'buy' if result[0] else 'sell'
-            functions.set_recommendation(db_connection=connection, analysis_id=3,
-                                         coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                         target_price=target_price, current_price=close,
-                                         cost_price=cost, risk=result[1])
-            broadcast_messages(connection=connection, analysis_id=3,
-                               coin_id=coin_id, current_price=close,
-                               target_price=target_price, risk=result[1], position=position,
-                               timeframe_id=timeframe_id)
+            functions.set_recommendation(analysis_id=3, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
+                                         target_price=target_price, current_price=close, cost_price=cost,
+                                         risk=result[1])
+            broadcast_messages(coin_id=coin_id, analysis_id=3, timeframe_id=timeframe_id, position=position,
+                               target_price=target_price, current_price=close, risk=result[1])
 
         sell_counter = 0
         if old_position == "buy" and old_price < close:
@@ -188,11 +185,8 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
                 result = False, "high"
             target_price = close * gain + close if result[0] else -close * gain + close
             position = 'buy' if result[0] else 'sell'
-            functions.set_recommendation(db_connection=connection, analysis_id=3,
-                                         coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                         target_price=target_price, current_price=close,
-                                         cost_price=cost, risk=result[1])
-            broadcast_messages(connection=connection, analysis_id=3,
-                               coin_id=coin_id, current_price=close,
-                               target_price=target_price, risk=result[1], position=position,
-                               timeframe_id=timeframe_id)
+            functions.set_recommendation(analysis_id=3, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
+                                         target_price=target_price, current_price=close, cost_price=cost,
+                                         risk=result[1])
+            broadcast_messages(coin_id=coin_id, analysis_id=3, timeframe_id=timeframe_id, position=position,
+                               target_price=target_price, current_price=close, risk=result[1])

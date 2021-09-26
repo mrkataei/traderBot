@@ -1,6 +1,6 @@
 import telebot
 from time import sleep
-from Inc import db, functions
+from Inc import functions
 from Auth import login
 import numpy as np
 from Libraries.definitions import *
@@ -12,10 +12,10 @@ class Telegram:
         self.bot = None
         self.user_dict = {}
         self.reg_dict = {}
-        __connection = db.con_db()
-        self.coins_list = np.array(functions.get_coins(__connection))
-        self.timeframes_list = np.array(functions.get_timeframe(__connection))
-        self.analysis_list = np.array(functions.get_analysis(__connection))
+        (__connection, __cursor) = functions.get_connection_and_cursor()
+        self.coins_list = np.array(functions.get_coins())
+        self.timeframes_list = np.array(functions.get_timeframe())
+        self.analysis_list = np.array(functions.get_analysis())
 
     def bot_polling(self):
         print("Starting bot polling now")
@@ -39,9 +39,8 @@ class Telegram:
 
     def process_password(self, message):
         try:
-            connection = db.con_db()
             user = self.user_dict[message.chat.id]
-            res = login.login(db_connection=connection, username=user.username, password=message.text)
+            res = login.login(username=user.username, password=message.text)
             if res[0]:
                 self.bot.delete_message(message.chat.id, message.message_id)
                 self.bot.send_message(message.chat.id, res[1])
@@ -49,8 +48,8 @@ class Telegram:
                 user.login = True
                 # our client deleted his/her account and chat id not updated
                 # this statement after login update his/her chat id
-                if not functions.check_chat_id(connection, message.chat.id):
-                    functions.update_chat_id(db_connection=connection, username=user.username, chat_id=message.chat.id)
+                if not functions.check_chat_id(message.chat.id):
+                    functions.update_chat_id(username=user.username, chat_id=message.chat.id)
                 print(self.user_dict)
             else:
                 self.bot.send_message(message.chat.id, res[1])
@@ -62,9 +61,8 @@ class Telegram:
             # del self.user_dict[message.chat.id]
 
     def easy_login(self, message):
-        connection = db.con_db()
         try:
-            check = functions.check_chat_id(db_connection=connection, chat_id=message.chat.id)
+            check = functions.check_chat_id(chat_id=message.chat.id)
             user = self.user_dict[message.chat.id]
             if check:
                 user.username = check
@@ -118,4 +116,3 @@ class Telegram:
         key_markup.add(key_add, key_new, key_frame, key_analysis, key_candle, key_show, key_recommendation,
                        key_remove, key_logout, key_help)
         self.bot.send_message(message.chat.id, trans('C_what_can_i_do'), reply_markup=key_markup)
-
