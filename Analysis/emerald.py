@@ -17,7 +17,7 @@ for insert new signal :
 import pandas as pd
 import pandas_ta as ta
 import numpy as np
-from Inc import db, functions
+from Inc import functions
 from Telegram.Client.message import broadcast_messages
 
 
@@ -38,7 +38,6 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     tenkan = setting['indicators_setting']['ichimoku']['tenkan']
     kijun = setting['indicators_setting']['ichimoku']['kijun']
     senkou = setting['indicators_setting']['ichimoku']['senkou']
-    connection = db.con_db()
     ichimoku_all = _get_ichimoku(data=data, tenkan=tenkan, kijun=kijun, senkou=senkou)
     ichimoku = ichimoku_all[0]
     future = ichimoku_all[1]
@@ -49,7 +48,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     last_ichimoku = np.array(ichimoku.tail(1))[0].astype(float)
     close = float(last_ichimoku[5])
     try:
-        query = functions.get_recommendations(analysis_id=1, timeframe=timeframe_id, coin_id=coin_id)
+        query = functions.get_recommendations(analysis_id=1, timeframe_id=timeframe_id, coin_id=coin_id)
         old_position = query[0][2]
         old_risk = query[0][7]
         # when no rows in database

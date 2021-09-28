@@ -30,14 +30,14 @@ def cross_under(x, y):
 
 class Tools:
 
-    def __init__(self, analysis_id: int, timeframe_id: int ,coin_id: int):
+    def __init__(self, analysis_id: int, timeframe_id: int, coin_id: int):
         self.analysis_id = analysis_id
         self.timeframe_id = timeframe_id
         self.coin_id = coin_id
 
     def get_last_data(self, start_position: bool = None):
-        query = functions.get_recommendations(coin_id=self.coin_id, analysis_id=self.analysis_id,
-                                              timeframe=self.timeframe_id)
+        query = functions.get_recommendations(analysis_id=self.analysis_id, timeframe_id=self.timeframe_id,
+                                              coin_id=self.coin_id)
         try:
             old_position = query[0][2]
             old_price = query[0][4]

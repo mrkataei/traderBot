@@ -35,7 +35,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     last_macd = np.array(macd_df.tail(2))
     close = float(last_macd[1, 3])
     try:
-        query = functions.get_recommendations(analysis_id=2, timeframe=timeframe_id, coin_id=coin_id)
+        query = functions.get_recommendations(analysis_id=2, timeframe_id=timeframe_id, coin_id=coin_id)
         old_position = query[0][2]
         old_price = query[0][4]
         # when no rows in database

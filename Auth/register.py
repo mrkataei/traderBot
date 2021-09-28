@@ -7,10 +7,11 @@ need hash function for password - any registration in app for now needs username
 
 from Inc import functions
 from Libraries.definitions import *
+from Inc.db import con_db
 
 
 def register(username: str, chat_id: str, password: str, password2: str, question_id: int, answer: str):
-    (connection, cursor) = functions.get_connection_and_cursor()
+    connection = con_db()
     # check_password return tuple (bool,Error:str)
     chek_pass = functions.chek_password(password=password, password2=password2)
     # check_username function return True if username not exists
@@ -24,6 +25,7 @@ def register(username: str, chat_id: str, password: str, password2: str, questio
             sql = "INSERT INTO users (username, chat_id ,password , salt, role , question_id , question_answer ) " \
                   "VALUES (%s, %s , %s , %s , %s , %s , %s)"
             val = (username, chat_id, password[0], password[1], 'user', question_id, answer)
+            cursor = connection.cursor()
             cursor.execute(sql, val)
             # insert into database
             connection.commit()

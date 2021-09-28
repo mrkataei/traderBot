@@ -6,15 +6,17 @@ is private and inner def in reset password for security
 """
 from Inc import functions
 from Libraries.definitions import *
+from Inc.db import con_db
 
 
 def reset_password(username: str, answer: str, new_password: str, new_password2: str):
-    (connection, cursor) = functions.get_connection_and_cursor()
+    connection = con_db()
 
     def check_answer():
         try:
             query = "SELECT * FROM users WHERE username='{username}' AND question_answer='{answer}' " \
                     "LIMIT 1".format(username=username, answer=answer)
+            cursor = connection.cursor()
             cursor.execute(query)
             record = cursor.fetchall()
             # if false wrong answer
@@ -37,6 +39,7 @@ def reset_password(username: str, answer: str, new_password: str, new_password2:
                 password = functions.hash_pass(password=new_password)
                 sql = "UPDATE users SET password='{password}', salt='{salt}' " \
                       "WHERE username='{username}'".format(password=password[0], salt=password[1], username=username)
+                cursor = connection.cursor()
                 cursor.execute(sql)
                 connection.commit()
                 return True

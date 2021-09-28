@@ -7,12 +7,14 @@ and compare to database row
 """
 from Libraries.definitions import *
 from Inc import functions
+from Inc.db import con_db
 
 
 def login(username: str, password: str):
-    (connection, cursor) = functions.get_connection_and_cursor()
+    connection = con_db()
     try:
         query = "SELECT * from users WHERE username='{username}' LIMIT 1".format(username=username)
+        cursor = connection.cursor()
         cursor.execute(query)
         record = cursor.fetchall()
         if record and record[0][2] == functions.hash_pass(password=password, salt=record[0][3])[0]:

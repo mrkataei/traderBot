@@ -1,6 +1,6 @@
 import asyncio
 from binance import AsyncClient, BinanceSocketManager
-from Inc import db, functions
+from Inc import functions
 import pandas as pd
 
 
@@ -47,7 +47,6 @@ def append(data: pd.DataFrame, symbol: str, timeframe: str, candle):
 class Stream:
     def __init__(self, symbol: str):
         self.symbol = symbol
-        self.connection = db.con_db()
         self.coin_id = functions.get_coin_id(symbol)
         self.client = None
         self.socket = None

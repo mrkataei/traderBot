@@ -12,7 +12,6 @@ class Telegram:
         self.bot = None
         self.user_dict = {}
         self.reg_dict = {}
-        (__connection, __cursor) = functions.get_connection_and_cursor()
         self.coins_list = np.array(functions.get_coins())
         self.timeframes_list = np.array(functions.get_timeframe())
         self.analysis_list = np.array(functions.get_analysis())
