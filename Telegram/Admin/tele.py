@@ -22,7 +22,7 @@ class AdminBot(Telegram):
     def __init__(self):
         Telegram.__init__(self, API_KEY=API_KEY)
         __connection = db.con_db()
-        self.admins = np.array(functions.get_admins(__connection))
+        self.admins = np.array(functions.get_admins())
 
     def bot_actions(self):
         # /start command enter by admin
@@ -54,7 +54,7 @@ class AdminBot(Telegram):
                 msg = user.temp
                 if str(call.data).split('_')[2] == "yes":
                     connection = db.con_db()
-                    chat_ids = np.array(functions.get_chat_ids(connection))
+                    chat_ids = np.array(functions.get_chat_ids())
                     admin_broadcast(msg, chat_ids)
                     self.bot.reply_to(call.message, "Done!\nyour message send to all")
                 else:
@@ -79,7 +79,7 @@ class AdminBot(Telegram):
             if self.check_login(message):
                 connection = db.con_db()
                 usernames = ''
-                users = np.array(functions.get_usernames(connection))
+                users = np.array(functions.get_usernames())
                 for index, user in enumerate(users, start=1):
                     usernames += str(index) + '-' + str(user[0]) + ' ,'
                 self.bot.reply_to(message, usernames)
@@ -101,7 +101,7 @@ class AdminBot(Telegram):
             user = self.user_dict[message.chat.id]
             connection = db.con_db()
             try:
-                chat_id = functions.get_user_chat_id(connection, user.temp)
+                chat_id = functions.get_user_chat_id(user.temp)
                 admin_send_message(message=message.text, chat_id=chat_id)
             except Exception as e:
                 self.bot.reply_to(message, e)
@@ -116,10 +116,10 @@ class AdminBot(Telegram):
             try:
                 connection = db.con_db()
                 # ('username', timestamp, 'role', assets, timeframe, analysis_is)
-                qu = functions.get_user_details(connection, message.text)[0]
-                analysis = functions.get_analysis(connection, qu[5])[0][0] if qu[5] else "No analysis"
-                timeframe = functions.get_timeframe(connection, qu[4])[0][0]
-                coins = functions.get_user_coins(connection, qu[0])
+                qu = functions.get_user_details(message.text)[0]
+                analysis = functions.get_analysis(qu[5])[0][0] if qu[5] else "No analysis"
+                timeframe = functions.get_timeframe(qu[4])[0][0]
+                coins = functions.get_user_coins(qu[0])
                 res = f"Username:{qu[0]}\n" \
                       f"Join at:{qu[1]}\n" \
                       f"Assets:{qu[3]}\n" \

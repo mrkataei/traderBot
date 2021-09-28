@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 22, 2021 at 04:10 PM
+-- Generation Time: Sep 23, 2021 at 10:50 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -29,17 +29,18 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `analysis` (
   `id` int(11) NOT NULL,
-  `name` char(20) NOT NULL
+  `name` char(20) NOT NULL,
+  `description` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `analysis`
 --
 
-INSERT INTO `analysis` (`id`, `name`) VALUES
-(3, 'diamond'),
-(1, 'emerald'),
-(2, 'ruby');
+INSERT INTO `analysis` (`id`, `name`, `description`) VALUES
+(1, 'emerald', 'this signal is work for all coins and have 75% accuracy.'),
+(2, 'ruby', 'this signal works for all coins and have 75% accuracy.'),
+(3, 'diamond', 'this signal works only on btcusdt-4h , etcusdt-4h , bchusdt-4h , adausdt-4h , ethusdt-4h and dogeusdst-30m.\r\naccuracy of signal is 99.9% ');
 
 -- --------------------------------------------------------
 
@@ -174,7 +175,7 @@ CREATE TABLE `indicators_settings` (
 
 INSERT INTO `indicators_settings` (`indicator_id`, `settings`, `id`) VALUES
 (4, 'tenkan:9,kijun:26,senkou:52', 1),
-(1, 'slow:23,sign:20,fast:5,source:close', 2),
+(1, 'slow:23,signal:20,fast:5,source:close', 2),
 (1, 'fast:6,slow:14,signal:20,source:hlc3', 3),
 (1, 'fast:9,slow:15,signal:20,source:close', 4),
 (1, 'fast:12,slow:18,signal:20,source:hlc3', 7),
@@ -214,7 +215,6 @@ CREATE TABLE `recommendations` (
   `timestmp` timestamp NOT NULL DEFAULT current_timestamp(),
   `id` int(12) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 --
 -- Table structure for table `score_analysis`
@@ -305,7 +305,16 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`username`, `chat_id`, `password`, `salt`, `role`, `question_id`, `question_answer`, `timestamp`) VALUES
 ('arman', '417318078', '6103082b2ee92c048eb1bed6e03366d1de0ee064f57982806861644270c97c59ec83fdf21853830d7fe4a110cd670d1dd15e0318814d25879e9d71a471e7a438', 12206, 'user', 2, 'zahedan', '2021-09-15 10:24:18'),
-('kouroshataei', '1210507821', '93a898fa890e0a1d6370ce6715f241d08d83ffda7a7e4150feb91cff607683538d9ee7a45047a39354a21c9e9b1daf56b552d1966650062f23efa3a58a018a86', 89640, 'admin', 1, 'qoli', '2021-08-02 09:31:33');
+('Ava', '113564501', 'eed8e1dbac644dbc52e12da83fa59119f3d18153a108f80dc32ba035beb4d28e3717da40990379d50b5e43d16f100414ea74d5f397f398962469157ffee2e207', 73278, 'user', 2, 'Mshd', '2021-09-02 10:02:00'),
+('Fr4ys', '69964482', 'ad08ed46a240e129d3f213f749b13b2ff356653b5290bd4d0b807a96244a3f5409470caf7d49c92a424a92e5f79a402e6fc41fcf67b7f887eae41e1efb24e060', 53538, 'user', 1, 'Mmd', '2021-09-07 11:24:44'),
+('jickab', '366781788', 'd8fc58e751507d7e4789a4523750461bf5514159ad9e2edeafcd49153a403c53c070652eb97fdfcd4c52073a3a6c81d048c8a0e60836dd25feb3b7b9ef29d600', 13676, 'user', 2, 'Mashhad', '2021-08-22 05:21:05'),
+('kami', '912323333', '0c57d3645ebdd09eee26773b3115f24db74d26d1e1d9f81be1f6481259ca6bed4de3c0df3fa9066a62a1e557dbba0b5100db1e40fb58d24d5bce6ddcab22126e', 45796, 'user', 2, 'mashhad', '2021-09-03 00:36:16'),
+('kourosh', '1079329555', 'd008020c484be3d2f97a1b5af3a384cdb8f6ab9bd44f6f1b4028302019b88fd4757bef6ffcb2a9ca62f27c24fddb9c1e818488a4b165fa2f0735a02f012e1d4e', 66640, 'user', 2, 'mashhad', '2021-08-22 03:19:41'),
+('kourosh2', '1349338275', 'dbb162b99efd6a857be21f6484f3d8ee56fb63805c21171ad9bcb73593d68b5131cd8269a9ea6761febcc897c787d440728acdc88f17eefee62605ae51a0f72a', 23490, 'user', 2, 'ferdos', '2021-08-23 05:55:50'),
+('kourosh75', '1978824576', '6bf79110d8e1b6a7687ca1ce6eb863ce5e8279eff7fc4fb9374987f8e8c27414d7bf85a158162a7325383f404dd485aa138d64b2584e253c5cb785d50191a9fc', 89058, 'user', 2, 'mashhad', '2021-09-13 15:21:36'),
+('kouroshataei', '1210507821', '93a898fa890e0a1d6370ce6715f241d08d83ffda7a7e4150feb91cff607683538d9ee7a45047a39354a21c9e9b1daf56b552d1966650062f23efa3a58a018a86', 89640, 'admin', 1, 'qoli', '2021-08-02 09:31:33'),
+('Mhrohany', '102316762', 'bf12e257954da99f0d2a70350e643510acbb08c90613365d6e0e654b70e00fe04bdf016ce21265f474a4874e4a046b8d2dcf7d851b141898fee3d44aaa530011', 73278, 'user', 2, 'Mashhad', '2021-09-02 10:09:57'),
+('shrm', '100724824', '2baf1170a54994e08d405ac1e15c794f06813bd5e00083565af990aa503238380746154b4226439bbb8725a130d7ed19ef82682bd8828c22ca3e763a4536a64a', 13676, 'user', 1, 'A', '2021-08-22 04:56:14');
 
 -- --------------------------------------------------------
 
@@ -345,7 +354,16 @@ CREATE TABLE `user_timeframe` (
 
 INSERT INTO `user_timeframe` (`id`, `user`, `timeframe_id`) VALUES
 (1, 'kouroshataei', 1),
-(41, 'arman', 1);
+(2, 'arman', 1),
+(3, 'kourosh', 3),
+(4, 'shrm', 1),
+(5, 'jickab', 3),
+(6, 'kourosh2', 4),
+(7, 'Ava', 3),
+(8, 'Mhrohany', 1),
+(9, 'kami', 4),
+(10, 'Fr4ys', 1),
+(11, 'kourosh75', 1);
 
 -- --------------------------------------------------------
 
@@ -522,7 +540,7 @@ ALTER TABLE `indicators_settings`
 -- AUTO_INCREMENT for table `recommendations`
 --
 ALTER TABLE `recommendations`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
 
 --
 -- AUTO_INCREMENT for table `timeframes`
@@ -540,7 +558,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `user_analysis`
 --
 ALTER TABLE `user_analysis`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `user_timeframe`

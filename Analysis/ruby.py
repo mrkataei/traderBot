@@ -35,7 +35,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     last_macd = np.array(macd_df.tail(2))
     close = float(last_macd[1, 3])
     try:
-        query = functions.get_recommendations(connection, coin_id=coin_id, analysis_id=2, timeframe=timeframe_id)
+        query = functions.get_recommendations(analysis_id=2, timeframe=timeframe_id, coin_id=coin_id)
         old_position = query[0][2]
         old_price = query[0][4]
         # when no rows in database
@@ -49,25 +49,17 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         result = True, "medium"
         target_price = close * gain + close if result[0] else -close * gain + close
         position = 'buy' if result[0] else 'sell'
-        functions.set_recommendation(db_connection=connection, analysis_id=2,
-                                     coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                     target_price=target_price, current_price=close,
-                                     cost_price=cost, risk=result[1])
-        broadcast_messages(connection=connection, analysis_id=2,
-                           coin_id=coin_id, current_price=close,
-                           target_price=target_price, risk=result[1], position=position,
-                           timeframe_id=timeframe_id)
+        functions.set_recommendation(analysis_id=2, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
+                                     target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
+        broadcast_messages(coin_id=coin_id, analysis_id=2, timeframe_id=timeframe_id, position=position,
+                           target_price=target_price, current_price=close, risk=result[1])
     elif float(last_macd[1, 1]) < np.array(macd_df.tail(delay)["histogram"])[0] and \
             old_price < close and old_position == "buy":
         result = False, "medium"
         target_price = close * gain + close if result[0] else -close * gain + close
         position = 'buy' if result[0] else 'sell'
-        functions.set_recommendation(db_connection=connection, analysis_id=2,
-                                     coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                     target_price=target_price, current_price=close,
-                                     cost_price=cost, risk=result[1])
-        broadcast_messages(connection=connection, analysis_id=2,
-                           coin_id=coin_id, current_price=close,
-                           target_price=target_price, risk=result[1], position=position,
-                           timeframe_id=timeframe_id)
+        functions.set_recommendation(analysis_id=2, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
+                                     target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
+        broadcast_messages(coin_id=coin_id, analysis_id=2, timeframe_id=timeframe_id, position=position,
+                           target_price=target_price, current_price=close, risk=result[1])
 

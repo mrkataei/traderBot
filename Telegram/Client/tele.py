@@ -14,7 +14,7 @@ import telebot
 from telebot import apihelper
 from time import sleep
 from Auth import register, reset_password
-from Inc import db, functions
+from Inc import functions
 import numpy as np
 from binance.client import Client
 from Telegram.Client import candle
@@ -25,16 +25,10 @@ from Analysis.tradingview import tradingview_recommendations as tr
 
 apihelper.ENABLE_MIDDLEWARE = True
 
-# from decouple import config
-# statics
-# API_KEY = config('API_KEY', default='')
-
-# API_KEY = config('API_KEY')
 # @testkourosh2bot -> address // use this bot for test your code
 # API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 
 client = Client()
-connection = db.con_db()
 
 
 class ClientBot(Telegram):
@@ -111,15 +105,16 @@ class ClientBot(Telegram):
             elif call.data == "login_chat_id":
                 self.easy_login(message=call.message)
             elif call.data == "reg":
-                if not functions.check_chat_id(connection, call.message.chat.id):
+                if not functions.check_chat_id(call.message.chat.id):
                     # create object from user and store in our dictionary with chat_id key value
-                    user = Register(call.message.chat.id)
-                    self.reg_dict[call.message.chat.id] = user
+                    if call.message.chat.id not in self.reg_dict:
+                        user = Register(call.message.chat.id)
+                        self.reg_dict[call.message.chat.id] = user
                     self.bot.reply_to(call.message, trans('C_enter_username'))
                     # handle next step message user enter after sign up
                     self.bot.register_next_step_handler(call.message, callback=process_reg_step_1)
                 else:
-                    username = functions.get_user_with_chat_id(connection, call.message.chat.id)
+                    username = functions.get_user_with_chat_id(call.message.chat.id)
                     self.bot.reply_to(call.message,
                                       trans('C_already_have_account') + f" {username} \n" + trans('C_please_start'))
                     self.user_dict[call.message.chat.id].session = False
@@ -160,7 +155,7 @@ class ClientBot(Telegram):
                 coin = self.coins_list[np.where(self.coins_list[:, 1] == call.data)][0][0]
                 # for coins in coins[:1]:
                 user = self.user_dict[call.message.chat.id]
-                if not functions.set_coin(connection, user.username, coin, user.watchlist[0][2])[0]:
+                if not functions.set_coin(user.username, coin, user.watchlist[0][2])[0]:
                     self.bot.reply_to(call.message, trans('C_coin_already_exist'))
                 else:
                     self.bot.reply_to(call.message, trans('C_done') + "\n"
@@ -171,20 +166,20 @@ class ClientBot(Telegram):
                 time = self.timeframes_list[np.where(self.timeframes_list[:, 1] == call.data)][0][1]
                 # for coins in coins[:1]:
                 user = self.user_dict[call.message.chat.id]
-                functions.update_timeframe(connection, user.username, time_id)
+                functions.update_timeframe(user.username, time_id)
                 self.bot.reply_to(call.message, trans('C_done') + trans('C_timeframe_changed') + time)
 
             elif call.data in self.analysis_list[:, 1]:
                 user = self.user_dict[call.message.chat.id]
                 analysis_id = self.analysis_list[np.where(self.analysis_list[:, 1] == call.data)][0][0]
-                functions.set_user_analysis(connection, user.username, int(analysis_id))
-                description = functions.get_description_analysis(connection, int(analysis_id))
+                functions.set_user_analysis(user.username, int(analysis_id))
+                description = functions.get_description_analysis(int(analysis_id))
                 self.bot.reply_to(call.message,
                                   trans('C_done') + "\n" + trans('C_now') + call.data + trans('C_working_for_you')
                                   + "\n" + "description:\n" + description)
             elif call.data == "remove_watchlist":
                 user = self.user_dict[call.message.chat.id]
-                user.watchlist = functions.get_user_watchlist(connection, user.username)
+                user.watchlist = functions.get_user_watchlist(user.username)
                 if user.watchlist:
                     watchlist_remove = telebot.types.InlineKeyboardMarkup()
                     # for watch in user.watchlist :
@@ -198,14 +193,14 @@ class ClientBot(Telegram):
                     self.bot.reply_to(call.message, trans('C_null_watchlist'))
             elif call.data == "watchlist_remove_step2":
                 user = self.user_dict[call.message.chat.id]
-                functions.delete_watchlist(connection, user.username, user.temp_watch)
+                functions.delete_watchlist(user.username, user.temp_watch)
                 self.bot.reply_to(call.message, trans('C_done') + '\n' + trans('C_create_watchlist'))
 
             elif call.data == "remove_coins":
                 user = self.user_dict[call.message.chat.id]
-                user.watchlist = functions.get_user_watchlist(connection, user.username)
+                user.watchlist = functions.get_user_watchlist(user.username)
                 if user.watchlist:
-                    if functions.get_empty_coins_remain(connection, user.username, user.watchlist[0][2]) == 2:
+                    if functions.get_empty_coins_remain(user.username, user.watchlist[0][2]) == 2:
                         self.bot.reply_to(call.message, trans('C_null_coin'))
                     else:
                         watchlist_remove = telebot.types.InlineKeyboardMarkup()
@@ -220,9 +215,9 @@ class ClientBot(Telegram):
                                       trans('C_create_watchlist_first') + '\n' + trans('C_create_watchlist'))
             elif call.data == "coins_remove_step2":
                 user = self.user_dict[call.message.chat.id]
-                user.watchlist = functions.get_user_watchlist(connection, user.username)
+                user.watchlist = functions.get_user_watchlist(user.username)
                 coin_keyboard = telebot.types.InlineKeyboardMarkup()
-                user_coins = functions.get_user_coins(connection, user.username, user.watchlist[0][2])
+                user_coins = functions.get_user_coins(user.username, user.watchlist[0][2])
                 for coin in user_coins:
                     coin_keyboard.add(telebot.types.InlineKeyboardButton(coin, callback_data=coin + " delete_coin"))
                 self.bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_coin'),
@@ -232,17 +227,16 @@ class ClientBot(Telegram):
                 user = self.user_dict[call.message.chat.id]
                 temp = str(call.data).split(" ")
                 coin = self.coins_list[np.where(self.coins_list[:, 1] == temp[0])][0][0]
-                functions.set_null_coin_user(connection, user.username, coin)
+                functions.set_null_coin_user(user.username, coin)
                 self.bot.reply_to(call.message, trans('C_done') + '\n' + trans('C_add_coins'))
 
             elif "remove_analysis" in call.data:
                 user = self.user_dict[call.message.chat.id]
                 analysis_keyboard = telebot.types.InlineKeyboardMarkup()
-                analysis = functions.get_user_analysis(connection, user.username)
+                analysis = functions.get_user_analysis(user.username)
                 if analysis:
                     for anal in analysis:
-                        analysis_keyboard.add(telebot.types.InlineKeyboardButton(functions.get_analysis(connection,
-                                                                                                        anal[2])[0][0],
+                        analysis_keyboard.add(telebot.types.InlineKeyboardButton(functions.get_analysis(anal[2])[0][0],
                                                                                  callback_data="analysis_delete_" +
                                                                                                str(anal[2])))
                     self.bot.send_message(chat_id=call.message.chat.id, text=trans('C_select_analysis'),
@@ -253,8 +247,7 @@ class ClientBot(Telegram):
             elif "analysis_delete_" in call.data:
                 user = self.user_dict[call.message.chat.id]
                 temp = str(call.data).split('_')
-                functions.delete_analysis(db_connection=connection, username=user.username,
-                                          analysis_id=int(temp[2]))
+                functions.delete_analysis(username=user.username, analysis_id=int(temp[2]))
                 self.bot.send_message(chat_id=call.message.chat.id, text=trans('C_done'))
 
             elif '_tradingview_' in call.data:
@@ -289,7 +282,7 @@ class ClientBot(Telegram):
                 self.bot.register_next_step_handler(msg, process_reg_step_2)
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
-                del self.reg_dict[message.chat.id]
+                self.user_dict[message.chat.id].session = False
                 print(e)
 
         def process_reg_step_2(message):
@@ -302,14 +295,14 @@ class ClientBot(Telegram):
                 self.bot.delete_message(message.chat.id, message.message_id)
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
-                del self.reg_dict[message.chat.id]
+                self.user_dict[message.chat.id].session = False
                 print(e)
 
         def process_reg_step_3(message):
             try:
                 user = self.reg_dict[message.chat.id]
                 user.password2 = message.text
-                question_dict = functions.get_security_questions(connection)
+                question_dict = functions.get_security_questions()
                 self.bot.delete_message(message.chat.id, message.message_id)
                 # select question
                 questions = telebot.types.InlineKeyboardMarkup()
@@ -321,7 +314,7 @@ class ClientBot(Telegram):
                                       reply_markup=questions)
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
-                del self.reg_dict[message.chat.id]
+                self.user_dict[message.chat.id].session = False
                 print(e)
 
         def process_reg_step_4(message):
@@ -329,20 +322,20 @@ class ClientBot(Telegram):
                 user = self.reg_dict[message.chat.id]
                 user.answer = message.text
                 # insert to database
-                res = register.register(db_connection=connection, username=user.username, chat_id=user.chat_id,
-                                        password=user.password1, password2=user.password2,
-                                        question_id=user.security_question_id, answer=user.answer)
+                res = register.register(username=user.username, chat_id=user.chat_id, password=user.password1,
+                                        password2=user.password2, question_id=user.security_question_id,
+                                        answer=user.answer)
                 # initial default timeframe 1min
-                functions.set_timeframe(connection, user.username, 1)
+                functions.set_timeframe(user.username, 1)
                 # init first amount bank
-                functions.set_amount_bank_user(connection, user.username, 10)
+                functions.set_amount_bank_user(user.username, 10)
                 self.bot.reply_to(message, res + "\n" + trans('C_please_start'))
                 self.user_dict[message.chat.id].session = False
                 self.bot.delete_message(message.chat.id, message.message_id)
                 del self.reg_dict[message.chat.id]
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
-                del self.reg_dict[message.chat.id]
+                self.user_dict[message.chat.id].session = False
                 print(e)
 
         """
@@ -354,11 +347,11 @@ class ClientBot(Telegram):
                 user = self.reg_dict[message.chat.id]
                 user.username = message.text
                 # check user exists if dont handle this next step crashed ->get_user_security_id handled this
-                q_id = functions.get_user_security_id(connection, user.username)
-                question = functions.get_security_questions(connection, q_id)
+                q_id = functions.get_user_security_id(user.username)
+                question = functions.get_security_questions(q_id)
                 if q_id:
                     user.security_question_id = q_id
-                    user.security_question = functions.get_security_questions(connection, q_id)
+                    user.security_question = functions.get_security_questions(q_id)
                     msg = self.bot.reply_to(message, question[0][1])
                     self.bot.register_next_step_handler(msg, process_forget_step_2)
                 else:
@@ -370,7 +363,6 @@ class ClientBot(Telegram):
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
                 self.user_dict[message.chat.id].session = False
-                del self.reg_dict[message.chat.id]
                 print(e)
 
         def process_forget_step_2(message):
@@ -381,7 +373,7 @@ class ClientBot(Telegram):
                 self.bot.register_next_step_handler(msg, process_forget_step_3)
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
-                del self.reg_dict[message.chat.id]
+                self.user_dict[message.chat.id].session = False
                 print(e)
 
         def process_forget_step_3(message):
@@ -393,7 +385,7 @@ class ClientBot(Telegram):
                 self.bot.register_next_step_handler(msg, process_forget_step_4)
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
-                del self.reg_dict[message.chat.id]
+                self.user_dict[message.chat.id].session = False
                 print(e)
 
         def process_forget_step_4(message):
@@ -401,16 +393,16 @@ class ClientBot(Telegram):
                 user = self.reg_dict[message.chat.id]
                 user.password2 = message.text
                 # reset_password function handle all error about passwords and wrong answer
-                res = reset_password.reset_password(db_connection=connection, username=user.username,
-                                                    answer=user.answer,
+                res = reset_password.reset_password(username=user.username, answer=user.answer,
                                                     new_password=user.password1, new_password2=user.password2)
                 self.bot.reply_to(message, res)
                 self.bot.delete_message(message.chat.id, message.message_id)
                 # after reset password and update database we dont need this object
+                self.user_dict[message.chat.id].session = False
                 del self.reg_dict[message.chat.id]
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
-                del self.reg_dict[message.chat.id]
+                self.user_dict[message.chat.id].session = False
                 print(e)
 
         """
@@ -421,8 +413,7 @@ class ClientBot(Telegram):
         def new_watchlist(message):
             if self.check_login(message):
                 user = self.user_dict[message.chat.id]
-                # if len(functions.get_user_watchlist(connection , user.username)) < 1:
-                if not functions.get_user_watchlist(connection, user.username):
+                if not functions.get_user_watchlist(user.username):
                     self.bot.reply_to(message, trans('C_enter_watchlist_name'))
                     self.bot.register_next_step_handler(message, process_new_watch)
                 else:
@@ -433,7 +424,7 @@ class ClientBot(Telegram):
                 # fetch object
                 user = self.user_dict[message.chat.id]
                 for create in range(0, 4):
-                    functions.create_watchlist(connection, user.username, message.text)
+                    functions.create_watchlist(user.username, message.text)
                 user.watchlist = message.text
                 self.bot.reply_to(message, trans('C_good') + "\n" + trans('C_add_coins'))
             except Exception as e:
@@ -444,9 +435,9 @@ class ClientBot(Telegram):
         def add_coin(message):
             if self.check_login(message):
                 user = self.user_dict[message.chat.id]
-                user.watchlist = functions.get_user_watchlist(connection, user.username)
+                user.watchlist = functions.get_user_watchlist(user.username)
                 if user.watchlist:
-                    if functions.get_empty_coins_remain(connection, user.username, user.watchlist[0][2]) != 0:
+                    if functions.get_empty_coins_remain(user.username, user.watchlist[0][2]) != 0:
                         watchlist = telebot.types.InlineKeyboardMarkup()
                         watchlist.add(telebot.types.InlineKeyboardButton(user.watchlist[0][2],
                                                                          callback_data='watchlist'))
@@ -478,14 +469,14 @@ class ClientBot(Telegram):
         def show_details(message):
             if self.check_login(message):
                 user = self.user_dict[message.chat.id]
-                user.watchlist = functions.get_user_watchlist(connection, user.username)
+                user.watchlist = functions.get_user_watchlist(user.username)
                 if user.watchlist:
-                    amount = functions.get_amount_bank_user(connection, user.username)
-                    timeframe = functions.get_user_timeframe(connection, user.username)
+                    amount = functions.get_amount_bank_user(user.username)
+                    timeframe = functions.get_user_timeframe(user.username)
                     coins = ""
                     for watchlist in user.watchlist:
                         if watchlist[1]:
-                            coin = str(functions.get_coin_name(connection, int(watchlist[1])))
+                            coin = str(functions.get_coin_name(int(watchlist[1])))
                             percent = candle.get_percent_candle(coin, timeframe)
                             percent = str(percent) + " 🔴" if percent < 0 else str(percent) + " 🟢"
                             coins += coin + " %" + percent + "\n"
@@ -501,8 +492,8 @@ class ClientBot(Telegram):
         def show_candle(message):
             if self.check_login(message):
                 user = self.user_dict[message.chat.id]
-                coins = functions.get_user_coins(connection, user.username)
-                timeframe = functions.get_user_timeframe(connection, user.username)
+                coins = functions.get_user_coins(user.username)
+                timeframe = functions.get_user_timeframe(user.username)
                 for coin in coins:
                     res = candle.candle_details_to_string(coin, timeframe)
                     self.bot.reply_to(message, res)
@@ -511,8 +502,8 @@ class ClientBot(Telegram):
         def show_recommendation(message):
             if self.check_login(message):
                 user = self.user_dict[message.chat.id]
-                coins = functions.get_user_coins(connection, user.username)
-                timeframe = functions.get_user_timeframe(connection, user.username)
+                coins = functions.get_user_coins(user.username)
+                timeframe = functions.get_user_timeframe(user.username)
                 user.timeframe = timeframe
                 for coin in coins:
                     recommendation = telebot.types.InlineKeyboardMarkup()
@@ -535,7 +526,7 @@ class ClientBot(Telegram):
             if self.check_login(message):
                 # if user dont have an analysis
                 user = self.user_dict[message.chat.id]
-                analysis = functions.get_user_analysis_name(connection, user.username)
+                analysis = functions.get_user_analysis_name(user.username)
                 if not analysis:
                     analysis_keyboard = telebot.types.InlineKeyboardMarkup()
                     for index, analyze in self.analysis_list:
@@ -578,7 +569,7 @@ class ClientBot(Telegram):
                 print(e)
 
         @self.bot.message_handler(commands=['guide'])
-        def help_me(message):
+        def guide_me(message):
             try:
                 self.bot.reply_to(message, trans('C_guide'))
 

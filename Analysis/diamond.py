@@ -128,15 +128,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         last_data = diamond_tools.get_last_data(connection, start_position=False)
         old_position = last_data[0]
         old_price = last_data[1]
-        # try:
-        #     query = functions.get_recommendations(connection, coin_id=coin_id, analysis_id=3, timeframe=timeframe_id)
-        #     old_position = query[0][2]
-        #     old_price = query[0][4]
-        #     # when no rows in database
-        # except Exception as e:
-        #     old_position = 'sell'
-        #     old_price = 0
-        #     print(e)
+
 
         buy_counter = 0
         if old_position == "sell":
@@ -161,17 +153,8 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
             else:
                 result = True, "high"
             # add signal to database
+
             diamond_tools.signal_process(connection, close=close, gain=gain, result=result, cost=cost)
-            # target_price = close * gain + close if result[0] else -close * gain + close
-            # position = 'buy' if result[0] else 'sell'
-            # functions.set_recommendation(db_connection=connection, analysis_id=3,
-            #                              coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-            #                              target_price=target_price, current_price=close,
-            #                              cost_price=cost, risk=result[1])
-            # broadcast_messages(connection=connection, analysis_id=3,
-            #                    coin_id=coin_id, current_price=close,
-            #                    target_price=target_price, risk=result[1], position=position,
-            #                    timeframe_id=timeframe_id)
 
         sell_counter = 0
         if old_position == "buy" and old_price < close:
@@ -197,13 +180,3 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
                 result = False, "high"
 
             diamond_tools.signal_process(connection, close=close, gain=gain, result=result, cost=cost)
-            # position = 'buy' if result[0] else 'sell'
-            # functions.set_recommendation(db_connection=connection, analysis_id=3,
-            #                              coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-            #                              target_price=target_price, current_price=close,
-            #                              cost_price=cost, risk=result[1])
-            # broadcast_messages(connection=connection, analysis_id=3,
-            #                    coin_id=coin_id, current_price=close,
-            #                    target_price=target_price, risk=result[1], position=position,
-            #                    timeframe_id=timeframe_id)
-
