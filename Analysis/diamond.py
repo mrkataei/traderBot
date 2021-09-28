@@ -27,6 +27,7 @@ import pandas_ta as ta
 import numpy as np
 from Inc import db, functions
 from Telegram.Client.message import broadcast_messages
+from Libraries.tools import Tools
 
 
 def get_source(data: pd.DataFrame, source: str = 'close'):
@@ -63,6 +64,8 @@ valid_coins_and_times = {
 
 
 def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict):
+    diamond_tools = Tools(analysis_id=3, timeframe_id=timeframe_id, coin_id=coin_id)
+
     if coin_id in valid_coins_and_times['coins'] \
             and timeframe_id in valid_coins_and_times['coins'][coin_id]['timeframes']:
         connection = db.con_db()
@@ -122,15 +125,10 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         last_stoch_rsi = np.array(stoch_rsi_df.tail(2))
 
         # check last signal of analysis on db
-        try:
-            query = functions.get_recommendations(analysis_id=3, timeframe=timeframe_id, coin_id=coin_id)
-            old_position = query[0][2]
-            old_price = query[0][4]
-            # when no rows in database
-        except Exception as e:
-            old_position = 'sell'
-            old_price = 0
-            print(e)
+        last_data = diamond_tools.get_last_data(connection, start_position=False)
+        old_position = last_data[0]
+        old_price = last_data[1]
+
 
         buy_counter = 0
         if old_position == "sell":
@@ -141,26 +139,22 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
             if last_rsi[0] < rsi_oversell:
                 buy_counter += 1
             # check crossOver
-            if cross_over(last_stoch_rsi[:, 0], last_stoch_rsi[1, 1]):
+            if diamond_tools.cross_over(last_stoch_rsi[:, 0], last_stoch_rsi[1, 1]):
                 buy_counter += 1
             # check macd < 0 and macd > macd[1]
             if last_macd[0, 0] < last_macd[1, 0] < 0:
                 buy_counter += 1
         # buy signal operation
         if buy_counter > 3:
+
             # calculate risk
             if buy_counter == 4:
                 result = True, "medium"
             else:
                 result = True, "high"
             # add signal to database
-            target_price = close * gain + close if result[0] else -close * gain + close
-            position = 'buy' if result[0] else 'sell'
-            functions.set_recommendation(analysis_id=3, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                         target_price=target_price, current_price=close, cost_price=cost,
-                                         risk=result[1])
-            broadcast_messages(coin_id=coin_id, analysis_id=3, timeframe_id=timeframe_id, position=position,
-                               target_price=target_price, current_price=close, risk=result[1])
+
+            diamond_tools.signal_process(connection, close=close, gain=gain, result=result, cost=cost)
 
         sell_counter = 0
         if old_position == "buy" and old_price < close:
@@ -171,7 +165,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
             if last_rsi[0] < rsi_overbuy:
                 sell_counter += 1
             # check crossunder
-            if cross_under(last_stoch_rsi[:, 0], last_stoch_rsi[1, 1]):
+            if diamond_tools.cross_under(last_stoch_rsi[:, 0], last_stoch_rsi[1, 1]):
                 sell_counter += 1
             # macd > 0 and macd < macd[1]
             if 0 < last_macd[1, 0] < last_macd[0, 0]:
@@ -179,14 +173,10 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
 
         # sell signal operation
         if sell_counter > 3:
+
             if buy_counter == 4:
                 result = False, "medium"
             else:
                 result = False, "high"
-            target_price = close * gain + close if result[0] else -close * gain + close
-            position = 'buy' if result[0] else 'sell'
-            functions.set_recommendation(analysis_id=3, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                         target_price=target_price, current_price=close, cost_price=cost,
-                                         risk=result[1])
-            broadcast_messages(coin_id=coin_id, analysis_id=3, timeframe_id=timeframe_id, position=position,
-                               target_price=target_price, current_price=close, risk=result[1])
+
+            diamond_tools.signal_process(connection, close=close, gain=gain, result=result, cost=cost)
