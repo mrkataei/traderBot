@@ -5,7 +5,7 @@ for see details about users and recommendations
 """
 import os
 import telebot
-from Inc import db, functions
+from Inc import functions
 from Account.clients import User
 import numpy as np
 import subprocess
@@ -21,7 +21,6 @@ API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
 class AdminBot(Telegram):
     def __init__(self):
         Telegram.__init__(self, API_KEY=API_KEY)
-        __connection = db.con_db()
         self.admins = np.array(functions.get_admins())
 
     def bot_actions(self):
@@ -53,7 +52,6 @@ class AdminBot(Telegram):
                 user = self.user_dict[call.message.chat.id]
                 msg = user.temp
                 if str(call.data).split('_')[2] == "yes":
-                    connection = db.con_db()
                     chat_ids = np.array(functions.get_chat_ids())
                     admin_broadcast(msg, chat_ids)
                     self.bot.reply_to(call.message, "Done!\nyour message send to all")
@@ -77,7 +75,6 @@ class AdminBot(Telegram):
         @self.bot.message_handler(commands=['users'])
         def show_users(message):
             if self.check_login(message):
-                connection = db.con_db()
                 usernames = ''
                 users = np.array(functions.get_usernames())
                 for index, user in enumerate(users, start=1):
@@ -99,7 +96,6 @@ class AdminBot(Telegram):
 
         def process_message_to_user_step2(message):
             user = self.user_dict[message.chat.id]
-            connection = db.con_db()
             try:
                 chat_id = functions.get_user_chat_id(user.temp)
                 admin_send_message(message=message.text, chat_id=chat_id)
@@ -114,7 +110,6 @@ class AdminBot(Telegram):
 
         def process_user_details(message):
             try:
-                connection = db.con_db()
                 # ('username', timestamp, 'role', assets, timeframe, analysis_is)
                 qu = functions.get_user_details(message.text)[0]
                 analysis = functions.get_analysis(qu[5])[0][0] if qu[5] else "No analysis"
