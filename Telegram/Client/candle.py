@@ -7,34 +7,34 @@ from binance.client import Client
 import pandas as pd
 from Libraries.definitions import *
 
-client = Client()
+_client = Client()
 
 
 def get_interval_client(timeframe: str):
     return {
-        '1min': client.KLINE_INTERVAL_1MINUTE,
-        '3min': client.KLINE_INTERVAL_3MINUTE,
-        '5min': client.KLINE_INTERVAL_5MINUTE,
-        '15min': client.KLINE_INTERVAL_15MINUTE,
-        '30min': client.KLINE_INTERVAL_30MINUTE,
-        '1hour': client.KLINE_INTERVAL_1HOUR,
-        '2hour': client.KLINE_INTERVAL_2HOUR,
-        '4hour': client.KLINE_INTERVAL_4HOUR,
-        '6hour': client.KLINE_INTERVAL_6HOUR,
-        '8hour': client.KLINE_INTERVAL_8HOUR,
-        '12hour': client.KLINE_INTERVAL_12HOUR,
-        '1day': client.KLINE_INTERVAL_1DAY,
-        '3day': client.KLINE_INTERVAL_3DAY,
-        'weekly': client.KLINE_INTERVAL_1WEEK,
-        'monthly': client.KLINE_INTERVAL_1MONTH,
+        '1min': _client.KLINE_INTERVAL_1MINUTE,
+        '3min': _client.KLINE_INTERVAL_3MINUTE,
+        '5min': _client.KLINE_INTERVAL_5MINUTE,
+        '15min': _client.KLINE_INTERVAL_15MINUTE,
+        '30min': _client.KLINE_INTERVAL_30MINUTE,
+        '1hour': _client.KLINE_INTERVAL_1HOUR,
+        '2hour': _client.KLINE_INTERVAL_2HOUR,
+        '4hour': _client.KLINE_INTERVAL_4HOUR,
+        '6hour': _client.KLINE_INTERVAL_6HOUR,
+        '8hour': _client.KLINE_INTERVAL_8HOUR,
+        '12hour': _client.KLINE_INTERVAL_12HOUR,
+        '1day': _client.KLINE_INTERVAL_1DAY,
+        '3day': _client.KLINE_INTERVAL_3DAY,
+        'weekly': _client.KLINE_INTERVAL_1WEEK,
+        'monthly': _client.KLINE_INTERVAL_1MONTH,
 
-    }.get(timeframe, client.KLINE_INTERVAL_1MINUTE)
+    }.get(timeframe, _client.KLINE_INTERVAL_1MINUTE)
 
 
 def get_candle_details(symbol: str, timeframe: str):
     symbol = symbol.upper()
     timeframe = get_interval_client(timeframe)
-    data = pd.DataFrame(client.get_klines(symbol=symbol, interval=timeframe, limit=1)).values
+    data = pd.DataFrame(_client.get_klines(symbol=symbol, interval=timeframe, limit=1)).values
     return data
 
 

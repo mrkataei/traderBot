@@ -11,12 +11,11 @@ security question and question id and answer for insert to database after insert
 avoid memory leak ,
 """
 import telebot
-from telebot import apihelper
+import numpy as np
 from time import sleep
+from telebot import apihelper
 from Auth import register, reset_password
 from Inc import functions
-import numpy as np
-from binance.client import Client
 from Telegram.Client import candle
 from Account.clients import User, Register
 from Libraries.definitions import *
@@ -27,8 +26,6 @@ apihelper.ENABLE_MIDDLEWARE = True
 
 # @testkourosh2bot -> address // use this bot for test your code
 # API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
-
-client = Client()
 
 
 class ClientBot(Telegram):

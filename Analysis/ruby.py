@@ -5,9 +5,6 @@ from Inc import db, functions
 from Telegram.Client.message import broadcast_messages
 
 
-# from Telegram import message
-
-
 def cross_over(x, y):
     return True if x[0] < y < x[1] else False
 
@@ -52,7 +49,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         functions.set_recommendation(analysis_id=2, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
                                      target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
         broadcast_messages(coin_id=coin_id, analysis_id=2, timeframe_id=timeframe_id, position=position,
-                           target_price=target_price, current_price=close, risk=result[1])
+                           target_price=target_price, current_price=close, risk=result[1], bot_ins=None)
     elif float(last_macd[1, 1]) < np.array(macd_df.tail(delay)["histogram"])[0] and \
             old_price < close and old_position == "buy":
         result = False, "medium"
@@ -61,5 +58,5 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         functions.set_recommendation(analysis_id=2, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
                                      target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
         broadcast_messages(coin_id=coin_id, analysis_id=2, timeframe_id=timeframe_id, position=position,
-                           target_price=target_price, current_price=close, risk=result[1])
+                           target_price=target_price, current_price=close, risk=result[1], bot_ins=None)
 

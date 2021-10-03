@@ -17,7 +17,7 @@ for insert new signal :
 import pandas as pd
 import pandas_ta as ta
 import numpy as np
-from Inc import functions
+from Inc.functions import get_recommendations, set_recommendation
 from Telegram.Client.message import broadcast_messages
 
 
@@ -34,7 +34,7 @@ def _get_ichimoku(data: pd.DataFrame, tenkan, kijun, senkou):
     return ichimoku, get_future_spans()
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict, bot_ins):
     tenkan = setting['indicators_setting']['ichimoku']['tenkan']
     kijun = setting['indicators_setting']['ichimoku']['kijun']
     senkou = setting['indicators_setting']['ichimoku']['senkou']
@@ -48,7 +48,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     last_ichimoku = np.array(ichimoku.tail(1))[0].astype(float)
     close = float(last_ichimoku[5])
     try:
-        query = functions.get_recommendations(analysis_id=1, timeframe_id=timeframe_id, coin_id=coin_id)
+        query = get_recommendations(analysis_id=1, timeframe_id=timeframe_id, coin_id=coin_id)
         old_position = query[0][2]
         old_risk = query[0][7]
         # when no rows in database
@@ -92,11 +92,11 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     target_price = close * gain + close if result[0] else -close * gain + close
     position = 'buy' if result[0] else 'sell'
     if old_position != position or old_risk != result[1]:
-        functions.set_recommendation(analysis_id=1, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
+        set_recommendation(analysis_id=1, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
                                      target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
         broadcast_messages(coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id, position=position,
-                           target_price=target_price, current_price=close, risk=result[1])
-    # for transaction in future
-    # users = functions.get_user_recommendation(connection, coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id)
-    # for user in users:
-    #     functions.pay_transaction(db_connection=connection ,cost_price=cost ,username=user ,detail="")
+                           target_price=target_price, current_price=close, risk=result[1], bot_ins=bot_ins)
+# for transaction in future
+# users = functions.get_user_recommendation(connection, coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id)
+# for user in users:
+#     functions.pay_transaction(db_connection=connection ,cost_price=cost ,username=user ,detail="")

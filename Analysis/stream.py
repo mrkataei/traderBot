@@ -18,8 +18,16 @@ for insert new signal :
 """
 import asyncio
 import threading
-from Analysis import emerald, diamond
+import telebot
+from Analysis.emerald import signal as emerald
+from Analysis.diamond import signal as diamond
 from Interfaces.stream import Stream, append
+
+# master bot already run on vps dont use this @algowatchbot -> address
+API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
+# @testkourosh2bot -> address // use this bot for test your code
+# API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+_bot_ins = telebot.TeleBot(API_KEY)
 
 
 class StreamIStrategies(Stream):
@@ -37,11 +45,11 @@ class StreamIStrategies(Stream):
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=1)
                     self.data_30min = append(data=self.data_30min.tail(100), symbol=self.symbol,
                                              timeframe="30min", candle=c_30m_data)
-                    emerald.signal(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                   timeframe_id=1, setting=setting_emerald)
+                    emerald(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                            timeframe_id=1, setting=setting_emerald, bot_ins=_bot_ins)
                     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
-                    diamond.signal(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                   timeframe_id=1, setting=setting_diamond)
+                    diamond(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                            timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins)
                     await asyncio.sleep(1790)
 
     async def stream_1hour_candle(self):
@@ -53,8 +61,8 @@ class StreamIStrategies(Stream):
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
                     self.data_1hour = append(data=self.data_1hour.tail(100), symbol=self.symbol,
                                              timeframe="1hour", candle=c_1h_data)
-                    emerald.signal(data=self.data_1hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                   timeframe_id=2, setting=setting_emerald)
+                    emerald(data=self.data_1hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                            timeframe_id=2, setting=setting_emerald, bot_ins=_bot_ins)
                     await asyncio.sleep(3590)
 
     async def stream_4hour_candle(self):
@@ -66,11 +74,11 @@ class StreamIStrategies(Stream):
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
                     self.data_4hour = append(data=self.data_4hour.tail(100), symbol=self.symbol,
                                              timeframe="4hour", candle=c_4h_data)
-                    emerald.signal(data=self.data_4hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                   timeframe_id=3, setting=setting_emerald)
+                    emerald(data=self.data_4hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                            timeframe_id=3, setting=setting_emerald, bot_ins=_bot_ins)
                     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
-                    diamond.signal(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                   timeframe_id=3, setting=setting_diamond)
+                    diamond(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                            timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins)
                     await asyncio.sleep(14390)
 
     async def stream_1day_candle(self):
@@ -82,8 +90,8 @@ class StreamIStrategies(Stream):
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
                     self.data_1day = append(data=self.data_1day.tail(100), symbol=self.symbol,
                                             timeframe="1day", candle=c_1d_data)
-                    emerald.signal(data=self.data_1day, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                                   timeframe_id=4, setting=setting_emerald)
+                    emerald(data=self.data_1day, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                            timeframe_id=4, setting=setting_emerald, bot_ins=_bot_ins)
                     await asyncio.sleep(86390)
 
     def set_cost(self, cost: float):
@@ -93,9 +101,18 @@ class StreamIStrategies(Stream):
         self.gain = gain
 
 
-def run_ichimoku_threads(*symbols: str):
-    for symbol in symbols:
-        ichimoku_symbol = StreamIStrategies(symbol=symbol)
-        btcusdt_thread = threading.Thread(target=ichimoku_symbol.run)
-        btcusdt_thread.daemon = True
-        btcusdt_thread.start()
+class StrategiesThreads:
+    def __init__(self, *symbols: str):
+        self.symbols = symbols
+        self.threads = []
+        for symbol in symbols:
+            self.threads.append(threading.Thread(target=StreamIStrategies(symbol=symbol).run))
+
+    def start_threads(self):
+        for thread in self.threads:
+            thread.daemon = True
+            thread.start()
+
+    def join_threads(self):
+        for thread in self.threads:
+            thread.join()

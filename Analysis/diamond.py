@@ -41,7 +41,7 @@ valid_coins_and_times = {
 }
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict, bot_ins):
     diamond_tools = Tools(analysis_id=3, timeframe_id=timeframe_id, coin_id=coin_id)
 
     if coin_id in valid_coins_and_times['coins'] \
@@ -128,7 +128,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
             else:
                 result = True, "high"
             # add signal to database
-            diamond_tools.signal_process(close=close, gain=gain, result=result, cost=cost)
+            diamond_tools.signal_process(close=close, gain=gain, result=result, cost=cost, bot_ins=bot_ins)
 
         sell_counter = 0
         if old_position == "buy" and old_price < close:
@@ -151,4 +151,4 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
                 result = False, "medium"
             else:
                 result = False, "high"
-            diamond_tools.signal_process(close=close, gain=gain, result=result, cost=cost)
+            diamond_tools.signal_process(close=close, gain=gain, result=result, cost=cost, bot_ins=bot_ins)

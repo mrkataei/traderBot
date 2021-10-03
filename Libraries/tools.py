@@ -1,6 +1,6 @@
 import pandas as pd
 import pandas_ta as ta
-from Inc import functions
+from Inc.functions import get_recommendations, set_recommendation
 from Telegram.Client.message import broadcast_messages
 
 
@@ -36,7 +36,7 @@ class Tools:
         self.coin_id = coin_id
 
     def get_last_data(self, start_position: bool = None):
-        query = functions.get_recommendations(analysis_id=self.analysis_id, timeframe_id=self.timeframe_id,
+        query = get_recommendations(analysis_id=self.analysis_id, timeframe_id=self.timeframe_id,
                                               coin_id=self.coin_id)
         try:
             old_position = query[0][2]
@@ -49,11 +49,11 @@ class Tools:
 
         return old_position, old_price
 
-    def signal_process(self, close: float, gain: float, result: tuple, cost: float):
+    def signal_process(self, close: float, gain: float, result: tuple, cost: float, bot_ins):
         position = 'buy' if result[0] else 'sell'
         tp = target_price(close=close, gain=gain, result=result)
-        functions.set_recommendation(analysis_id=self.analysis_id, coin_id=self.coin_id, timeframe_id=self.timeframe_id,
+        set_recommendation(analysis_id=self.analysis_id, coin_id=self.coin_id, timeframe_id=self.timeframe_id,
                                      position=position, target_price=tp, current_price=close, cost_price=cost,
                                      risk=result[1])
-        broadcast_messages(analysis_id=self.analysis_id, coin_id=self.coin_id, current_price=close,
-                           target_price=tp, risk=result[1], position=position, timeframe_id=self.timeframe_id)
+        broadcast_messages(coin_id=self.coin_id, analysis_id=self.analysis_id, timeframe_id=self.timeframe_id,
+                           position=position, target_price=tp, current_price=close, risk=result[1], bot_ins=bot_ins)

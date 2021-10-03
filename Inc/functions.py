@@ -444,7 +444,6 @@ def set_recommendation(analysis_id: int, coin_id: int, timeframe_id: int, positi
         cursor = connection.cursor()
         cursor.execute(sql, val)
         connection.commit()
-        print('tamam')
     except Error as err:
         return "Something went wrong: {}".format(err)
 
