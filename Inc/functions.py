@@ -705,6 +705,20 @@ def get_analysis_setting(coin_id: int, timeframe_id: int, analysis_id: int):
         return "Something went wrong: {}".format(err)
 
 
+def get_indicator_id(indicator_name: str):
+    try:
+        query = "SELECT id from indicators " \
+                "WHERE name ='{indicator_name}'".format(indicator_name=indicator_name)
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(query)
+        record = cursor.fetchall()[0][0]
+        return record
+
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
 def get_indicator_name_from_indicators_settings(indicator_setting_id: int):
     try:
         query = "SELECT indicator_id from indicators_settings " \
@@ -720,6 +734,18 @@ def get_indicator_name_from_indicators_settings(indicator_setting_id: int):
         return "Something went wrong: {}".format(err)
 
 
+def get_all_indicator_settings():
+    try:
+        query = "SELECT settings,id FROM indicators_settings"
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(query)
+        record = cursor.fetchall()
+        return record
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
 def get_indicator_name(indicator_id: int):
     try:
         query = "SELECT name from indicators WHERE id = {indicator_id}".format(indicator_id=indicator_id)
@@ -729,5 +755,80 @@ def get_indicator_name(indicator_id: int):
         record = cursor.fetchall()
         record = record[0][0]
         return record
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def update_analysis_setting_string(coin_id: int, timeframe_id: int, analysis_id: int, analysis_setting: str):
+    try:
+        query = "UPDATE analysis_setting SET analysis_setting='{analysis_setting}' WHERE coin_id={coin_id} " \
+                "AND timeframe_id={timeframe_id} " \
+                "AND analysis_setting={analysis_id}".format(analysis_setting=analysis_setting,
+                                                            coin_id=coin_id, timeframe_id=timeframe_id,
+                                                            analysis_id=analysis_id)
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(query)
+        connection.commit()
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def check_indicator_setting_exist(indicator_setting: str):
+    records = get_all_indicator_settings()
+    for record in records:
+        if indicator_setting in record[0]:
+            return True, int(record[1])
+
+
+def set_indicator_setting(indicator_id: int, indicator_setting: str):
+    try:
+        sql = "INSERT INTO indicators_settings (indicator_id ,settings ) VALUES (%s, %s )"
+        val = (indicator_id, indicator_setting)
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(sql, val)
+        connection.commit()
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def get_indicator_setting_id(setting: str):
+    try:
+        query = "SELECT id from indicators_settings WHERE settings = '{setting}'".format(setting=setting)
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(query)
+        record = cursor.fetchall()
+        if record:
+            return record[0][0]
+        else:
+            return None
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def update_analysis_setting_indicator_id(coin_id: int, timeframe_id: int, analysis_id: int, settings: dict):
+    indicators_id_exist = ''
+    for indicator in settings:
+        res = check_indicator_setting_exist(settings[indicator])
+        if res:
+            indicators_id_exist += str(res[1]) + ','
+        else:
+            indicator_id = get_indicator_id(indicator)
+            set_indicator_setting(indicator_id=indicator_id, indicator_setting=settings[indicator])
+            indicators_id_exist += str(get_indicator_setting_id(settings[indicator])) + ','
+    try:
+
+        indicators_id_exist = indicators_id_exist.rstrip(indicators_id_exist[-1])
+        query = "UPDATE analysis_setting SET indicator_setting_id='{indicator_setting_id}' WHERE coin_id={coin_id} " \
+                "AND timeframe_id={timeframe_id} " \
+                "AND analysis_id={analysis_id}".format(indicator_setting_id=indicators_id_exist,
+                                                            coin_id=coin_id, timeframe_id=timeframe_id,
+                                                            analysis_id=analysis_id)
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(query)
+        connection.commit()
     except Error as err:
         return "Something went wrong: {}".format(err)
