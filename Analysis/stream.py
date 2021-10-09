@@ -22,12 +22,23 @@ import telebot
 from Analysis.emerald import signal as emerald
 from Analysis.diamond import signal as diamond
 from Interfaces.stream import Stream, append
+from binance import BinanceSocketManager
+from time import sleep
 
 # master bot already run on vps dont use this @algowatchbot -> address
-API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
+# API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
 # @testkourosh2bot -> address // use this bot for test your code
-# API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 _bot_ins = telebot.TeleBot(API_KEY)
+
+
+def check_connection(socket):
+    try:
+        socket.kline_socket(symbol='BTCUSDT', interval='1m')
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 class StreamIStrategies(Stream):
@@ -36,10 +47,17 @@ class StreamIStrategies(Stream):
         self.cost = cost
         self.gain = gain
 
+    def __del__(self):
+        print('deleted')
+
     async def stream_30min_candle(self):
-        candle_30min = self.socket.kline_socket(symbol=self.symbol, interval='30m')
+        candle_30min = self.socket.kline_socket(symbol=self.symbol, interval='1m')
         async with candle_30min:
             while True:
+                while not check_connection(self.socket):
+                    await self.set_client_socket()
+                    sleep(20)
+
                 c_30m_data = await candle_30min.recv()
                 if c_30m_data['k']['x']:
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=1)
@@ -50,12 +68,14 @@ class StreamIStrategies(Stream):
                     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
                     diamond(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                             timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins)
-                    await asyncio.sleep(1790)
+                    await asyncio.sleep(58)
 
     async def stream_1hour_candle(self):
-        candle_1hour = self.socket.kline_socket(symbol=self.symbol, interval='1h')
+        candle_1hour = self.socket.kline_socket(symbol=self.symbol, interval='3m')
         async with candle_1hour:
             while True:
+                if not check_connection(self.socket):
+                    await self.set_client_socket()
                 c_1h_data = await candle_1hour.recv()
                 if c_1h_data['k']['x']:
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
@@ -63,12 +83,14 @@ class StreamIStrategies(Stream):
                                              timeframe="1hour", candle=c_1h_data)
                     emerald(data=self.data_1hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                             timeframe_id=2, setting=setting_emerald, bot_ins=_bot_ins)
-                    await asyncio.sleep(3590)
+                    await asyncio.sleep(178)
 
     async def stream_4hour_candle(self):
-        candle_4hour = self.socket.kline_socket(symbol=self.symbol, interval='4h')
+        candle_4hour = self.socket.kline_socket(symbol=self.symbol, interval='5m')
         async with candle_4hour:
             while True:
+                if not check_connection(self.socket):
+                    await self.set_client_socket()
                 c_4h_data = await candle_4hour.recv()
                 if c_4h_data['k']['x']:
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
@@ -79,12 +101,14 @@ class StreamIStrategies(Stream):
                     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
                     diamond(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                             timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins)
-                    await asyncio.sleep(14390)
+                    await asyncio.sleep(298)
 
     async def stream_1day_candle(self):
-        candle_1day = self.socket.kline_socket(symbol=self.symbol, interval='1d')
+        candle_1day = self.socket.kline_socket(symbol=self.symbol, interval='15m')
         async with candle_1day:
             while True:
+                if not check_connection(self.socket):
+                    await self.set_client_socket()
                 c_1d_data = await candle_1day.recv()
                 if c_1d_data['k']['x']:
                     setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
@@ -92,7 +116,7 @@ class StreamIStrategies(Stream):
                                             timeframe="1day", candle=c_1d_data)
                     emerald(data=self.data_1day, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                             timeframe_id=4, setting=setting_emerald, bot_ins=_bot_ins)
-                    await asyncio.sleep(86390)
+                    await asyncio.sleep(898)
 
     def set_cost(self, cost: float):
         self.cost = cost
@@ -105,8 +129,26 @@ class StrategiesThreads:
     def __init__(self, *symbols: str):
         self.symbols = symbols
         self.threads = []
-        for symbol in symbols:
-            self.threads.append(threading.Thread(target=StreamIStrategies(symbol=symbol).run))
+        self.stream_classes = []
+        self.init_classes()
+        self.init_threads()
+
+    def init_classes(self):
+        for symbol in self.symbols:
+            self.stream_classes.append(StreamIStrategies(symbol=symbol))
+            print('done')
+
+    def init_threads(self):
+        for st_class in self.stream_classes:
+            self.threads.append(threading.Thread(target=st_class.run))
+            print('done to')
+
+    def delete(self):
+        # self.join_threads()
+        del self.stream_classes
+        del self.threads
+        self.stream_classes = []
+        self.threads = []
 
     def start_threads(self):
         for thread in self.threads:
@@ -114,5 +156,8 @@ class StrategiesThreads:
             thread.start()
 
     def join_threads(self):
+        for st_class in self.stream_classes:
+            st_class.__del__()
         for thread in self.threads:
             thread.join()
+            print("joined")

@@ -86,6 +86,16 @@ class AdminBot(Telegram):
                     usernames += str(index) + '-' + str(user[0]) + ' ,'
                 self.bot.reply_to(message, usernames)
 
+        @self.bot.message_handler(commands=['log'])
+        def show_users(message):
+            if self.check_login(message):
+                main_log = open('main.out', 'r')
+                admin_log = open('client.out', 'r')
+                client_log = open('admin.out', 'r')
+                self.bot.send_document(chat_id=message.chat.id, data=main_log)
+                self.bot.send_document(chat_id=message.chat.id, data=admin_log)
+                self.bot.send_document(chat_id=message.chat.id, data=client_log)
+
         @self.bot.message_handler(commands=['message'])
         def show_users(message):
             if self.check_login(message):
