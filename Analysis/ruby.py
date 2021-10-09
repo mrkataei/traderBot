@@ -3,7 +3,7 @@ import pandas_ta as ta
 import numpy as np
 from Inc import db, functions
 from Telegram.Client.message import broadcast_messages
-
+from Libraries.macd import macd
 
 def cross_over(x, y):
     return True if x[0] < y < x[1] else False
@@ -20,9 +20,10 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     slow = settings['indicators_setting']['MACD']['slow']
     sign = settings['indicators_setting']['MACD']['signal']
     fast = settings['indicators_setting']['MACD']['fast']
+    matype = settings['indicators_setting']['MACD']['matype']
     connection = db.con_db()
     # create macd dataframe macd has 3 column original macd , histogram  and signal
-    macd_df = ta.macd(close=data['close'], slow=slow, fast=fast, signal=sign)
+    macd_df = macd(close=data['close'], slow=slow, fast=fast, signal=sign , matype= matype)
     macd_df.columns = ["macd", "histogram", "signal"]
     # add price of coin to the macd_df
     macd_df["close"] = data.close
