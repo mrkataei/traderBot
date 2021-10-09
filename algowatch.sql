@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 23, 2021 at 10:50 AM
+-- Generation Time: Oct 09, 2021 at 09:57 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -87,7 +87,7 @@ INSERT INTO `analysis_setting` (`id`, `coin_id`, `timeframe_id`, `analysis_id`, 
 (23, 6, 3, 1, '', '1'),
 (24, 6, 4, 1, '', '1'),
 (26, 1, 3, 3, 'stoch_k_oversell:24,stoch_k_overbuy:75,stoch_rsi_k_overbuy:74,stoch_rsi_k_oversell:20,rsi_oversell:37,rsi_overbuy:64', '2,14,19,10'),
-(27, 2, 3, 3, 'stoch_k_oversell:21,stoch_k_overbuy:83,stoch_rsi_k_overbuy:81,stoch_rsi_k_oversell:10,rsi_oversell:37,rsi_overbuy:80', '11,20,3,15'),
+(27, 2, 3, 3, 'stoch_k_oversell:29,stoch_k_overbuy:86,stoch_rsi_k_oversell:16,stoch_rsi_k_overbuy:86,rsi_oversell:39,rsi_overbuy:64', '25,17,26,27'),
 (28, 5, 3, 3, 'stoch_k_oversell:17,stoch_k_overbuy:93,stoch_rsi_k_overbuy:69,stoch_rsi_k_oversell:8,rsi_oversell:36,rsi_overbuy:85', '12,16,21,4'),
 (29, 3, 3, 3, 'stoch_k_oversell:37,stoch_k_overbuy:91,stoch_rsi_k_overbuy:85,stoch_rsi_k_oversell:17,rsi_oversell:50,rsi_overbuy:58', '13,17,22,7'),
 (30, 6, 3, 3, 'stoch_k_oversell:10,stoch_k_overbuy:91,stoch_rsi_k_overbuy:55,stoch_rsi_k_oversell:84,rsi_oversell:81,rsi_overbuy:88', '10,14,24,8'),
@@ -175,12 +175,12 @@ CREATE TABLE `indicators_settings` (
 
 INSERT INTO `indicators_settings` (`indicator_id`, `settings`, `id`) VALUES
 (4, 'tenkan:9,kijun:26,senkou:52', 1),
-(1, 'slow:23,signal:20,fast:5,source:close', 2),
-(1, 'fast:6,slow:14,signal:20,source:hlc3', 3),
-(1, 'fast:9,slow:15,signal:20,source:close', 4),
-(1, 'fast:12,slow:18,signal:20,source:hlc3', 7),
-(1, 'fast:11,slow:36,signal:20,source:close', 8),
-(1, 'fast:13,slow:18,signal:20,source:ohlc4', 9),
+(1, 'fast:5,slow:23,signal:20,source:close,matype:ema', 2),
+(1, 'fast:6,slow:14,signal:20,source:hlc3,matype:ema', 3),
+(1, 'fast:9,slow:15,signal:20,source:close,matype:ema', 4),
+(1, 'fast:12,slow:18,signal:20,source:hlc3,matype:ema', 7),
+(1, 'fast:11,slow:36,signal:20,source:close,matype:ema', 8),
+(1, 'fast:13,slow:18,signal:20,source:ohlc4,matype:ema', 9),
 (3, 'source:close,length:5', 10),
 (3, 'source:close,length:4', 11),
 (3, 'source:close,length:7', 12),
@@ -195,7 +195,10 @@ INSERT INTO `indicators_settings` (`indicator_id`, `settings`, `id`) VALUES
 (5, 'rsi_length:6,length:21,k:4,d:3,source:hlc3', 21),
 (5, 'rsi_length:14,length:14,k:4,d:2,source:ohlc4', 22),
 (5, 'rsi_length:12,length:20,k:5,d:3,source:ohlc4', 23),
-(5, 'rsi_length:16,length:23,k:3,d:3,source:high', 24);
+(5, 'rsi_length:16,length:23,k:3,d:3,source:high', 24),
+(3, 'length:4,source:close', 25),
+(5, 'k:3,d:3,rsi_length:22,length:11,source:ohlc4', 26),
+(1, 'slow:26,signal:20,fast:10,source:low,matype:ema', 27);
 
 -- --------------------------------------------------------
 
@@ -215,6 +218,8 @@ CREATE TABLE `recommendations` (
   `timestmp` timestamp NOT NULL DEFAULT current_timestamp(),
   `id` int(12) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `score_analysis`
@@ -534,7 +539,7 @@ ALTER TABLE `indicators`
 -- AUTO_INCREMENT for table `indicators_settings`
 --
 ALTER TABLE `indicators_settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `recommendations`
