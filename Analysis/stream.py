@@ -21,6 +21,7 @@ import threading
 import telebot
 from Analysis.emerald import signal as emerald
 from Analysis.diamond import signal as diamond
+from Analysis.ruby import signal as ruby
 from Interfaces.stream import Stream, append
 
 # master bot already run on vps dont use this @algowatchbot -> address
@@ -76,6 +77,9 @@ class StreamIStrategies(Stream):
                                              timeframe="4hour", candle=c_4h_data)
                     emerald(data=self.data_4hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                             timeframe_id=3, setting=setting_emerald, bot_ins=_bot_ins)
+                    setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
+                    ruby(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                         timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins)
                     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
                     diamond(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                             timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins)
