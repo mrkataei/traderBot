@@ -93,7 +93,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     position = 'buy' if result[0] else 'sell'
     if old_position != position or old_risk != result[1]:
         set_recommendation(analysis_id=1, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                     target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
+                           target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
         broadcast_messages(coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id, position=position,
                            target_price=target_price, current_price=close, risk=result[1], bot_ins=bot_ins)
 # for transaction in future
