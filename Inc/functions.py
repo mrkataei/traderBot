@@ -824,11 +824,46 @@ def update_analysis_setting_indicator_id(coin_id: int, timeframe_id: int, analys
         query = "UPDATE analysis_setting SET indicator_setting_id='{indicator_setting_id}' WHERE coin_id={coin_id} " \
                 "AND timeframe_id={timeframe_id} " \
                 "AND analysis_id={analysis_id}".format(indicator_setting_id=indicators_id_exist,
-                                                            coin_id=coin_id, timeframe_id=timeframe_id,
-                                                            analysis_id=analysis_id)
+                                                       coin_id=coin_id, timeframe_id=timeframe_id,
+                                                       analysis_id=analysis_id)
         connection = con_db()
         cursor = connection.cursor()
         cursor.execute(query)
         connection.commit()
     except Error as err:
         return "Something went wrong: {}".format(err)
+
+
+def get_indicators_setting_with_indicator_id(indicator_id: int):
+    try:
+        query = "SELECT settings, id from indicators_settings WHERE indicator_id = {indicator_id}".format(
+            indicator_id=indicator_id)
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(query)
+        record = cursor.fetchall()
+        if record:
+            return record
+        else:
+            return None
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def update_indicator_setting_with_id(indicator_setting_id: int, settings: str):
+    try:
+        sql = "UPDATE indicators_settings SET settings ='{settings}' WHERE " \
+              "id={indicator_setting_id} LIMIT 1".format(indicator_setting_id=indicator_setting_id, settings=settings)
+        connection = con_db()
+        cursor = connection.cursor()
+        cursor.execute(sql)
+        connection.commit()
+    except Error as err:
+        return "Something went wrong: {}".format(err)
+
+
+def add_new_settings_to_indicator_setting(indicator_id: int, additional_setting: str):
+    settings = get_indicators_setting_with_indicator_id(indicator_id)
+    for setting in settings:
+        update_indicator_setting_with_id(indicator_setting_id=int(setting[1]), settings=setting[0] + additional_setting)
+

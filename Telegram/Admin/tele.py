@@ -107,6 +107,16 @@ class AdminBot(Telegram):
             except Exception as e:
                 self.bot.reply_to(message, e)
 
+        @self.bot.message_handler(commands=['log'])
+        def show_users(message):
+            if self.check_login(message):
+                main_log = open('main.out', 'r')
+                admin_log = open('client.out', 'r')
+                client_log = open('admin.out', 'r')
+                self.bot.send_document(chat_id=message.chat.id, data=main_log)
+                self.bot.send_document(chat_id=message.chat.id, data=admin_log)
+                self.bot.send_document(chat_id=message.chat.id, data=client_log)
+
         @self.bot.message_handler(commands=['detail'])
         def show_users(message):
             if self.check_login(message):
