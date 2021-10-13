@@ -91,8 +91,8 @@ INSERT INTO `analysis_setting` (`id`, `coin_id`, `timeframe_id`, `analysis_id`, 
 (28, 5, 3, 3, 'stoch_k_oversell:17,stoch_k_overbuy:93,stoch_rsi_k_overbuy:69,stoch_rsi_k_oversell:8,rsi_oversell:36,rsi_overbuy:85', '12,16,21,4'),
 (29, 3, 3, 3, 'stoch_k_oversell:37,stoch_k_overbuy:91,stoch_rsi_k_overbuy:85,stoch_rsi_k_oversell:17,rsi_oversell:50,rsi_overbuy:58', '13,17,22,7'),
 (30, 6, 3, 3, 'stoch_k_oversell:10,stoch_k_overbuy:91,stoch_rsi_k_overbuy:55,stoch_rsi_k_oversell:84,rsi_oversell:81,rsi_overbuy:88', '10,14,24,8'),
-(31, 4, 1, 3, 'stoch_k_oversell:20,stoch_k_overbuy:92,stoch_rsi_k_overbuy:96,stoch_rsi_k_oversell:18,rsi_oversell:29,rsi_overbuy:62', '10,18,23,9');
-
+(31, 4, 1, 3, 'stoch_k_oversell:20,stoch_k_overbuy:92,stoch_rsi_k_overbuy:96,stoch_rsi_k_oversell:18,rsi_oversell:29,rsi_overbuy:62', '10,18,23,9'),
+(32, 2, 3, 2, 'delay:13,safe_line:-8603,hist_line:0', '28');
 -- --------------------------------------------------------
 
 --
@@ -198,8 +198,8 @@ INSERT INTO `indicators_settings` (`indicator_id`, `settings`, `id`) VALUES
 (5, 'rsi_length:16,length:23,k:3,d:3,source:high', 24),
 (3, 'length:4,source:close', 25),
 (5, 'k:3,d:3,rsi_length:22,length:11,source:ohlc4', 26),
-(1, 'slow:26,signal:20,fast:10,source:low,matype:ema', 27);
-
+(1, 'slow:26,signal:20,fast:10,source:low,matype:ema', 27),
+(1, 'slow:17,signal:9,fast:4,source:close,matype:sma', 28);
 -- --------------------------------------------------------
 
 --

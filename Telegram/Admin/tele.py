@@ -110,9 +110,9 @@ class AdminBot(Telegram):
         @self.bot.message_handler(commands=['log'])
         def show_users(message):
             if self.check_login(message):
-                main_log = open('main.out', 'r')
-                admin_log = open('client.out', 'r')
-                client_log = open('admin.out', 'r')
+                main_log = open('main.txt', 'r')
+                admin_log = open('client.txt', 'r')
+                client_log = open('admin.txt', 'r')
                 self.bot.send_document(chat_id=message.chat.id, data=main_log)
                 self.bot.send_document(chat_id=message.chat.id, data=admin_log)
                 self.bot.send_document(chat_id=message.chat.id, data=client_log)

@@ -25,7 +25,6 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         source = settings['indicators_setting']['MACD']['source']
         source = get_source(data=data, source=source)
 
-        print(settings)
         # create macd dataframe macd has 3 column original macd , histogram  and signal
         macd_df = macd(close=source, slow=slow, fast=fast, signal=sign, matype=matype)
         macd_df.columns = ["macd", "histogram", "signal"]
