@@ -19,6 +19,7 @@ import pandas_ta as ta
 import numpy as np
 from Inc.functions import get_recommendations, set_recommendation
 from Telegram.Client.message import broadcast_messages
+import datetime
 
 
 def _get_ichimoku(data: pd.DataFrame, tenkan, kijun, senkou):
@@ -48,7 +49,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     # one last row in ichimoku
     last_ichimoku = np.array(ichimoku.tail(1))[0].astype(float)
     close = float(last_ichimoku[5])
-    print("emerald checking ..." + symbol, timeframe)
+    print(str(datetime.datetime.now()), "emerald checking ..." + symbol, timeframe)
     try:
         query = get_recommendations(analysis_id=1, timeframe_id=timeframe_id, coin_id=coin_id)
         old_position = query[0][2]

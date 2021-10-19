@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from Libraries.tools import Tools, cross_over, get_source
 from Libraries.macd import macd
+import datetime
 
 valid_coins_and_times = {
     'coins':
@@ -25,7 +26,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         matype = settings['indicators_setting']['MACD']['matype']
         source = settings['indicators_setting']['MACD']['source']
         source = get_source(data=data, source=source)
-        print("ruby checking ... " + symbol, timeframe)
+        print(str(datetime.datetime.now()), "ruby checking ... " + symbol, timeframe)
 
         # create macd dataframe macd has 3 column original macd , histogram  and signal
         macd_df = macd(close=source, slow=slow, fast=fast, signal=sign, matype=matype)
