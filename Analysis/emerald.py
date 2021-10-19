@@ -34,7 +34,8 @@ def _get_ichimoku(data: pd.DataFrame, tenkan, kijun, senkou):
     return ichimoku, get_future_spans()
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict, bot_ins):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict, bot_ins,
+           symbol: str, timeframe: str):
     tenkan = setting['indicators_setting']['ichimoku']['tenkan']
     kijun = setting['indicators_setting']['ichimoku']['kijun']
     senkou = setting['indicators_setting']['ichimoku']['senkou']
@@ -47,6 +48,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     # one last row in ichimoku
     last_ichimoku = np.array(ichimoku.tail(1))[0].astype(float)
     close = float(last_ichimoku[5])
+    print("emerald checking ..." + symbol, timeframe)
     try:
         query = get_recommendations(analysis_id=1, timeframe_id=timeframe_id, coin_id=coin_id)
         old_position = query[0][2]
@@ -93,7 +95,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     position = 'buy' if result[0] else 'sell'
     if old_position != position or old_risk != result[1]:
         set_recommendation(analysis_id=1, coin_id=coin_id, timeframe_id=timeframe_id, position=position,
-                                     target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
+                           target_price=target_price, current_price=close, cost_price=cost, risk=result[1])
         broadcast_messages(coin_id=coin_id, analysis_id=1, timeframe_id=timeframe_id, position=position,
                            target_price=target_price, current_price=close, risk=result[1], bot_ins=bot_ins)
 # for transaction in future

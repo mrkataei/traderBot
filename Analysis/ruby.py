@@ -11,7 +11,8 @@ valid_coins_and_times = {
 }
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, bot_ins, settings: dict):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, bot_ins, settings: dict,
+           symbol: str, timeframe: str):
     if coin_id in valid_coins_and_times['coins'] \
             and timeframe_id in valid_coins_and_times['coins'][coin_id]['timeframes']:
         ruby_tools = Tools(analysis_id=2, timeframe_id=timeframe_id, coin_id=coin_id)
@@ -24,6 +25,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         matype = settings['indicators_setting']['MACD']['matype']
         source = settings['indicators_setting']['MACD']['source']
         source = get_source(data=data, source=source)
+        print("ruby checking ... " + symbol, timeframe)
 
         # create macd dataframe macd has 3 column original macd , histogram  and signal
         macd_df = macd(close=source, slow=slow, fast=fast, signal=sign, matype=matype)
