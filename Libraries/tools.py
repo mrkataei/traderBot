@@ -45,7 +45,7 @@ class Tools:
         except Exception as e:
             old_position = 'buy' if start_position else "sell"
             old_price = 0
-            print(e)
+            # print(e)
 
         return old_position, old_price
 

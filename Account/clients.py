@@ -36,8 +36,10 @@ class Register:
 
 class BitfinexClient:
     BASE_URL = "https://api.bitfinex.com/"
-    __KEY = "KeRPcVqCQQw37SekGlPf37Am6DhzdCeqHBfgyieNNra"
-    __SECRET = "b2pYpIXMdfpZgP0F8sXWiWRgcrkHNY6BmnfMtYe7BsI"
+    # __KEY = "KeRPcVqCQQw37SekGlPf37Am6DhzdCeqHBfgyieNNra"
+    __KEY = "sUYAU0Yk6WaiI3KIVLn7gg69RrKD5P2VKISjnWT7Cdp"
+    # __SECRET = "b2pYpIXMdfpZgP0F8sXWiWRgcrkHNY6BmnfMtYe7BsI"
+    __SECRET = "TXkcX8lpiYvpFJZEaw1X7lQeuMsDCnx8FqS17O72m0y"
 
     def _nonce(self):
         # Returns a nonce
@@ -85,10 +87,10 @@ class BitfinexClient:
             print('error, status_code = ', response.status_code)
             return ''
 
-    def submit_limit_order(self, symbol: str, price: str, amount: str):
+    def submit_market_order(self, symbol: str, amount: str):
         # Amount of order (positive for buy, negative for sell)
         response = self.req('v2/auth/w/order/submit',
-                            params={'type': 'LIMIT', 'symbol': symbol, 'price': price, 'amount': amount, 'lev': 1})
+                            params={'type': 'EXCHANGE MARKET', 'symbol': symbol, 'amount': amount})
         if response.status_code == 200:
             return response.json()
         else:
@@ -104,3 +106,25 @@ class BitfinexClient:
             print('error, status_code = ', response.status_code)
             return ''
 
+    def get_balance_available(self, symbol: str, direction: int):
+        if direction == -1:
+            rate = '1'
+        else:
+            try:
+                symbol_ticker = symbol[1:]
+                r = requests.get(f'https://api.bitfinex.com/v1/pubticker/{symbol_ticker}')
+                data = r.json()
+                rate = data['last_price']
+            except Exception as e:
+                print(e)
+                return
+        # dir -> Direction of the order (1 for by, -1 for sell)
+        # rate-> rate is price you wanna buy or sell symbol , for sell is 1
+        response = self.req('v2/auth/calc/order/avail',
+                            params={'symbol': symbol, 'dir': direction, 'rate': rate, 'type': 'EXCHANGE'})
+        if response.status_code == 200:
+            return response.json()[0]
+        else:
+            print('error, status_code = ', response.status_code)
+            print(response.text)
+            return ''

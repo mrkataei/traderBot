@@ -55,7 +55,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
     except Exception as e:
         old_position = 'buy'
         old_risk = 'low'
-        print(e)
+        # print(e)
 
     def check():
         # return Tuple ( buy->True , sell->False ) and risk (0(low)-10(high))

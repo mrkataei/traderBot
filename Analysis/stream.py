@@ -16,13 +16,14 @@ for insert new signal :
         functions.set_recommendation(connection, 1, 1, 1, "sell", 2500, 2300, 2, "high")
         broadcast_message(*args)
 """
-import asyncio
 import threading
+from time import sleep
 import telebot
 from Analysis.emerald import signal as emerald
 from Analysis.diamond import signal as diamond
 from Analysis.ruby import signal as ruby
-from Interfaces.stream import Stream, append
+from Interfaces.stream import Stream
+from Libraries.data_collector import get_candle_api as candles
 
 # master bot already run on vps dont use this @algowatchbot -> address
 API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
@@ -37,66 +38,43 @@ class StreamIStrategies(Stream):
         self.cost = cost
         self.gain = gain
 
-    async def stream_30min_candle(self):
-        candle_30min = self.socket.kline_socket(symbol=self.symbol, interval='30m')
-        async with candle_30min:
-            while True:
-                c_30m_data = await candle_30min.recv()
-                if c_30m_data['k']['x']:
-                    setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=1)
-                    self.data_30min = append(data=self.data_30min.tail(100), symbol=self.symbol,
-                                             timeframe="30min", candle=c_30m_data)
-                    emerald(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                            timeframe_id=1, setting=setting_emerald, bot_ins=_bot_ins)
-                    setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
-                    diamond(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                            timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins)
-                    await asyncio.sleep(1790)
+    def stream_30min_candle(self):
+        while True:
+            data = candles(symbol=self.symbol, timeframe='30m', limit=100)
+            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=1)
+            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                    timeframe_id=1, setting=setting_emerald, bot_ins=_bot_ins)
+            setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
+            diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                    timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol)
+            sleep(900)
 
-    async def stream_1hour_candle(self):
-        candle_1hour = self.socket.kline_socket(symbol=self.symbol, interval='1h')
-        async with candle_1hour:
-            while True:
-                c_1h_data = await candle_1hour.recv()
-                if c_1h_data['k']['x']:
-                    setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
-                    self.data_1hour = append(data=self.data_1hour.tail(100), symbol=self.symbol,
-                                             timeframe="1hour", candle=c_1h_data)
-                    emerald(data=self.data_1hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                            timeframe_id=2, setting=setting_emerald, bot_ins=_bot_ins)
-                    await asyncio.sleep(3590)
+    def stream_1hour_candle(self):
+        data = candles(symbol=self.symbol, timeframe='1h', limit=100)
+        setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
+        emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                timeframe_id=2, setting=setting_emerald, bot_ins=_bot_ins)
+        sleep(1800)
 
-    async def stream_4hour_candle(self):
-        candle_4hour = self.socket.kline_socket(symbol=self.symbol, interval='4h')
-        async with candle_4hour:
-            while True:
-                c_4h_data = await candle_4hour.recv()
-                if c_4h_data['k']['x']:
-                    setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
-                    self.data_4hour = append(data=self.data_4hour.tail(100), symbol=self.symbol,
-                                             timeframe="4hour", candle=c_4h_data)
-                    emerald(data=self.data_4hour, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                            timeframe_id=3, setting=setting_emerald, bot_ins=_bot_ins)
-                    setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
-                    ruby(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                         timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins)
-                    setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
-                    diamond(data=self.data_30min, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                            timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins)
-                    await asyncio.sleep(14390)
+    def stream_4hour_candle(self):
+        data = candles(symbol=self.symbol, timeframe='4h', limit=100)
+        setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
+        emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                timeframe_id=3, setting=setting_emerald, bot_ins=_bot_ins)
+        setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
+        ruby(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+             timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins)
+        setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
+        diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol)
+        sleep(3600)
 
-    async def stream_1day_candle(self):
-        candle_1day = self.socket.kline_socket(symbol=self.symbol, interval='1d')
-        async with candle_1day:
-            while True:
-                c_1d_data = await candle_1day.recv()
-                if c_1d_data['k']['x']:
-                    setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
-                    self.data_1day = append(data=self.data_1day.tail(100), symbol=self.symbol,
-                                            timeframe="1day", candle=c_1d_data)
-                    emerald(data=self.data_1day, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                            timeframe_id=4, setting=setting_emerald, bot_ins=_bot_ins)
-                    await asyncio.sleep(86390)
+    def stream_1day_candle(self):
+        data = candles(symbol=self.symbol, timeframe='1D', limit=100)
+        setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
+        emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                timeframe_id=4, setting=setting_emerald, bot_ins=_bot_ins)
+        sleep(43200)
 
     def set_cost(self, cost: float):
         self.cost = cost

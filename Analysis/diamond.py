@@ -26,8 +26,10 @@ import pandas as pd
 import pandas_ta as ta
 import numpy as np
 from Libraries.tools import Tools, get_source, cross_over, cross_under
+from Trade import spot
 
-
+symbols_bitfinix = {'BTCUSDT': 'tBTCUSD', 'ETHUSDT': 'tETHUSD', 'ADAUSDT': 'tADAUSD', 'DOGEUSDT': 'tDOGE:USD',
+                    'BCHUSDT': 'tBCHN:USD', 'ETCUSDT': 'tETCUSD'}
 valid_coins_and_times = {
     'coins':
         {
@@ -41,9 +43,11 @@ valid_coins_and_times = {
 }
 
 
-def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict, bot_ins):
+def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, setting: dict, bot_ins,
+           symbol: str):
     diamond_tools = Tools(analysis_id=3, timeframe_id=timeframe_id, coin_id=coin_id)
-
+    client = spot.BitfinexClient()
+    symbol = symbols_bitfinix[symbol]
     if coin_id in valid_coins_and_times['coins'] \
             and timeframe_id in valid_coins_and_times['coins'][coin_id]['timeframes']:
         # macd
@@ -129,6 +133,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
                 result = True, "high"
             # add signal to database
             diamond_tools.signal_process(close=close, gain=gain, result=result, cost=cost, bot_ins=bot_ins)
+            spot.buy_market(client=client, symbol=symbol)
 
         sell_counter = 0
         if old_position == "buy" and old_price < close:
@@ -147,8 +152,9 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
 
         # sell signal operation
         if sell_counter > 3:
-            if buy_counter == 4:
+            if sell_counter == 4:
                 result = False, "medium"
             else:
                 result = False, "high"
             diamond_tools.signal_process(close=close, gain=gain, result=result, cost=cost, bot_ins=bot_ins)
+            spot.sell_market(client=client, symbol=symbol)

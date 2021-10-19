@@ -1,58 +1,65 @@
 """
 Mr.Kataei 8/4/2021
-for init server and analysis which have not any machine learning we dont need any big data so
-collect data from binance who get us 500 rows of candles we want , in start server we get this
-and store in Static and use it in indicators analysis continuously , for now 30min , 1hour ,4hour ,1day timeframes
+get_candle_api use in stream to get candles for analysis and strategies this method have limit for n last candles
+you need for analysis.data collect form Bitfinex API where url can change for any API you want.
+there is 3 type of dictionary for bitfinex symbols or CSvs we need to save
+_get_all_candles is private method to use in generate_big_data where collect all data that can get from bitfinex
+
 """
-from binance.client import Client
+import time
 import pandas as pd
+import requests
+
+symbols = {'BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'DOGEUSDT', 'BCHUSDT', 'ETCUSDT'}
+
+symbols_bitfinix = {'BTCUSDT': 'tBTCUSD', 'ETHUSDT': 'tETHUSD', 'ADAUSDT': 'tADAUSD', 'DOGEUSDT': 'tDOGE:USD',
+                    'BCHUSDT': 'tBCHN:USD', 'ETCUSDT': 'tETCUSD'}
+
+symbols_csv = {'tBTCUSD': 'Bitcoin', 'tETHUSD': 'Ethereum', 'tADAUSD': 'Cardano', 'tDOGE:USD': 'Doge-Coin',
+               'tBCHN:USD': 'Bitcoin-Cash', 'tETCUSD': 'Ethereum-Classic'}
+
+timeframe_csv = {'30m': '30-Minute', '1h': '1-Hour', '4h': '4-Hour', '1D': '1-Day'}
 
 
-# default timeframes 30min , 1hour ,4hour ,1day
-def generate_data(*symbols: str):
-    client = Client()
-    columns = ['date', 'open', 'high', 'low', 'close', 'volume', 'time2', 'QAV', 'trades',
-               'TBAV', 'TQAV', 'Ignore']
+def get_candle_api(symbol: str, timeframe: str, limit: int):
+    symbol = symbols_bitfinix[symbol]
+    params = {'limit': limit, 'sort': -1}
+    url = f'https://api-pub.bitfinex.com/v2/candles/trade:{timeframe}:{symbol}/hist'
+    r = requests.get(url=url, params=params)
+    data = r.json()
+    data = pd.DataFrame(data=data, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
+    data.date = pd.DatetimeIndex(pd.to_datetime(data['date'], unit='ms', yearfirst=True)
+                                 ).tz_localize('UTC').tz_convert('Asia/Tehran')
+    data = data.iloc[::-1]
+    return data
+
+
+def _get_all_candles(symbol: str, timeframe: str):
+    symbol = symbols_bitfinix[symbol]
+    params = {'limit': 10000, 'sort': 1}
+    url = f'https://api-pub.bitfinex.com/v2/candles/trade:{timeframe}:{symbol}/hist'
+    r = requests.get(url=url, params=params)
+    data = r.json()
+    data = pd.DataFrame(data=data, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
+    start_time = int(data.tail(1)['date'].values[0])
+    end_time = int(round(time.time() * 1000))
+    while start_time < end_time:
+        params = {'limit': 10000, 'sort': 1, 'start': start_time}
+        r = requests.get(url=url, params=params)
+        next_data = r.json()
+        next_data = pd.DataFrame(data=next_data, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
+        data = pd.concat([data, next_data], axis=0)
+        data = data.reset_index(drop=True)
+        start_time = int(data.tail(1)['date'].values[0])
+    data.date = pd.DatetimeIndex(pd.to_datetime(data['date'], unit='ms', yearfirst=True)
+                                 ).tz_localize('UTC').tz_convert('Asia/Tehran')
+    data = data.drop_duplicates(subset=['date'])
+    data.to_csv(path_or_buf=f'Static/{symbols_csv[symbol]}-{timeframe_csv[timeframe]}.csv', index=False)
+
+
+def generate_big_data():
     for symbol in symbols:
-        data30min = pd.DataFrame(client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_30MINUTE, limit=100),
-                                 columns=columns).astype(float)
-        data1hour = pd.DataFrame(client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_1HOUR, limit=100),
-                                 columns=columns).astype(float)
-        data4hour = pd.DataFrame(client.get_klines(symbol=symbol, interval=Client.KLINE_INTERVAL_4HOUR, limit=100),
-                                 columns=columns).astype(float)
-        data1day = pd.DataFrame(client.get_klines(symbol=symbol, interval=client.KLINE_INTERVAL_1DAY, limit=100),
-                                columns=columns).astype(float)
-
-        # private functions
-        # in future we will add new timezones for now Tehran
-        def convert_timezone():
-            data30min['date'] = pd.DatetimeIndex(
-                pd.to_datetime(data30min['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert(
-                'Asia/Tehran')
-            data1hour['date'] = pd.DatetimeIndex(
-                pd.to_datetime(data1hour['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert(
-                'Asia/Tehran')
-            data4hour['date'] = pd.DatetimeIndex(
-                pd.to_datetime(data4hour['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert(
-                'Asia/Tehran')
-            data1day['date'] = pd.DatetimeIndex(
-                pd.to_datetime(data1day['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert(
-                'Asia/Tehran')
-
-        # delete close time and Ignore cols
-        def delete_columns():
-            del data30min['time2']
-            del data1hour['time2']
-            del data4hour['time2']
-            del data1day['time2']
-            del data30min['Ignore']
-            del data1hour['Ignore']
-            del data4hour['Ignore']
-            del data1day['Ignore']
-
-        convert_timezone()
-        delete_columns()
-        data1hour.to_csv(path_or_buf=f'Static/{symbol}-1hour.csv', index=False)
-        data30min.to_csv(path_or_buf=f'Static/{symbol}-30min.csv', index=False)
-        data4hour.to_csv(path_or_buf=f'Static/{symbol}-4hour.csv', index=False)
-        data1day.to_csv(path_or_buf=f'Static/{symbol}-1day.csv', index=False)
+        _get_all_candles(symbol=symbol, timeframe='30m')
+        _get_all_candles(symbol=symbol, timeframe='1h')
+        _get_all_candles(symbol=symbol, timeframe='4h')
+        _get_all_candles(symbol=symbol, timeframe='1D')
