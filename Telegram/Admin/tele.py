@@ -178,7 +178,7 @@ class AdminBot(Telegram):
             try:
                 os.system(f'kill {int(message.text)}')
                 os.system("cd /root/traderBot")
-                os.system("nohup python3 main.py &")
+                os.system("nohup python3 -u main.py > main.txt &")
                 self.bot.reply_to(message, "Done!\n /ps to watch process")
             except Exception as e:
                 self.bot.reply_to(message, 'Something wrong please try again!')
