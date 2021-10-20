@@ -47,34 +47,37 @@ class StreamIStrategies(Stream):
             setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
             diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                     timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='30m')
-            sleep(20)
+            sleep(450)
 
     def stream_1hour_candle(self):
-        data = candles(symbol=self.symbol, timeframe='1h', limit=100)
-        setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
-        emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                timeframe_id=2, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='1hour')
-        sleep(41)
+        while True:
+            data = candles(symbol=self.symbol, timeframe='1h', limit=100)
+            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
+            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                    timeframe_id=2, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='1hour')
+            sleep(900)
 
     def stream_4hour_candle(self):
-        data = candles(symbol=self.symbol, timeframe='4h', limit=100)
-        setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
-        emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                timeframe_id=3, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
-        setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
-        ruby(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-             timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
-        setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
-        diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
-        sleep(163)
+        while True:
+            data = candles(symbol=self.symbol, timeframe='4h', limit=100)
+            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
+            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                    timeframe_id=3, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
+            setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
+            ruby(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                 timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
+            setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
+            diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                    timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
+            sleep(1800)
 
     def stream_1day_candle(self):
-        data = candles(symbol=self.symbol, timeframe='1D', limit=100)
-        setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
-        emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                timeframe_id=4, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='1Day')
-        sleep(211)
+        while True:
+            data = candles(symbol=self.symbol, timeframe='1D', limit=100)
+            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
+            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                    timeframe_id=4, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='1Day')
+            sleep(21600)
 
     def set_cost(self, cost: float):
         self.cost = cost

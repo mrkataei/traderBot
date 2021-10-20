@@ -48,10 +48,10 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
            symbol: str, timeframe: str):
     diamond_tools = Tools(analysis_id=3, timeframe_id=timeframe_id, coin_id=coin_id)
     client = spot.BitfinexClient()
-    print(str(datetime.datetime.now()), "diamond checking ... " + symbol, timeframe)
     symbol = symbols_bitfinix[symbol]
     if coin_id in valid_coins_and_times['coins'] \
             and timeframe_id in valid_coins_and_times['coins'][coin_id]['timeframes']:
+        print(str(datetime.datetime.now()), "diamond checking ... " + symbol, timeframe)
         # macd
         slow = setting['indicators_setting']['MACD']['slow']
         sign = setting['indicators_setting']['MACD']['signal']
