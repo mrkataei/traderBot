@@ -37,23 +37,25 @@ class Tools:
 
     def get_last_data(self, start_position: bool = None):
         query = get_recommendations(analysis_id=self.analysis_id, timeframe_id=self.timeframe_id,
-                                              coin_id=self.coin_id)
+                                    coin_id=self.coin_id)
         try:
             old_position = query[0][2]
+            old_risk = query[0][7]
             old_price = query[0][4]
             # when no rows in database
         except Exception as e:
             old_position = 'buy' if start_position else "sell"
+            old_risk = 'low'
             old_price = 0
             print(e)
 
-        return old_position, old_price
+        return old_position, old_price, old_risk
 
     def signal_process(self, close: float, gain: float, result: tuple, cost: float, bot_ins):
         position = 'buy' if result[0] else 'sell'
         tp = target_price(close=close, gain=gain, result=result)
         set_recommendation(analysis_id=self.analysis_id, coin_id=self.coin_id, timeframe_id=self.timeframe_id,
-                                     position=position, target_price=tp, current_price=close, cost_price=cost,
-                                     risk=result[1])
+                           position=position, target_price=tp, current_price=close, cost_price=cost,
+                           risk=result[1])
         broadcast_messages(coin_id=self.coin_id, analysis_id=self.analysis_id, timeframe_id=self.timeframe_id,
                            position=position, target_price=tp, current_price=close, risk=result[1], bot_ins=bot_ins)

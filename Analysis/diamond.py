@@ -26,8 +26,9 @@ import pandas as pd
 import pandas_ta as ta
 import numpy as np
 from Libraries.tools import Tools, get_source, cross_over, cross_under
+from Libraries.macd import macd
 
-
+ta.cross()
 valid_coins_and_times = {
     'coins':
         {
@@ -80,7 +81,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         rsi_overbuy = setting['analysis_setting']['rsi_overbuy']
 
         # macd dataframe
-        macd_df = ta.macd(close=macd_source, slow=slow, fast=fast, signal=sign)
+        macd_df = macd(close=macd_source, slow=slow, fast=fast, matype="sma", signal=sign)
         close = float(np.array(data.tail(1)["close"])[0])
         # get last 2 positions of  macd df
         last_macd = np.array(macd_df.tail(2))
@@ -147,7 +148,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
 
         # sell signal operation
         if sell_counter > 3:
-            if buy_counter == 4:
+            if sell_counter == 4:
                 result = False, "medium"
             else:
                 result = False, "high"
