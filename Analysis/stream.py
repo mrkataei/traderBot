@@ -23,7 +23,7 @@ from Analysis.emerald import signal as emerald
 from Analysis.diamond import signal as diamond
 from Analysis.ruby import signal as ruby
 from Interfaces.stream import Stream
-from Libraries.data_collector import get_candle_api as candles
+from Libraries.data_collector import get_candle_bitfinex as candles
 
 # master bot already run on vps dont use this @algowatchbot -> address
 API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
