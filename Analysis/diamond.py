@@ -27,6 +27,7 @@ import pandas_ta as ta
 import numpy as np
 from Libraries.tools import Tools, get_source, cross_over, cross_under
 from Trade import spot
+from Libraries.macd import macd
 import datetime
 
 symbols_bitfinix = {'BTCUSDT': 'tBTCUSD', 'ETHUSDT': 'tETHUSD', 'ADAUSDT': 'tADAUSD', 'DOGEUSDT': 'tDOGE:USD',
@@ -56,6 +57,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         slow = setting['indicators_setting']['MACD']['slow']
         sign = setting['indicators_setting']['MACD']['signal']
         fast = setting['indicators_setting']['MACD']['fast']
+        ma_type = setting['indicators_setting']['MACD']['matype']
         macd_source = setting['indicators_setting']['MACD']['source']
         macd_source = get_source(data=data, source=macd_source)
 
@@ -86,7 +88,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         rsi_overbuy = setting['analysis_setting']['rsi_overbuy']
 
         # macd dataframe
-        macd_df = ta.macd(close=macd_source, slow=slow, fast=fast, signal=sign)
+        macd_df = macd(close=macd_source, slow=slow, fast=fast, signal=sign, matype=ma_type)
         close = float(np.array(data.tail(1)["close"])[0])
         # get last 2 positions of  macd df
         last_macd = np.array(macd_df.tail(2))

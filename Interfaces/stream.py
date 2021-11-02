@@ -8,6 +8,9 @@ class Stream:
         self.coin_id = get_coin_id(symbol)
 
     # there is 4 functions for 4 timeframes after all used in main async
+    def stream_1min_candle(self):
+        raise Exception("NotImplementedException")
+
     def stream_30min_candle(self):
         raise Exception("NotImplementedException")
 
@@ -27,10 +30,12 @@ class Stream:
         raise Exception("NotImplementedException")
 
     def stream(self):
+        stream_1m_candle = threading.Thread(target=self.stream_1min_candle)
         stream_30min_candle = threading.Thread(target=self.stream_30min_candle)
         stream_1hour_candle = threading.Thread(target=self.stream_1hour_candle)
         stream_4hour_candle = threading.Thread(target=self.stream_4hour_candle)
         stream_1day_candle = threading.Thread(target=self.stream_1day_candle)
+        stream_1m_candle.start()
         stream_30min_candle.start()
         stream_1hour_candle.start()
         stream_4hour_candle.start()

@@ -25,27 +25,34 @@ timeframe_csv = {'30m': '30-Minute', '1h': '1-Hour', '4h': '4-Hour', '1D': '1-Da
 def get_candle_binance(symbol: str, timeframe: str, limit: int):
     params = {'interval': timeframe, 'symbol': symbol, 'limit': limit}
     url = 'https://api1.binance.com/api/v3/klines'
-    r = requests.get(url=url, params=params)
-    data = r.json()
-    data = pd.DataFrame(data=data, columns=['date', 'open', 'high', 'low', 'close', 'volume', 'close_time',
-                                            'Qav', 'trade-number', 'TBbav', 'TBbqv', 'ignore']).astype(float)
-    data = data[data.columns[0:6]]
-    data.date = pd.DatetimeIndex(pd.to_datetime(data['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert(
-        'Asia/Tehran')
-    return data
+    try:
+        r = requests.get(url=url, params=params)
+        data = r.json()
+        data = pd.DataFrame(data=data, columns=['date', 'open', 'high', 'low', 'close', 'volume', 'close_time',
+                                                'Qav', 'trade-number', 'TBbav', 'TBbqv', 'ignore']).astype(float)
+        data = data[data.columns[0:6]]
+        data.date = pd.DatetimeIndex(pd.to_datetime(data['date'], unit='ms', yearfirst=True)).tz_localize('UTC').tz_convert(
+            'Asia/Tehran')
+        return data
+    except Exception as e:
+        print('something wrong on get data from binance:\n', e)
 
 
 def get_candle_bitfinex(symbol: str, timeframe: str, limit: int):
     symbol = symbols_bitfinix[symbol]
     params = {'limit': limit, 'sort': -1}
     url = f'https://api-pub.bitfinex.com/v2/candles/trade:{timeframe}:{symbol}/hist'
-    r = requests.get(url=url, params=params)
-    data = r.json()
-    data = pd.DataFrame(data=data, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
-    data.date = pd.DatetimeIndex(pd.to_datetime(data['date'], unit='ms', yearfirst=True)
-                                 ).tz_localize('UTC').tz_convert('Asia/Tehran')
-    data = data.iloc[::-1]
-    return data
+    try:
+        r = requests.get(url=url, params=params)
+        data = r.json()
+        data = pd.DataFrame(data=data, columns=['date', 'open', 'close', 'high', 'low', 'volume'])
+        data.date = pd.DatetimeIndex(pd.to_datetime(data['date'], unit='ms', yearfirst=True)
+                                     ).tz_localize('UTC').tz_convert('Asia/Tehran')
+        data = data.iloc[::-1]
+        data = data.reset_index(drop=True)
+        return data
+    except Exception as e:
+        print('something wrong on get data from bitfinex:\n', e)
 
 
 def _get_all_candles(symbol: str, timeframe: str):

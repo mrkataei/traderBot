@@ -1,5 +1,3 @@
-from Libraries.data_collector import get_candle_bitfinex as candle
-
 
 def _average(*inputs: float):
     result = 0.0
@@ -38,7 +36,7 @@ def hanging_man(candles):
 def inverted_hammer(candles):
     # work with at least 3 candle and return True if pattern be true
     c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
-    if c_high[1] > c_low[0] and c_high[1] > c_high[2] > c_close[1] and c_high[2] < c_open[1]:
+    if c_low[0] > c_high[1] > c_high[2] > c_close[1] > c_close[2] and c_open[2] < c_close[1] and c_high[2] < c_open[1]:
         return True
     else:
         return False
@@ -47,7 +45,7 @@ def inverted_hammer(candles):
 def shooting_star(candles):
     # work with at least 2 candle and return True if pattern be true
     c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
-    if c_high[1] > c_high[0] > _average(c_open[1], c_close[1]) and c_open[1] > c_close[1] > c_close[1] > c_close[0] \
+    if c_high[1] > c_high[0] > _average(c_open[1], c_close[1]) and c_open[1] > c_close[1] > c_close[0] \
             and c_open[1] > c_high[0]:
         return True
     else:
@@ -165,8 +163,8 @@ def three_inside_up(candles):
 def three_inside_down(candles):
     # work with at least 3 candle and return True if pattern be true
     c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
-    if c_close[0] > c_open[1] > c_close[1] > c_open[0] and c_open[2] > _average(c_open[1], c_close[1]) \
-            and c_open[2] > c_close[2] and c_close[2] < c_open[0]:
+    if c_close[0] > c_open[1] > c_close[1] > c_open[0] > c_close[2] \
+            and _average(c_open[1], c_close[1]) > c_open[2] > c_close[2]:
         return True
     else:
         return False
@@ -252,7 +250,7 @@ def matching_high(candles):
 def upside_gap_two_crows(candles):
     # work with at least 3 candle and return True if pattern be true
     c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
-    if c_open[0] < c_close[0] < c_close[1] < c_open[1] < c_open[2] and c_close[2] >= c_high[0]:
+    if c_open[0] < c_close[0] and c_open[2] > c_open[1] > c_close[1] > c_close[2] >= c_high[0]:
         return True
     else:
         return False
@@ -305,7 +303,8 @@ def rising_three_methods(candles):
 def falling_three_methods(candles):
     # work with at least 5 candle and return True if pattern be true
     c_open, c_high, c_close, c_low = _last_limit_data(candles, 5)
-    if c_open[0] > c_close[0] and c_close[4] < c_open[1] < c_open[2] < c_close[1] < c_close[2] < c_open[3] < c_close[3] \
+    if c_open[0] > c_close[0] \
+            and c_close[4] < c_open[1] < c_open[2] < c_close[1] < c_close[2] < c_open[3] < c_close[3] \
             and c_close[3] > c_open[4] > c_open[3] and c_close[4] < c_low[0]:
         return True
     else:
@@ -356,7 +355,7 @@ def three_line_strike_bullish(candles, tolerance: float):
     third = abs(c_open[0] - c_close[0])
 
     if c_close[3] < c_open[0] < c_open[1] < c_close[0] <= c_open[2] < c_close[1] < c_close[2] <= c_open[3] \
-            and c_high[2] > c_high[3] and abs(first - sec) < tolerance and abs(sec - third) < tolerance:
+            and c_high[2] >= c_high[3] and abs(first - sec) < tolerance and abs(sec - third) < tolerance:
         return True
     else:
         return False
@@ -450,10 +449,21 @@ def breakaway_bullish(candles):
         return False
 
 
+def breakaway_bearish(candles):
+    # work with at least 5 candle and return True if pattern be true
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 5)
+    if c_open[0] < c_close[0] <= c_open[1] < c_close[1] < c_close[2] < c_open[1] < c_open[2] \
+            and c_open[2] > c_close[2] and c_close[2] < c_open[3] < c_close[3] and c_close[3] > c_open[2] \
+            and c_open[4] < _average(c_open[3], c_close[3]) and c_close[4] < c_open[1]:
+        return True
+    else:
+        return False
+
+
 def in_neck_line_bullish(candles):
     # work with at least 2 candle and return True if pattern be true
     c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
-    if c_open[1] < c_close[0] <= c_close[1] < c_open[1] and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]):
+    if c_open[0] < c_close[0] <= c_close[1] < c_open[1] and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]):
         return True
     else:
         return False
@@ -462,7 +472,7 @@ def in_neck_line_bullish(candles):
 def in_neck_line_bearish(candles):
     # work with at least 2 candle and return True if pattern be true
     c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
-    if c_open[1] > c_close[0] >= c_close[1] > c_open[1] and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]):
+    if c_open[0] > c_close[0] >= c_close[1] > c_open[1] and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]):
         return True
     else:
         return False
@@ -669,6 +679,3 @@ def ladder_bottom(candles):
         return True
     else:
         return False
-
-
-print(harami_cross_bearish(candle('BTCUSDT', '30m', 20)))
