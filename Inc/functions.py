@@ -576,16 +576,13 @@ def get_all_user_timeframe():
         return "Something went wrong: {}".format(err)
 
 
-def get_user_recommendation(coin_id: int = None, analysis_id: int = None, timeframe_id: int = None):
+def get_user_recommendation(coin_id: int = None, analysis_id: int = None):
     try:
-        if coin_id and analysis_id and timeframe_id:
-            query = "SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ," \
-                    "user_analysis.analysis_id  FROM watchlist INNER JOIN user_timeframe " \
-                    "ON watchlist.user = user_timeframe.user INNER JOIN user_analysis " \
-                    "ON user_timeframe.user = user_analysis.user " \
-                    "WHERE coin_id ={coin_id} AND analysis_id={analysis_id} " \
-                    "AND timeframe_id={timeframe_id}".format(coin_id=coin_id, analysis_id=analysis_id,
-                                                             timeframe_id=timeframe_id)
+        if coin_id and analysis_id:
+            query = "SELECT watchlist.user , watchlist.coin_id ," \
+                    "user_analysis.analysis_id  FROM watchlist INNER JOIN user_analysis " \
+                    "ON watchlist.user = user_analysis.user " \
+                    "WHERE coin_id ={coin_id} AND analysis_id={analysis_id} ".format(coin_id=coin_id, analysis_id=analysis_id)
         else:
             query = "SELECT watchlist.user , watchlist.coin_id , user_timeframe.timeframe_id ," \
                     "user_analysis.analysis_id  FROM watchlist INNER JOIN user_timeframe " \
@@ -866,4 +863,3 @@ def add_new_settings_to_indicator_setting(indicator_id: int, additional_setting:
     settings = get_indicators_setting_with_indicator_id(indicator_id)
     for setting in settings:
         update_indicator_setting_with_id(indicator_setting_id=int(setting[1]), settings=setting[0] + additional_setting)
-

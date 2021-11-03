@@ -8,7 +8,7 @@ from Libraries.definitions import *
 
 def broadcast_messages(coin_id: int, analysis_id: int, timeframe_id: int, position: str, target_price: float,
                        current_price: float, risk: str, bot_ins):
-    users = get_user_recommendation(coin_id=coin_id, analysis_id=analysis_id, timeframe_id=timeframe_id)
+    users = get_user_recommendation(coin_id=coin_id, analysis_id=analysis_id)
     coin = get_coin_name(coin_id)
     analysis = get_analysis(analysis_id)
     timeframe = get_timeframe(timeframe_id)

@@ -26,7 +26,7 @@ from Interfaces.stream import Stream
 from Libraries.data_collector import get_candle_binance as candles
 
 # master bot already run on vps dont use this @algowatchbot -> address
-API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
+API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0?'
 # @testkourosh2bot -> address // use this bot for test your code
 # API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 _bot_ins = telebot.TeleBot(API_KEY)
@@ -40,15 +40,14 @@ class StreamIStrategies(Stream):
 
     def stream_1min_candle(self):
         while True:
-            data = candles(symbol=self.symbol, timeframe='1m', limit=200)
+            data = candles(symbol=self.symbol, timeframe='1m', limit=10)
+            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id, timeframe_id=5, bot_ins=_bot_ins,
+                    symbol=self.symbol, timeframe='1min')
             sleep(60)
 
     def stream_30min_candle(self):
         while True:
             data = candles(symbol=self.symbol, timeframe='30m', limit=200)
-            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=1)
-            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                    timeframe_id=1, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='30m')
             setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
             diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                     timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='30m')
@@ -57,17 +56,11 @@ class StreamIStrategies(Stream):
     def stream_1hour_candle(self):
         while True:
             data = candles(symbol=self.symbol, timeframe='1h', limit=200)
-            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=2)
-            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                    timeframe_id=2, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='1hour')
             sleep(3600)
 
     def stream_4hour_candle(self):
         while True:
             data = candles(symbol=self.symbol, timeframe='4h', limit=200)
-            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=3)
-            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                    timeframe_id=3, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
             setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
             ruby(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
                  timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
@@ -79,9 +72,6 @@ class StreamIStrategies(Stream):
     def stream_1day_candle(self):
         while True:
             data = candles(symbol=self.symbol, timeframe='1D', limit=200)
-            setting_emerald = self.get_setting_analysis(analysis_id=1, timeframe_id=4)
-            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                    timeframe_id=4, setting=setting_emerald, bot_ins=_bot_ins, symbol=self.symbol, timeframe='1Day')
             sleep(86400)
 
     def set_cost(self, cost: float):
