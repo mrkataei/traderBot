@@ -7,7 +7,7 @@ from Libraries.definitions import *
 
 
 class Telegram:
-    def __init__(self, API_KEY: str = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'):
+    def __init__(self, API_KEY: str = '1987308624:AAHEYHcAYaeqiii2REcHMrSefohBSedWIxA'):
         self.API_KEY = API_KEY
         self.bot = None
         self.user_dict = {}

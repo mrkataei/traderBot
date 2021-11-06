@@ -26,7 +26,7 @@ from Interfaces.stream import Stream
 from Libraries.data_collector import get_candle_binance as candles
 
 # master bot already run on vps dont use this @algowatchbot -> address
-API_KEY = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0?'
+API_KEY = '1987308624:AAHEYHcAYaeqiii2REcHMrSefohBSedWIxA'
 # @testkourosh2bot -> address // use this bot for test your code
 # API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 _bot_ins = telebot.TeleBot(API_KEY)
