@@ -29,7 +29,7 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         old_position = query[0][2]
         # when no rows in database
     except Exception as e:
-        old_position = 'buy'
+        old_position = 'sell'
         # print(e)
 
     def check():
