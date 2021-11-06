@@ -17,7 +17,7 @@ API_KEY = '1987746421:AAFjiQ22yuRXhzYOrRkVmeuuHM96sD4aqpA'
 # test bot fro admin
 # API_KEY = '1991184876:AAGfWUbxXEbnbWHeKrlh2knooi8lF1PSWKI'
 # algowatch original API
-API_KEY_MESSAGE = '1987308624:AAEow3hvRGt4w6ZFmz3bYaQz1J8p-OzRer0'
+API_KEY_MESSAGE = '1987308624:AAHEYHcAYaeqiii2REcHMrSefohBSedWIxA'
 # test API
 # API_KEY_MESSAGE = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 _bot_ins = telebot.TeleBot(API_KEY_MESSAGE)
