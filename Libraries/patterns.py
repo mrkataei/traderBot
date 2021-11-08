@@ -698,6 +698,40 @@ def get_all_patterns(dataframe: pd.DataFrame):
     for i in range(0, len(dataframe), 2):
         try:
             dataframe.loc[i + 1, 'hammer'] = 1 if hammer(dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'hanging_man'] = 1 if hanging_man(dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'shooting_star'] = 1 if shooting_star(dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'harami_cross_bullish'] = 1 if harami_cross_bullish(
+                dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'harami_cross_bearish'] = 1 if harami_cross_bearish(
+                dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'doji_star_bullish'] = 1 if doji_star_bullish(
+                dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'doji_star_bearish'] = 1 if doji_star_bearish(
+                dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'matching_low'] = 1 if matching_low(dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'matching_high'] = 1 if matching_high(dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'homing_pigeon'] = 1 if homing_pigeon(dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'separating_lines_bullish'] = 1 if separating_lines_bullish(
+                dataframe[i:i + 2].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 1, 'separating_lines_bearish'] = 1 if separating_lines_bearish(
+                dataframe[i:i + 2].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 1, 'on_neck_line_bullish'] = 1 if on_neck_line_bullish(
+                dataframe[i:i + 2].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 1, 'on_neck_line_bearish'] = 1 if on_neck_line_bearish(
+                dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'in_neck_line_bullish'] = 1 if in_neck_line_bullish(
+                dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'in_neck_line_bearish'] = 1 if in_neck_line_bearish(
+                dataframe[i:i + 2].reset_index(drop=True)) else 0
+            dataframe.loc[i + 1, 'belt_hold_bullish'] = 1 if belt_hold_bullish(
+                dataframe[i:i + 2].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 1, 'belt_hold_bearish'] = 1 if belt_hold_bearish(
+                dataframe[i:i + 2].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 1, 'kicking_bullish'] = 1 if kicking_bullish(dataframe[i:i + 2].reset_index(drop=True),
+                                                                           tolerance=0.05) else 0
+            dataframe.loc[i + 1, 'kicking_bearish'] = 1 if kicking_bearish(dataframe[i:i + 2].reset_index(drop=True),
+                                                                           tolerance=0.05) else 0
+
             # do for all 2 candles patterns
         except:
             break
@@ -706,6 +740,69 @@ def get_all_patterns(dataframe: pd.DataFrame):
         try:
             dataframe.loc[i + 2, 'inverted_hammer'] = 1 if inverted_hammer(
                 dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'morning_doji_star'] = 1 if morning_doji_star(
+                dataframe[i:i + 3].reset_index(drop=True), limit=20) else 0
+            dataframe.loc[i + 2, 'evening_doji_star'] = 1 if evening_doji_star(
+                dataframe[i:i + 3].reset_index(drop=True), limit=20) else 0
+            dataframe.loc[i + 2, 'abandoned_baby_bullish'] = 1 if abandoned_baby_bullish(
+                dataframe[i:i + 3].reset_index(drop=True), limit=20) else 0
+            dataframe.loc[i + 2, 'abandoned_baby_bearish'] = 1 if abandoned_baby_bearish(
+                dataframe[i:i + 3].reset_index(drop=True), limit=20) else 0
+            dataframe.loc[i + 2, 'tri_star_bullish'] = 1 if tri_star_bullish(
+                dataframe[i:i + 3].reset_index(drop=True), limit=20) else 0
+            dataframe.loc[i + 2, ' tri_star_bearish'] = 1 if tri_star_bearish(
+                dataframe[i:i + 3].reset_index(drop=True), limit=20) else 0
+            dataframe.loc[i + 2, 'three_inside_up'] = 1 if three_inside_up(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'three_inside_down'] = 1 if three_inside_down(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'three_outside_up'] = 1 if three_outside_up(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'three_outside_down'] = 1 if three_outside_down(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'unique_three_river'] = 1 if unique_three_river(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'loentical_three_cross'] = 1 if loentical_three_cross(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'deliberation'] = 1 if deliberation(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'upside_gap_two_crows'] = 1 if upside_gap_two_crows(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'advance_block'] = 1 if advance_block(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'two_crows'] = 1 if two_crows(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'upside_tasuki_gap'] = 1 if upside_tasuki_gap(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'downside_tasuki_gap'] = 1 if downside_tasuki_gap(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'sidebyside_white_lines_bullish'] = 1 if sidebyside_white_lines_bullish(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'sidebyside_white_lines_bearish'] = 1 if sidebyside_white_lines_bearish(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'upside_gap_three_methods'] = 1 if upside_gap_three_methods(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'downside_gap_three_methods'] = 1 if downside_gap_three_methods(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'engulfing_bullish'] = 1 if engulfing_bullish(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'engulfing_bearish'] = 1 if engulfing_bearish(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'harami_bullish'] = 1 if harami_bullish(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'harami_bearish'] = 1 if harami_bearish(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'piercing_line'] = 1 if piercing_line(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'dark_cloud_cover'] = 1 if dark_cloud_cover(
+                dataframe[i:i + 3].reset_index(drop=True)) else 0
+            dataframe.loc[i + 2, 'stick_sandwich'] = 1 if stick_sandwich(
+                dataframe[i:i + 3].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 2, 'meeting_line_bullish'] = 1 if meeting_line_bullish(
+                dataframe[i:i + 3].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 2, 'meeting_line_bearish'] = 1 if meeting_line_bearish(
+                dataframe[i:i + 3].reset_index(drop=True), tolerance=0.05) else 0
+
             # do for all 3 candles patterns
         except:
             break
@@ -715,6 +812,22 @@ def get_all_patterns(dataframe: pd.DataFrame):
         try:
             dataframe.loc[i + 3, 'concealing_baby'] = 1 if concealing_baby(
                 dataframe[i:i + 4].reset_index(drop=True)) else 0
+            dataframe.loc[i + 3, 'rising_three_methods'] = 1 if rising_three_methods(
+                dataframe[i:i + 4].reset_index(drop=True)) else 0
+            dataframe.loc[i + 3, 'three_line_strike_bullish'] = 1 if three_line_strike_bullish(
+                dataframe[i:i + 4].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 3, 'three_line_strike_bearish'] = 1 if three_line_strike_bearish(
+                dataframe[i:i + 4].reset_index(drop=True), tolerance=0.05) else 0
+            dataframe.loc[i + 3, 'three_white_soldiers'] = 1 if three_white_soldiers(
+                dataframe[i:i + 4].reset_index(drop=True)) else 0
+            dataframe.loc[i + 3, 'three_black_crows'] = 1 if three_black_crows(
+                dataframe[i:i + 4].reset_index(drop=True)) else 0
+            dataframe.loc[i + 3, 'morning_star'] = 1 if morning_star(
+                dataframe[i:i + 4].reset_index(drop=True)) else 0
+            dataframe.loc[i + 3, 'evening_star'] = 1 if evening_star(
+                dataframe[i:i + 4].reset_index(drop=True)) else 0
+            dataframe.loc[i + 3, 'three_stars_in_the_south'] = 1 if three_stars_in_the_south(
+                dataframe[i:i + 4].reset_index(drop=True), tolerance=0.05) else 0
             # do for all 4 candles patterns
         except:
             break
@@ -723,8 +836,16 @@ def get_all_patterns(dataframe: pd.DataFrame):
         try:
             dataframe.loc[i + 4, 'falling_three_methods'] = 1 if falling_three_methods(
                 dataframe[i:i + 5].reset_index(drop=True)) else 0
+            dataframe.loc[i + 4, 'breakaway_bullish'] = 1 if breakaway_bullish(
+                dataframe[i:i + 5].reset_index(drop=True)) else 0
+            dataframe.loc[i + 4, 'breakaway_bearish'] = 1 if breakaway_bearish(
+                dataframe[i:i + 5].reset_index(drop=True)) else 0
+            dataframe.loc[i + 4, 'ladder_bottom'] = 1 if ladder_bottom(
+                dataframe[i:i + 5].reset_index(drop=True)) else 0
+
             # do for all 5 candles patterns
         except:
             break
     return dataframe
+
 
