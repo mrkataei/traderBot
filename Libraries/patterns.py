@@ -8,7 +8,8 @@ def _average(*inputs: float):
     return result / len(inputs)
 
 
-def get_ohcl(candles):
+def _last_limit_data(candles, limit: int):
+    candles = candles.tail(limit).reset_index()
     c_high = candles['high']
     c_low = candles['low']
     c_close = candles['close']
@@ -16,9 +17,292 @@ def get_ohcl(candles):
     return c_open, c_high, c_close, c_low
 
 
+def get_ohcl(candles):
+    candles = candles.reset_index(drop=True)
+    c_high = candles['high']
+    c_low = candles['low']
+    c_close = candles['close']
+    c_open = candles['open']
+    return c_open, c_high, c_close, c_low
+
+
+class Patterns:
+    def __init__(self, dataframe: pd.DataFrame):
+        self.data = dataframe
+
+    def pattern_2_candles(self, candles):
+        # work with at least 2 candle and add rows to dataframe 1 if pattern be true
+        c_open, c_high, c_close, c_low = get_ohcl(self.data.loc[candles.index])
+        if candles.index.stop <= len(self.data):
+            if c_low[0] > c_open[1] > c_close[1] > c_low[1] and c_high[1] < c_low[0]:
+                self.data.loc[candles.index.stop - 1, 'hammer'] = 1
+            if c_open[1] > c_close[1] > c_high[0] > c_low[1]:
+                self.data.loc[candles.index.stop - 1, 'hanging_man'] = 1
+            if c_high[1] > c_high[0] > _average(c_open[1], c_close[1]) and c_open[1] > c_close[1] > c_close[0] \
+                    and c_open[1] > c_high[0]:
+                self.data.loc[candles.index.stop - 1, 'shooting_star'] = 1
+            if c_open[0] > c_close[0] and c_open[0] > c_high[1] and c_close[0] < c_low[1]:
+                self.data.loc[candles.index.stop - 1, 'harami_cross_bullish'] = 1
+            if c_open[0] < c_close[0] and c_open[0] < c_low[1] and c_close[0] > c_high[1]:
+                self.data.loc[candles.index.stop - 1, 'harami_cross_bearish'] = 1
+            if c_open[0] > c_close[0] and abs(c_open[1] - c_close[1]) < 20 and c_high[1] >= c_close[0]:
+                self.data.loc[candles.index.stop - 1, 'doji_star_bullish'] = 1
+            if c_open[0] < c_close[0] and c_open[1] > c_close[1] and c_close[1] <= c_close[0] < _average(c_open[1],
+                                                                                                         c_close[1]):
+                self.data.loc[candles.index.stop - 1, 'doji_star_bearish'] = 1
+            if c_close[1] <= c_close[0] < c_open[0] <= c_high[1] and c_close[1] < c_open[1] <= c_open[0]:
+                self.data.loc[candles.index.stop - 1, 'matching_low'] = 1
+            if c_close[0] > c_open[0] >= c_low[1] and c_close[0] >= c_close[1] > c_open[1] > c_open[0]:
+                self.data.loc[candles.index.stop - 1, 'matching_high'] = 1
+            if c_high[0] > c_open[0] >= c_high[1] > c_open[1] > c_close[1] > c_low[1] > c_close[0] > c_low[0]:
+                self.data.loc[candles.index.stop - 1, 'homing_pigeon'] = 1
+            if abs(abs(c_open[1] - c_close[1]) - abs(c_open[0] - c_close[0])) < 0.0005 and c_open[0] > c_close[0] \
+                    and c_high[0] > c_open[1] and c_open[1] < c_close[1] and c_low[1] < c_open[0] < c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'separating_lines_bullish'] = 1
+            if abs(abs(c_open[1] - c_close[1]) - abs(c_open[0] - c_close[0])) < 0.0005 \
+                    and c_open[0] < c_close[0] < c_open[1] <= c_open[0] < c_high[1] and c_low[0] < c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'separating_lines_bearish'] = 1
+            if c_open[0] < c_close[0] < c_close[1] < c_open[1] and abs(c_low[1] - c_close[1]) < 0.0005 \
+                    and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]) and c_close[1] <= c_high[0]:
+                self.data.loc[candles.index.stop - 1, 'on_neck_line_bullish'] = 1
+            if c_open[0] > c_close[0] > c_close[1] > c_open[1] and abs(c_open[0] - c_close[0]) > abs(
+                    c_open[1] - c_close[1]) and c_close[1] <= c_low[0]:
+                self.data.loc[candles.index.stop - 1, 'on_neck_line_bearish'] = 1
+            if c_open[0] < c_close[0] <= c_close[1] < c_open[1] and abs(c_open[0] - c_close[0]) > abs(
+                    c_open[1] - c_close[1]):
+                self.data.loc[candles.index.stop - 1, 'in_neck_line_bullish'] = 1
+            if c_open[0] > c_close[0] >= c_close[1] > c_open[1] and abs(c_open[0] - c_close[0]) > abs(
+                    c_open[1] - c_close[1]):
+                self.data.loc[candles.index.stop - 1, 'in_neck_line_bearish'] = 1
+            if c_open[0] > c_close[0] > c_open[1] and c_low[0] > c_open[1] and abs(c_open[1] - c_low[1]) < 0.0005 \
+                    and c_close[1] > _average(c_close[1], c_open[1]):
+                self.data.loc[candles.index.stop - 1, 'belt_hold_bullish'] = 1
+            if c_open[0] < c_close[0] < c_open[1] and c_high[0] < c_open[1] \
+                    and abs(c_open[1] - c_high[1]) < 0.0005 and c_close[1] < _average(c_close[1], c_open[1]):
+                self.data.loc[candles.index.stop - 1, 'belt_hold_bearish'] = 1
+            if c_open[0] > c_close[0] and abs(c_open[0] - c_high[0]) < 0.0005 and abs(c_close[0] - c_low[0]) < 0.0005 \
+                    and c_open[1] > c_open[0] and abs(c_open[1] - c_low[1]) < 0.0005 \
+                    and abs(c_close[1] - c_high[1]) < 0.0005 and c_close[1] - c_open[1] > c_open[0] - c_close[0]:
+                self.data.loc[candles.index.stop - 1, 'kicking_bullish'] = 1
+            if c_open[0] < c_close[0] and abs(c_open[0] - c_low[0]) < 0.0005 and abs(c_close[0] - c_high[0]) < 0.0005 \
+                    and c_open[1] < c_open[0] and abs(c_open[1] - c_high[1]) < 0.0005 \
+                    and abs(c_close[1] - c_low[1]) < 0.0005 and c_open[1] - c_close[1] > c_close[0] - c_open[0]:
+                self.data.loc[candles.index.stop - 1, 'kicking_bearish'] = 1
+        return 0
+
+    def pattern_3_candles(self, candles):
+        # work with at least 3 candle and add rows to dataframe 1 if pattern be true
+        c_open, c_high, c_close, c_low = get_ohcl(self.data.loc[candles.index])
+        if candles.index.stop <= len(self.data):
+            if c_low[0] > c_high[1] > c_high[2] > c_close[1] > c_close[2] and c_open[2] < c_close[1] and c_high[2] < \
+                    c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'inverted_hammer'] = 1
+            if c_open[0] > c_close[0] and abs(c_open[1] - c_close[1]) < 20 and c_close[1] < c_open[2] < c_close[2] \
+                    and c_low[2] >= c_close[1]:
+                self.data.loc[candles.index.stop - 1, 'morning_doji_star'] = 1
+            if c_open[0] < c_close[0] and abs(c_open[1] - c_close[1]) < 20 and c_close[1] > c_open[2] > c_close[2] \
+                    and c_high[2] <= c_close[1]:
+                self.data.loc[candles.index.stop - 1, 'evening_doji_star'] = 1
+            if c_open[0] > c_close[0] >= c_high[1] and abs(c_open[1] - c_close[1]) < 20 and c_open[2] < c_close[2] \
+                    and c_close[2] > c_close[0] and c_close[2] >= _average(c_open[0], c_close[0]) \
+                    and c_open[2] > c_close[1]:
+                self.data.loc[candles.index.stop - 1, 'abandoned_baby_bullish'] = 1
+            if c_open[0] < c_close[0] < c_close[1] and abs(c_open[1] - c_close[1]) < 20 \
+                    and c_close[1] > c_open[2] > c_close[2] and _average(c_open[0], c_close[0]) >= c_close[2] \
+                    and c_high[2] <= c_close[1]:
+                self.data.loc[candles.index.stop - 1, 'abandoned_baby_bearish'] = 1
+            if c_close[1] < c_close[2] < c_close[0] and abs(c_open[2] - c_close[2]) < 20 \
+                    and abs(c_open[1] - c_close[1]) < 20 and abs(c_open[0] - c_close[0]) < 20:
+                self.data.loc[candles.index.stop - 1, 'tri_star_bullish'] = 1
+            if c_close[0] < c_close[2] < c_close[1] and abs(c_open[2] - c_close[2]) < 20 \
+                    and abs(c_open[1] - c_close[1]) < 20 and abs(c_open[0] - c_close[0]) < 20:
+                self.data.loc[candles.index.stop - 1, 'tri_star_bearish'] = 1
+            if c_open[0] > c_close[0] and c_open[0] > c_close[1] > c_open[1] > c_close[0] \
+                    and c_open[1] < c_open[2] < c_close[1] and c_open[2] < c_close[2] and c_low[2] >= c_open[1] \
+                    and c_close[2] > c_open[0]:
+                self.data.loc[candles.index.stop - 1, 'three_inside_up'] = 1
+            if c_close[0] > c_open[1] > c_close[1] > c_open[0] > c_close[2] \
+                    and _average(c_open[1], c_close[1]) > c_open[2] > c_close[2]:
+                self.data.loc[candles.index.stop - 1, 'three_inside_down'] = 1
+            if c_open[1] < c_close[0] < c_open[0] < c_close[1] and c_open[2] < c_close[1] < c_close[2]:
+                self.data.loc[candles.index.stop - 1, 'three_outside_up'] = 1
+            if c_open[1] > c_close[0] > c_open[0] > c_close[1] > c_close[2] and c_open[2] > c_close[1] \
+                    and c_high[2] < c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'three_outside_down'] = 1
+            if c_open[0] > c_open[1] > c_close[1] > c_close[0] and c_low[1] < c_low[0] \
+                    and c_close[0] <= c_open[2] < c_close[2] < c_close[1] < c_high[2]:
+                self.data.loc[candles.index.stop - 1, 'unique_three_river'] = 1
+            if c_close[2] < c_open[2] <= c_close[1] < c_open[1] <= c_close[0] < c_open[0]:
+                self.data.loc[candles.index.stop - 1, 'loentical_three_cross'] = 1
+            if c_open[0] < c_close[0] and c_open[1] < c_close[1] and c_open[2] < c_close[2] and c_open[1] <= c_close[0] \
+                    and abs(c_open[2] - c_close[2]) < abs(c_open[1] - c_close[1]) and c_open[2] > c_close[1] \
+                    and c_low[2] >= c_close[1]:
+                self.data.loc[candles.index.stop - 1, 'deliberation'] = 1
+            if c_open[0] < c_close[0] and c_open[2] > c_open[1] > c_close[1] > c_close[2] >= c_high[0]:
+                self.data.loc[candles.index.stop - 1, 'upside_gap_two_crows'] = 1
+            if abs(c_open[2] - c_close[2]) < abs(c_open[1] - c_close[1]) < abs(c_open[0] - c_close[0]) \
+                    and c_open[0] < c_close[0] and c_open[1] < c_close[1] and c_open[2] < c_close[2] \
+                    and c_open[1] < c_close[0] and c_open[2] < c_close[1] and c_high[1] > c_close[2] \
+                    and c_low[2] < _average(c_open[1], c_close[1]):
+                self.data.loc[candles.index.stop - 1, 'advance_block'] = 1
+            if abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]) \
+                    and abs(c_open[2] - c_close[2]) > abs(c_open[1] - c_close[1]) and c_open[0] < c_close[0] \
+                    and c_high[0] <= c_low[1] and c_open[1] > c_close[1] \
+                    and c_close[1] < c_open[2] <= _average(c_open[1], c_close[1]) and c_open[2] > c_close[2] \
+                    and c_low[2] < _average(c_open[0], c_close[0]):
+                self.data.loc[candles.index.stop - 1, 'two_cows'] = 1
+            if c_open[0] < c_close[0] < c_close[2] < c_open[1] < c_open[2] < c_close[1]:
+                self.data.loc[candles.index.stop - 1, 'upside_tasuki_gap'] = 1
+            if c_open[0] > c_close[0] > c_close[2] > c_open[1] > c_open[2] > c_close[1]:
+                self.data.loc[candles.index.stop - 1, 'downside_tasuki_gap'] = 1
+            if c_open[0] < c_close[0] < c_open[2] < c_open[1] < c_close[2] < c_close[1] <= c_high[2] \
+                    and c_low[1] > c_high[0]:
+                self.data.loc[candles.index.stop - 1, 'sidebyside_white_lines_bullish'] = 1
+            if c_open[0] > c_close[0] > c_close[1] >= c_close[2] > c_open[2] >= c_open[1] and c_high[1] <= c_low[0]:
+                self.data.loc[candles.index.stop - 1, 'sidebyside_white_lines_bearish'] = 1
+            if c_open[0] < c_close[2] < c_close[0] < c_open[1] < c_open[2] < c_close[1] and c_low[1] > c_high[0]:
+                self.data.loc[candles.index.stop - 1, 'upside_gap_three_methods'] = 1
+            if c_open[0] > c_close[2] > c_close[0] > c_open[1] > c_open[2] > c_close[1] and c_high[1] < c_low[0]:
+                self.data.loc[candles.index.stop - 1, 'downside_gap_three_methods'] = 1
+            if c_high[2] > c_high[1] and c_low[2] < c_low[1] and c_open[2] < c_open[1] and c_close[2] > c_close[1] \
+                    and c_close[2] > c_open[2] and c_close[1] < c_close[0] and c_close[2] > c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'engulfing_bullish'] = 1
+            if c_high[2] > c_high[1] and c_low[2] < c_low[1] and c_open[2] > c_open[1] and c_close[2] < c_close[1] \
+                    and c_close[2] < c_open[2] and c_close[1] > c_close[0] and c_close[2] < c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'engulfing_bearish'] = 1
+            if c_open[1] > c_close[1] and c_close[1] < c_close[0] and c_close[1] < c_open[2] < c_open[1] \
+                    and c_close[1] < c_close[2] < c_open[1] and c_high[2] < c_high[1] and c_low[2] > c_low[1] \
+                    and c_close[2] >= c_open[2]:
+                self.data.loc[candles.index.stop - 1, 'harami_bullish'] = 1
+            if c_open[1] < c_close[1] and c_close[1] > c_close[0] and c_close[1] > c_open[2] > c_open[1] \
+                    and c_close[1] > c_close[2] > c_open[1] and c_high[2] < c_high[1] and c_low[2] > c_low[1] \
+                    and c_close[2] <= c_open[2]:
+                self.data.loc[candles.index.stop - 1, 'harami_bearish'] = 1
+            if c_close[0] > c_close[1] and c_open[2] < c_low[1] \
+                    and _average(c_open[1], c_close[1]) < c_close[2] < c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'piercing_line'] = 1
+            if c_close[0] < c_close[1] and c_open[2] > c_high[1] \
+                    and _average(c_open[1], c_close[1]) > c_close[2] > c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'dark_cloud_cover'] = 1
+            if c_open[0] > c_close[0] and c_close[0] < c_open[1] < c_close[1] < c_open[2] and c_open[2] > c_close[2] \
+                    and abs(c_close[2] - c_close[0]) < 0.0005:
+                self.data.loc[candles.index.stop - 1, 'stick_sandwich'] = 1
+            if c_open[0] > c_close[0] and c_open[1] > c_close[1] and abs(c_close[1] - c_close[2]) < 0.0005 \
+                    and c_open[2] < c_close[2] and c_open[1] >= c_high[2]:
+                self.data.loc[candles.index.stop - 1, 'meeting_line_bullish'] = 1
+            if c_open[0] < c_close[0] and c_open[1] < c_close[1] and abs(c_close[1] - c_close[2]) < 0.0005 \
+                    and c_open[2] > c_close[2] and c_open[1] <= c_low[2]:
+                self.data.loc[candles.index.stop - 1, 'meeting_line_bearish'] = 1
+        return 0
+
+    def pattern_4_candles(self, candles):
+        # work with at least 4 candle and add rows to dataframe 1 if pattern be true
+        c_open, c_high, c_close, c_low = get_ohcl(self.data.loc[candles.index])
+        if candles.index.stop <= len(self.data):
+            if c_open[0] > c_close[0] and c_open[1] > c_close[0] and c_open[1] > c_close[1] and c_high[2] > c_close[1] \
+                    and c_close[1] > c_open[2] > c_close[2] and c_open[3] >= c_high[2] and c_close[3] <= c_close[2]:
+                self.data.loc[candles.index.stop - 1, 'concealing_baby'] = 1
+            if c_low[3] >= c_low[0] and c_open[0] <= c_close[3] < c_open[3] < c_close[2] < c_open[2] <= c_close[1] \
+                    < c_close[1] < c_open[1] and c_high[3] > c_close[2]:
+                self.data.loc[candles.index.stop - 1, 'rising_three_methods'] = 1
+            if c_close[3] < c_open[0] < c_open[1] < c_close[0] <= c_open[2] < c_close[1] < c_close[2] <= c_open[3] \
+                    and c_high[2] >= c_high[3] and abs(
+                abs(c_open[2] - c_close[2]) - abs(c_open[1] - c_close[1])) < 0.0005 \
+                    and abs(abs(c_open[1] - c_close[1]) - abs(c_open[0] - c_close[0])) < 0.0005:
+                self.data.loc[candles.index.stop - 1, 'three_line_strike_bullish'] = 1
+            if c_open[3] < c_close[2] < c_close[1] < c_open[2] < c_close[0] < c_open[1] < c_open[0] < c_close[3] \
+                    and c_high[0] < c_close[3] and abs(
+                abs(c_open[2] - c_close[2]) - abs(c_open[1] - c_close[1])) < 0.0005 \
+                    and abs(abs(c_open[1] - c_close[1]) - abs(c_open[0] - c_close[0])) < 0.0005:
+                self.data.loc[candles.index.stop - 1, 'three_line_strike_beearish'] = 1
+            if c_open[0] > c_close[0] > c_open[1] and c_close[1] > _average(c_close[1], c_open[1]) \
+                    and c_open[1] < c_open[2] < c_close[1] and c_close[2] > _average(c_close[2], c_open[2]) \
+                    and c_open[2] < c_open[3] < c_close[2] and c_close[3] > _average(c_close[3], c_open[3]) \
+                    and c_high[1] < c_high[2] < c_high[3]:
+                self.data.loc[candles.index.stop - 1, 'three_white_soldiers'] = 1
+            if c_open[0] < c_close[0] < c_open[1] and c_close[1] < _average(c_close[1], c_open[1]) \
+                    and c_open[1] > c_open[2] > c_close[1] and c_close[2] < _average(c_close[2], c_open[2]) \
+                    and c_open[2] > c_open[3] > c_close[2] and c_close[3] < _average(c_close[3], c_open[3]) \
+                    and c_low[1] > c_low[2] > c_low[3]:
+                self.data.loc[candles.index.stop - 1, 'three_black_crows'] = 1
+            if c_close[0] > c_close[1] > c_open[2] and c_open[1] > c_close[1] > c_close[2] \
+                    and c_open[3] > c_open[2] and c_open[3] > c_close[2] and c_close[3] > c_close[1] \
+                    and c_open[1] - c_close[1] > c_close[3] - c_open[3]:
+                self.data.loc[candles.index.stop - 1, 'morning_star'] = 1
+            if c_close[0] < c_close[1] < c_open[2] and c_open[1] < c_close[1] < c_close[2] \
+                    and c_open[3] < c_open[2] and c_open[3] < c_close[2] and c_close[3] < c_close[1] \
+                    and c_close[1] - c_open[1] > c_open[3] - c_close[3]:
+                self.data.loc[candles.index.stop - 1, 'evening_star'] = 1
+            if c_open[0] > c_close[0] and c_open[1] > c_close[1] and abs(c_open[1] - c_high[1]) < 0.0005 \
+                    and c_close[2] < c_open[2] < c_open[1] and c_open[2] > c_close[1] and c_low[2] > c_low[1] \
+                    and abs(c_open[2] - c_high[2]) < 0.0005 and c_close[3] < c_open[3] < c_open[2] \
+                    and c_open[3] > c_close[2] and abs(c_open[3] - c_high[3]) < 0.0005 \
+                    and abs(c_close[3] - c_low[3]) < 0.0005 and c_close[3] >= c_low[2]:
+                self.data.loc[candles.index.stop - 1, 'three_stars_in_the_south'] = 1
+
+        return 0
+
+    def pattern_5_candles(self, candles):
+        # work with at least 5 candle and add rows to dataframe 1 if pattern be true
+        c_open, c_high, c_close, c_low = get_ohcl(self.data.loc[candles.index])
+        if candles.index.stop <= len(self.data):
+            if c_open[0] > c_close[0] \
+                    and c_close[4] < c_open[1] < c_open[2] < c_close[1] < c_close[2] < c_open[3] < c_close[3] \
+                    and c_close[3] > c_open[4] > c_open[3] and c_close[4] < c_low[0]:
+                self.data.loc[candles.index.stop - 1, 'falling_three_methods'] = 1
+            if c_open[0] > c_close[0] > c_open[1] and c_close[1] < c_close[2] < c_open[2] and c_open[3] > c_close[2] \
+                    and c_open[3] > c_close[3] and c_open[4] < c_close[4] and c_open[4] < c_open[3] \
+                    and c_close[4] > c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'breakaway_bullish'] = 1
+            if c_open[0] < c_close[0] <= c_open[1] < c_close[1] < c_close[2] < c_open[1] < c_open[2] \
+                    and c_open[2] > c_close[2] and c_close[2] < c_open[3] < c_close[3] and c_close[3] > c_open[2] \
+                    and c_open[4] < _average(c_open[3], c_close[3]) and c_close[4] < c_open[1]:
+                self.data.loc[candles.index.stop - 1, 'breakaway_bearish'] = 1
+            if c_open[0] > c_close[0] and c_close[1] < c_open[1] < c_open[0] and c_close[2] < c_open[2] < c_open[1] \
+                    and c_close[3] < c_open[3] < c_open[2] and c_close[4] > c_open[4] > c_open[3] \
+                    and c_low[0] > c_low[1] > c_low[2] > c_low[3]:
+                self.data.loc[candles.index.stop - 1, 'ladder_bottom'] = 1
+
+        return 0
+
+    def rolling_2candle(self):
+        window = self.data.rolling(2)
+        window.apply(self.pattern_2_candles, raw=False)
+
+    def rolling_3candle(self):
+        window = self.data.rolling(3)
+        window.apply(self.pattern_3_candles, raw=False)
+
+    def rolling_4candle(self):
+        window = self.data.rolling(4)
+        window.apply(self.pattern_4_candles, raw=False)
+
+    def rolling_5candle(self):
+        window = self.data.rolling(5)
+        window.apply(self.pattern_5_candles, raw=False)
+
+    def rolling_all(self):
+        self.rolling_2candle()
+        self.rolling_3candle()
+        self.rolling_4candle()
+        self.rolling_5candle()
+
+    def save_csv(self):
+        self.data.to_csv('test.csv')
+
+
+# test
+# data = pd.read_csv('../Static/Bitcoin-30m.csv')
+# del data['date']
+# del data['volume']
+# pat = Patterns(data)
+# pat.rolling_2candle()
+# pat.save_csv()
+
+
 def hammer(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_low[0] > c_open[1] > c_close[1] > c_low[1] and c_high[1] < c_low[0]:
         return True
     else:
@@ -27,7 +311,7 @@ def hammer(candles):
 
 def hanging_man(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[1] > c_close[1] > c_high[0] > c_low[1]:
         return True
     else:
@@ -36,7 +320,7 @@ def hanging_man(candles):
 
 def inverted_hammer(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_low[0] > c_high[1] > c_high[2] > c_close[1] > c_close[2] and c_open[2] < c_close[1] and c_high[2] < c_open[1]:
         return True
     else:
@@ -45,7 +329,7 @@ def inverted_hammer(candles):
 
 def shooting_star(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_high[1] > c_high[0] > _average(c_open[1], c_close[1]) and c_open[1] > c_close[1] > c_close[0] \
             and c_open[1] > c_high[0]:
         return True
@@ -55,7 +339,7 @@ def shooting_star(candles):
 
 def harami_cross_bullish(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] > c_close[0] and c_open[0] > c_high[1] and c_close[0] < c_low[1]:
         return True
     else:
@@ -64,7 +348,7 @@ def harami_cross_bullish(candles):
 
 def harami_cross_bearish(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] < c_close[0] and c_open[0] < c_low[1] and c_close[0] > c_high[1]:
         return True
     else:
@@ -73,7 +357,7 @@ def harami_cross_bearish(candles):
 
 def doji_star_bullish(candles, limit: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] > c_close[0] and abs(c_open[1] - c_close[1]) < limit and c_high[1] >= c_close[0]:
         return True
     else:
@@ -82,7 +366,7 @@ def doji_star_bullish(candles, limit: float):
 
 def doji_star_bearish(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] < c_close[0] and c_open[1] > c_close[1] and c_close[1] <= c_close[0] < _average(c_open[1], c_close[1]):
         return True
     else:
@@ -91,7 +375,7 @@ def doji_star_bearish(candles):
 
 def morning_doji_star(candles, limit: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[0] and abs(c_open[1] - c_close[1]) < limit and c_close[1] < c_open[2] < c_close[2] \
             and c_low[2] >= c_close[1]:
         return True
@@ -101,7 +385,7 @@ def morning_doji_star(candles, limit: float):
 
 def evening_doji_star(candles, limit: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[0] and abs(c_open[1] - c_close[1]) < limit and c_close[1] > c_open[2] > c_close[2] \
             and c_high[2] <= c_close[1]:
         return True
@@ -111,7 +395,7 @@ def evening_doji_star(candles, limit: float):
 
 def abandoned_baby_bullish(candles, limit: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[0] >= c_high[1] and abs(c_open[1] - c_close[1]) < limit and c_open[2] < c_close[2] \
             and c_close[2] > c_close[0] and c_close[2] >= _average(c_open[0], c_close[0]) and c_open[2] > c_close[1]:
         return True
@@ -121,7 +405,7 @@ def abandoned_baby_bullish(candles, limit: float):
 
 def abandoned_baby_bearish(candles, limit: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[0] < c_close[1] and abs(c_open[1] - c_close[1]) < limit \
             and c_close[1] > c_open[2] > c_close[2] and _average(c_open[0], c_close[0]) >= c_close[2] \
             and c_high[2] <= c_close[1]:
@@ -132,7 +416,7 @@ def abandoned_baby_bearish(candles, limit: float):
 
 def tri_star_bullish(candles, limit: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_close[1] < c_close[2] < c_close[0] and abs(c_open[2] - c_close[2]) < limit \
             and abs(c_open[1] - c_close[1]) < limit and abs(c_open[0] - c_close[0]) < limit:
         return True
@@ -142,7 +426,7 @@ def tri_star_bullish(candles, limit: float):
 
 def tri_star_bearish(candles, limit: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_close[0] < c_close[2] < c_close[1] and abs(c_open[2] - c_close[2]) < limit \
             and abs(c_open[1] - c_close[1]) < limit and abs(c_open[0] - c_close[0]) < limit:
         return True
@@ -152,7 +436,7 @@ def tri_star_bearish(candles, limit: float):
 
 def three_inside_up(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[0] and c_open[0] > c_close[1] > c_open[1] > c_close[0] \
             and c_open[1] < c_open[2] < c_close[1] and c_open[2] < c_close[2] and c_low[2] >= c_open[1] \
             and c_close[2] > c_open[0]:
@@ -163,7 +447,7 @@ def three_inside_up(candles):
 
 def three_inside_down(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_close[0] > c_open[1] > c_close[1] > c_open[0] > c_close[2] \
             and _average(c_open[1], c_close[1]) > c_open[2] > c_close[2]:
         return True
@@ -173,7 +457,7 @@ def three_inside_down(candles):
 
 def three_outside_up(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[1] < c_close[0] < c_open[0] < c_close[1] and c_open[2] < c_close[1] < c_close[2]:
         return True
     else:
@@ -182,7 +466,7 @@ def three_outside_up(candles):
 
 def three_outside_down(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[1] > c_close[0] > c_open[0] > c_close[1] > c_close[2] and c_open[2] > c_close[1] \
             and c_high[2] < c_open[1]:
         return True
@@ -192,7 +476,7 @@ def three_outside_down(candles):
 
 def unique_three_river(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_open[1] > c_close[1] > c_close[0] and c_low[1] < c_low[0] \
             and c_close[0] <= c_open[2] < c_close[2] < c_close[1] < c_high[2]:
         return True
@@ -202,7 +486,7 @@ def unique_three_river(candles):
 
 def concealing_baby(candles):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     if c_open[0] > c_close[0] and c_open[1] > c_close[0] and c_open[1] > c_close[1] and c_high[2] > c_close[1] \
             and c_close[1] > c_open[2] > c_close[2] and c_open[3] >= c_high[2] and c_close[3] <= c_close[2]:
         return True
@@ -212,7 +496,7 @@ def concealing_baby(candles):
 
 def loentical_three_cross(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_close[2] < c_open[2] <= c_close[1] < c_open[1] <= c_close[0] < c_open[0]:
         return True
     else:
@@ -221,7 +505,7 @@ def loentical_three_cross(candles):
 
 def deliberation(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[0] and c_open[1] < c_close[1] and c_open[2] < c_close[2] and c_open[1] <= c_close[0] \
             and abs(c_open[2] - c_close[2]) < abs(c_open[1] - c_close[1]) and c_open[2] > c_close[1] and c_low[2] >= \
             c_close[1]:
@@ -232,7 +516,7 @@ def deliberation(candles):
 
 def matching_low(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_close[1] <= c_close[0] < c_open[0] <= c_high[1] and c_close[1] < c_open[1] <= c_open[0]:
         return True
     else:
@@ -241,7 +525,7 @@ def matching_low(candles):
 
 def matching_high(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_close[0] > c_open[0] >= c_low[1] and c_close[0] >= c_close[1] > c_open[1] > c_open[0]:
         return True
     else:
@@ -250,7 +534,7 @@ def matching_high(candles):
 
 def upside_gap_two_crows(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[0] and c_open[2] > c_open[1] > c_close[1] > c_close[2] >= c_high[0]:
         return True
     else:
@@ -259,7 +543,7 @@ def upside_gap_two_crows(candles):
 
 def homing_pigeon(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_high[0] > c_open[0] >= c_high[1] > c_open[1] > c_close[1] > c_low[1] > c_close[0] > c_low[0]:
         return True
     else:
@@ -268,7 +552,7 @@ def homing_pigeon(candles):
 
 def advance_block(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if abs(c_open[2] - c_close[2]) < abs(c_open[1] - c_close[1]) < abs(c_open[0] - c_close[0]) \
             and c_open[0] < c_close[0] and c_open[1] < c_close[1] and c_open[2] < c_close[2] \
             and c_open[1] < c_close[0] and c_open[2] < c_close[1] and c_high[1] > c_close[2] \
@@ -280,7 +564,7 @@ def advance_block(candles):
 
 def two_crows(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]) \
             and abs(c_open[2] - c_close[2]) > abs(c_open[1] - c_close[1]) and c_open[0] < c_close[0] \
             and c_high[0] <= c_low[1] and c_open[1] > c_close[1] \
@@ -293,7 +577,7 @@ def two_crows(candles):
 
 def rising_three_methods(candles):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     if c_low[3] >= c_low[0] and c_open[0] <= c_close[3] < c_open[3] < c_close[2] < c_open[2] <= c_close[1] \
             < c_close[1] < c_open[1] and c_high[3] > c_close[2]:
         return True
@@ -303,7 +587,7 @@ def rising_three_methods(candles):
 
 def falling_three_methods(candles):
     # work with at least 5 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 5)
     if c_open[0] > c_close[0] \
             and c_close[4] < c_open[1] < c_open[2] < c_close[1] < c_close[2] < c_open[3] < c_close[3] \
             and c_close[3] > c_open[4] > c_open[3] and c_close[4] < c_low[0]:
@@ -314,7 +598,7 @@ def falling_three_methods(candles):
 
 def upside_tasuki_gap(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[0] < c_close[2] < c_open[1] < c_open[2] < c_close[1]:
         return True
     else:
@@ -323,7 +607,7 @@ def upside_tasuki_gap(candles):
 
 def downside_tasuki_gap(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[0] > c_close[2] > c_open[1] > c_open[2] > c_close[1]:
         return True
     else:
@@ -332,7 +616,7 @@ def downside_tasuki_gap(candles):
 
 def sidebyside_white_lines_bullish(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[0] < c_open[2] < c_open[1] < c_close[2] < c_close[1] <= c_high[2] and c_low[1] > c_high[0]:
         return True
     else:
@@ -341,7 +625,7 @@ def sidebyside_white_lines_bullish(candles):
 
 def sidebyside_white_lines_bearish(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[0] > c_close[1] >= c_close[2] > c_open[2] >= c_open[1] and c_high[1] <= c_low[0]:
         return True
     else:
@@ -350,7 +634,7 @@ def sidebyside_white_lines_bearish(candles):
 
 def three_line_strike_bullish(candles, tolerance: float):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     first = abs(c_open[2] - c_close[2])
     sec = abs(c_open[1] - c_close[1])
     third = abs(c_open[0] - c_close[0])
@@ -364,7 +648,7 @@ def three_line_strike_bullish(candles, tolerance: float):
 
 def separating_lines_bullish(candles, tolerance: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     first = abs(c_open[1] - c_close[1])
     sec = abs(c_open[0] - c_close[0])
 
@@ -377,7 +661,7 @@ def separating_lines_bullish(candles, tolerance: float):
 
 def separating_lines_bearish(candles, tolerance: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     first = abs(c_open[1] - c_close[1])
     sec = abs(c_open[0] - c_close[0])
 
@@ -390,7 +674,7 @@ def separating_lines_bearish(candles, tolerance: float):
 
 def three_line_strike_bearish(candles, tolerance: float):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     first = abs(c_open[2] - c_close[2])
     sec = abs(c_open[1] - c_close[1])
     third = abs(c_open[0] - c_close[0])
@@ -404,7 +688,7 @@ def three_line_strike_bearish(candles, tolerance: float):
 
 def upside_gap_three_methods(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[2] < c_close[0] < c_open[1] < c_open[2] < c_close[1] and c_low[1] > c_high[0]:
         return True
     else:
@@ -413,7 +697,7 @@ def upside_gap_three_methods(candles):
 
 def downside_gap_three_methods(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[2] > c_close[0] > c_open[1] > c_open[2] > c_close[1] and c_high[1] < c_low[0]:
         return True
     else:
@@ -422,7 +706,7 @@ def downside_gap_three_methods(candles):
 
 def on_neck_line_bullish(candles, tolerance: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] < c_close[0] < c_close[1] < c_open[1] and abs(c_low[1] - c_close[1]) < tolerance \
             and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]) and c_close[1] <= c_high[0]:
         return True
@@ -432,7 +716,7 @@ def on_neck_line_bullish(candles, tolerance: float):
 
 def on_neck_line_bearish(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] > c_close[0] > c_close[1] > c_open[1] and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]) \
             and c_close[1] <= c_low[0]:
         return True
@@ -442,7 +726,7 @@ def on_neck_line_bearish(candles):
 
 def breakaway_bullish(candles):
     # work with at least 5 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 5)
     if c_open[0] > c_close[0] > c_open[1] and c_close[1] < c_close[2] < c_open[2] and c_open[3] > c_close[2] \
             and c_open[3] > c_close[3] and c_open[4] < c_close[4] and c_open[4] < c_open[3] and c_close[4] > c_open[1]:
         return True
@@ -452,7 +736,7 @@ def breakaway_bullish(candles):
 
 def breakaway_bearish(candles):
     # work with at least 5 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 5)
     if c_open[0] < c_close[0] <= c_open[1] < c_close[1] < c_close[2] < c_open[1] < c_open[2] \
             and c_open[2] > c_close[2] and c_close[2] < c_open[3] < c_close[3] and c_close[3] > c_open[2] \
             and c_open[4] < _average(c_open[3], c_close[3]) and c_close[4] < c_open[1]:
@@ -463,7 +747,7 @@ def breakaway_bearish(candles):
 
 def in_neck_line_bullish(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] < c_close[0] <= c_close[1] < c_open[1] and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]):
         return True
     else:
@@ -472,7 +756,7 @@ def in_neck_line_bullish(candles):
 
 def in_neck_line_bearish(candles):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] > c_close[0] >= c_close[1] > c_open[1] and abs(c_open[0] - c_close[0]) > abs(c_open[1] - c_close[1]):
         return True
     else:
@@ -482,7 +766,7 @@ def in_neck_line_bearish(candles):
 # pin script
 def three_white_soldiers(candles):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     if c_open[0] > c_close[0] > c_open[1] and c_close[1] > _average(c_close[1], c_open[1]) \
             and c_open[1] < c_open[2] < c_close[1] and c_close[2] > _average(c_close[2], c_open[2]) \
             and c_open[2] < c_open[3] < c_close[2] and c_close[3] > _average(c_close[3], c_open[3]) \
@@ -494,7 +778,7 @@ def three_white_soldiers(candles):
 
 def three_black_crows(candles):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     if c_open[0] < c_close[0] < c_open[1] and c_close[1] < _average(c_close[1], c_open[1]) \
             and c_open[1] > c_open[2] > c_close[1] and c_close[2] < _average(c_close[2], c_open[2]) \
             and c_open[2] > c_open[3] > c_close[2] and c_close[3] < _average(c_close[3], c_open[3]) \
@@ -506,7 +790,7 @@ def three_black_crows(candles):
 
 def engulfing_bullish(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_high[2] > c_high[1] and c_low[2] < c_low[1] and c_open[2] < c_open[1] and c_close[2] > c_close[1] \
             and c_close[2] > c_open[2] and c_close[1] < c_close[0] and c_close[2] > c_open[1]:
         return True
@@ -516,7 +800,7 @@ def engulfing_bullish(candles):
 
 def engulfing_bearish(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_high[2] > c_high[1] and c_low[2] < c_low[1] and c_open[2] > c_open[1] and c_close[2] < c_close[1] \
             and c_close[2] < c_open[2] and c_close[1] > c_close[0] and c_close[2] < c_open[1]:
         return True
@@ -526,7 +810,7 @@ def engulfing_bearish(candles):
 
 def harami_bullish(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[1] > c_close[1] and c_close[1] < c_close[0] and c_close[1] < c_open[2] < c_open[1] \
             and c_close[1] < c_close[2] < c_open[1] and c_high[2] < c_high[1] and c_low[2] > c_low[1] \
             and c_close[2] >= c_open[2]:
@@ -537,7 +821,7 @@ def harami_bullish(candles):
 
 def harami_bearish(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[1] < c_close[1] and c_close[1] > c_close[0] and c_close[1] > c_open[2] > c_open[1] \
             and c_close[1] > c_close[2] > c_open[1] and c_high[2] < c_high[1] and c_low[2] > c_low[1] \
             and c_close[2] <= c_open[2]:
@@ -548,7 +832,7 @@ def harami_bearish(candles):
 
 def piercing_line(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_close[0] > c_close[1] and c_open[2] < c_low[1] and _average(c_open[1], c_close[1]) < c_close[2] < c_open[1]:
         return True
     else:
@@ -557,7 +841,7 @@ def piercing_line(candles):
 
 def dark_cloud_cover(candles):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_close[0] < c_close[1] and c_open[2] > c_high[1] and _average(c_open[1], c_close[1]) > c_close[2] > c_open[1]:
         return True
     else:
@@ -566,7 +850,7 @@ def dark_cloud_cover(candles):
 
 def morning_star(candles):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     if c_close[0] > c_close[1] > c_open[2] and c_open[1] > c_close[1] > c_close[2] \
             and c_open[3] > c_open[2] and c_open[3] > c_close[2] and c_close[3] > c_close[1] \
             and c_open[1] - c_close[1] > c_close[3] - c_open[3]:
@@ -577,7 +861,7 @@ def morning_star(candles):
 
 def evening_star(candles):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     if c_close[0] < c_close[1] < c_open[2] and c_open[1] < c_close[1] < c_close[2] \
             and c_open[3] < c_open[2] and c_open[3] < c_close[2] and c_close[3] < c_close[1] \
             and c_close[1] - c_open[1] > c_open[3] - c_close[3]:
@@ -588,7 +872,7 @@ def evening_star(candles):
 
 def belt_hold_bullish(candles, tolerance: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] > c_close[0] > c_open[1] and c_low[0] > c_open[1] and abs(c_open[1] - c_low[1]) < tolerance \
             and c_close[1] > _average(c_close[1], c_open[1]):
         return True
@@ -598,7 +882,7 @@ def belt_hold_bullish(candles, tolerance: float):
 
 def belt_hold_bearish(candles, tolerance: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] < c_close[0] < c_open[1] and c_high[0] < c_open[1] \
             and abs(c_open[1] - c_high[1]) < tolerance and c_close[1] < _average(c_close[1], c_open[1]):
         return True
@@ -608,7 +892,7 @@ def belt_hold_bearish(candles, tolerance: float):
 
 def three_stars_in_the_south(candles, tolerance: float):
     # work with at least 4 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 4)
     if c_open[0] > c_close[0] and c_open[1] > c_close[1] and abs(c_open[1] - c_high[1]) < tolerance \
             and c_close[2] < c_open[2] < c_open[1] and c_open[2] > c_close[1] and c_low[2] > c_low[1] \
             and abs(c_open[2] - c_high[2]) < tolerance and c_close[3] < c_open[3] < c_open[2] \
@@ -621,7 +905,7 @@ def three_stars_in_the_south(candles, tolerance: float):
 
 def stick_sandwich(candles, tolerance: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[0] and c_close[0] < c_open[1] < c_close[1] < c_open[2] and c_open[2] > c_close[2] \
             and abs(c_close[2] - c_close[0]) < tolerance:
         return True
@@ -631,7 +915,7 @@ def stick_sandwich(candles, tolerance: float):
 
 def meeting_line_bullish(candles, tolerance: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] > c_close[0] and c_open[1] > c_close[1] and abs(c_close[1] - c_close[2]) < tolerance \
             and c_open[2] < c_close[2] and c_open[1] >= c_high[2]:
         return True
@@ -641,7 +925,7 @@ def meeting_line_bullish(candles, tolerance: float):
 
 def meeting_line_bearish(candles, tolerance: float):
     # work with at least 3 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 3)
     if c_open[0] < c_close[0] and c_open[1] < c_close[1] and abs(c_close[1] - c_close[2]) < tolerance \
             and c_open[2] > c_close[2] and c_open[1] <= c_low[2]:
         return True
@@ -651,7 +935,7 @@ def meeting_line_bearish(candles, tolerance: float):
 
 def kicking_bullish(candles, tolerance: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] > c_close[0] and abs(c_open[0] - c_high[0]) < tolerance and abs(c_close[0] - c_low[0]) < tolerance \
             and c_open[1] > c_open[0] and abs(c_open[1] - c_low[1]) < tolerance \
             and abs(c_close[1] - c_high[1]) < tolerance and c_close[1] - c_open[1] > c_open[0] - c_close[0]:
@@ -662,7 +946,7 @@ def kicking_bullish(candles, tolerance: float):
 
 def kicking_bearish(candles, tolerance: float):
     # work with at least 2 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 2)
     if c_open[0] < c_close[0] and abs(c_open[0] - c_low[0]) < tolerance and abs(c_close[0] - c_high[0]) < tolerance \
             and c_open[1] < c_open[0] and abs(c_open[1] - c_high[1]) < tolerance \
             and abs(c_close[1] - c_low[1]) < tolerance and c_open[1] - c_close[1] > c_close[0] - c_open[0]:
@@ -673,58 +957,10 @@ def kicking_bearish(candles, tolerance: float):
 
 def ladder_bottom(candles):
     # work with at least 5 candle and return True if pattern be true
-    c_open, c_high, c_close, c_low = get_ohcl(candles)
+    c_open, c_high, c_close, c_low = _last_limit_data(candles, 5)
     if c_open[0] > c_close[0] and c_close[1] < c_open[1] < c_open[0] and c_close[2] < c_open[2] < c_open[1] \
             and c_close[3] < c_open[3] < c_open[2] and c_close[4] > c_open[4] > c_open[3] \
             and c_low[0] > c_low[1] > c_low[2] > c_low[3]:
         return True
     else:
         return False
-
-
-def candles_manager(candles):
-    c_high, c_low, c_close, c_open = [], [], [], []
-    for index, candle in candles.iterrows():
-        c_high.append(candle['high'])
-        c_low.append(candle['low'])
-        c_close.append(candle['close'])
-        c_open.append(candle['open'])
-        print(index)
-    return c_open, c_high, c_close, c_low
-
-
-def get_all_patterns(dataframe: pd.DataFrame):
-    # all patterns that work with 2 candles
-    for i in range(0, len(dataframe), 2):
-        try:
-            dataframe.loc[i + 1, 'hammer'] = 1 if hammer(dataframe[i:i + 2].reset_index(drop=True)) else 0
-            # do for all 2 candles patterns
-        except:
-            break
-    # all patterns that work with 3 candles
-    for i in range(0, len(dataframe), 3):
-        try:
-            dataframe.loc[i + 2, 'inverted_hammer'] = 1 if inverted_hammer(
-                dataframe[i:i + 3].reset_index(drop=True)) else 0
-            # do for all 3 candles patterns
-        except:
-            break
-
-    # all patterns that work with 4 candles
-    for i in range(0, len(dataframe), 4):
-        try:
-            dataframe.loc[i + 3, 'concealing_baby'] = 1 if concealing_baby(
-                dataframe[i:i + 4].reset_index(drop=True)) else 0
-            # do for all 4 candles patterns
-        except:
-            break
-    # all patterns that work with 5 candles
-    for i in range(0, len(dataframe), 5):
-        try:
-            dataframe.loc[i + 4, 'falling_three_methods'] = 1 if falling_three_methods(
-                dataframe[i:i + 5].reset_index(drop=True)) else 0
-            # do for all 5 candles patterns
-        except:
-            break
-    return dataframe
-
