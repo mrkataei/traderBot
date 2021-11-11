@@ -22,7 +22,7 @@ output: dataframe
 '''
 
 
-def create_df(data, setting: dict):
+def diamond_preprocess(data, setting: dict):
     global stoch_k_oversell
     global stoch_k_overbuy
     global stoch_rsi_k_overbuy
@@ -83,7 +83,7 @@ set globals and intial value for backtesting
 """
 
 
-def restart(intialvalue):
+def reset(intialvalue):
     global old_price
     global old_position
     global intial_value
@@ -93,11 +93,14 @@ def restart(intialvalue):
     low_price = sys.float_info.min
     intial_value = intialvalue
 
+
 """
 checked
 get time and timezone and changed the to standard format
 can be used for reformat the date of any dataframes
 """
+
+
 def change_date_type(date: str, time_zone=None):
     datetime_object = parser.parse(date)
     if time_zone:
@@ -105,36 +108,39 @@ def change_date_type(date: str, time_zone=None):
         datetime_object = timezone.localize(datetime_object)
     return datetime_object
 
+
 """
 
  create the window of data frame checked and its works correctly
  
 """
-def window(dataframe , starttime: str , endtime = None ,timezone = None):
-    starttime_object  = change_date_type(starttime , timezone)
+
+
+def window(dataframe, starttime: str, endtime=None, timezone=None):
+    starttime_object = change_date_type(starttime, timezone)
     index = dataframe.index
     # starttime_object = datetime.strptime(starttime, '%Y-%m-%d %H:%M:%S%z')
     condition = dataframe["date"] >= starttime_object
     try:
-      indices = index[condition]
-      indices = indices[0]
+        indices = index[condition]
+        indices = indices[0]
     except Exception as E:
-      indices = 0
+        indices = 0
     if endtime is None:
-      return dataframe[indices::].reset_index(drop = True)
+        return dataframe[indices::].reset_index(drop=True)
     else:
-      # endtime_object = datetime.strptime( endtime, '%Y-%m-%d %H:%M:%S%z')
-      endtime_object = change_date_type(endtime , timezone)
-      end_condition = dataframe["date"]  >=   endtime_object
-      try:
-        end_indices = index[end_condition]
-        end_indices = end_indices[0]
-        print(end_indices)
+        # endtime_object = datetime.strptime( endtime, '%Y-%m-%d %H:%M:%S%z')
+        endtime_object = change_date_type(endtime, timezone)
+        end_condition = dataframe["date"] >= endtime_object
+        try:
+            end_indices = index[end_condition]
+            end_indices = end_indices[0]
+            print(end_indices)
 
-        return dataframe[indices:end_indices].reset_index(drop = True)
-      except Exception as E:
-        print(E)
-        return dataframe[indices::].reset_index(drop = True)
+            return dataframe[indices:end_indices].reset_index(drop=True)
+        except Exception as E:
+            print(E)
+            return dataframe[indices::].reset_index(drop=True)
 
 
 """
@@ -145,11 +151,21 @@ that check conditions of each candle
 """
 
 
-def diamond(date, close, macd, rsi, stoch_k, stoch_d, stochrsi_k, stochrsi_d, macd1, crossover, crossunder):
+def diamond(row):
     global old_price
     global old_position
     global intial_value
     global low_price
+
+    date = row['date']
+    close = row["close"]
+    macd = row['macd']
+    rsi = row['rsi']
+    stoch_k = row["stoch_k"]
+    stochrsi_k = row["stochrsi_k"]
+    macd1 = row["macd1"]
+    crossover = row['crossover']
+    crossunder = row['crossunder']
     buy_counter = 0
     sell_counter = 0
 
@@ -213,23 +229,86 @@ def diamond(date, close, macd, rsi, stoch_k, stoch_d, stochrsi_k, stochrsi_d, ma
 checked and work correctly
 this function iterate on dataframe and process 
 signal of each row to generate dataframe of signals
+function parameter is a signal function such as diamond and pattern or ruby
 
 """
 
 
-def strategy(dataframe, intialvalue):
-    restart(intialvalue)
-    output_df = dataframe.apply(
-        lambda row: diamond(date=row["date"], close=row["close"], macd=row["macd"], rsi=row["rsi"],
-                            stoch_k=row["stoch_k"],
-                            stoch_d=row["stoch_d"], stochrsi_k=row["stochrsi_k"],
-                            stochrsi_d=row["stochrsi_d"],
-                            macd1=row["macd1"], crossover=row["crossover"],
-                            crossunder=row["crossunder"]), axis=1)
+def strategy(dataframe, function, instialvalue):
+    reset(instialvalue)
+    output_df = dataframe.apply(lambda row: function(row), axis=1)
     output_df = output_df.dropna()
     return pd.DataFrame(output_df.to_list(),
                         columns=['date', 'position', 'close-$', "risk", "amount-%", "value-$", "profit-$", "profit-%",
                                  "low price-%"])
+
+
+'''
+checked and its work!
+this function return dataframe of indicators and every details 
+that  patterns signal needs to generate signal
+parameters: dataframe 
+output: dataframe 
+'''
+
+
+def patterns_preprocess(dataframe):
+    dataframe = dataframe.replace(1, True)
+    # buy
+    dataframe["buy"] = dataframe[
+        ['ladder_bottom', 'doji_star_bullish', 'matching_low', 'in_neck_line_bullish', 'harami_cross_bullish', 'hammer',
+         'belt_hold_bullish', 'on_neck_line_bullish', 'homing_pigeon', 'tri_star_bullish', 'engulfing_bullish',
+         'harami_bullish',
+         'three_outside_up', 'morning_doji_star', 'three_inside_up', 'piercing_line', 'upside_gap_three_methods',
+         'abandoned_baby_bullish',
+         'inverted_hammer', 'upside_tasuki_gap', 'stick_sandwich', 'meeting_line_bullish', 'downside_gap_three_methods',
+         'three_white_soldiers', 'morning_star', 'breakaway_bullish']].any(axis='columns')
+    # sell
+    dataframe["sell"] = dataframe[
+        ['falling_three_methods', 'matching_high', 'hanging_man', "belt_hold_bearish", 'harami_cross_bearish',
+         'doji_star_bearish', 'in_neck_line_bearish', 'on_neck_line_bearish', 'shooting_star',
+         'engulfing_bearish', 'tri_star_bearish', 'loentical_three_cross', 'evening_doji_star',
+         'abandoned_baby_bearish',
+         'three_outside_down', 'harami_bearish', 'three_inside_down', 'deliberation', 'dark_cloud_cover',
+         'advance_block',
+         'meeting_line_bearish', 'evening_star', 'downside_tasuki_gap', 'three_black_crows']].any(axis='columns')
+
+    return dataframe[["date", 'close', 'open', 'low', 'high', 'volume', 'buy', 'sell']]
+
+
+'''
+checked and works correctly
+this function is a patterns signal
+that check conditions of each candle 
+ 
+'''
+
+
+def patterns(row):
+    date = row["date"]
+    close = row["close"]
+    buy = row["buy"]
+    sell = row["sell"]
+    global old_price
+    global old_position
+    global intial_value
+    global low_price
+    if close <= low_price:
+        low_price = close
+    if old_position == "sell" and buy:
+
+        old_position = "buy"
+        old_price = close
+        low_price = close
+        return date, "buy", close, "medium", intial_value / close, intial_value, "----", "----", "----"
+    elif old_position == "buy" and sell:
+
+        old_position = "sell"
+        intial_value = intial_value * (close / old_price)
+        low = low_price
+        low_price = sys.float_info.min
+        return date, "sell", close, "medium", intial_value / close, intial_value, close - old_price, round(
+            (close / old_price) * 100 - 100, 4), ((low - old_price) / old_price) * 100
 
 
 """
@@ -252,4 +331,20 @@ def results(dataframe, intial_value: int):
                         columns=["positive_trades", "total_trades", "acurracy-%", "net_profit-%",
                                  "average_trade_profit-%"])
 
+# df = pd.read_csv(r"D:\PycharmProjects\Static\Binance_ETHUSDT_minute.csv")
+#
+# df = df.iloc[::-1]
+# df= df.reset_index(drop=True) df.columns = ['unix','date' ,'symbol', 'open' , 'high' , 'low' ,
+# 'close' , 'volume','Adj close' , 'count']
+# print(df)
 
+# settings = {'analysis_setting': {'stoch_k_oversell': 29,
+# 'stoch_k_overbuy': 86, 'stoch_rsi_k_oversell': 16, 'stoch_rsi_k_overbuy': 86, 'rsi_oversell': 39, 'rsi_overbuy':
+# 64}, 'indicators_setting': {'RSI': {'length': 4, 'source': 'close'}, 'stoch': {'k': 22, 'd': 3, 'smooth': 3},
+# 'stochrsi': {'k': 3, 'd': 3, 'rsi_length': 22, 'length': 11, 'source': 'ohlc4'}, 'MACD': {'slow': 26, 'signal': 20,
+# 'fast': 10, 'source': 'low', 'matype': 'ema'}}}
+
+# new_df = diamond_preprocess(df , setting = settings )
+# print(new_df)
+# fuck = strategy(new_df , diamond , 100)
+# print(fuck)
