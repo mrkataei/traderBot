@@ -1,20 +1,18 @@
 """
 Mr.Kataei 8/15/2021
-async functions for get data stream from binance socket for 30m , 1h , 4h , 1day timeframes and multiple symbols
-.first you must init statics you have because when new data append date work truth , after that check your analysis
-with CSVs stored
+updated at 9/16/2021
+this StreamIStrategies class is inheritance  from stream and implement those functions and some
+ additional function work with StrategiesThreads that run on thread for each coin that every coin have many thread size
+ of timeframe already supported
+
+for broadcast signals we need API telebot that on bot for our signals
+/*for test code change the API First*/
+
 database configure :
-        coin_id -> 1=BTCUSDT , 2=ETHUSDT
-        timeframe_id -> 1=30min , 2=1hour ,3=4hour ,4=1day
-        analysis_id -> 1=ichimoku
-use this query for get user who have this signal with this coin and time:
-        users = functions.get_user_recommendation(connection, coin_id=1,analysis_id=1, timeframe_id=1)
-and get chat_id for notify them with this query :
-        chat_id = functions.get_user_chat_id(connection , user[0])
-all of this in Telegram/message just use broadcast method
-for insert new signal :
-        functions.set_recommendation(connection, 1, 1, 1, "sell", 2500, 2300, 2, "high")
-        broadcast_message(*args)
+        coin_id -> 1=BTCUSDT , 2=ETHUSDT , 3=
+        timeframe_id -> 1=30min , 2=1hour ,3=4hour ,4=1day, 1=1min
+        analysis_id -> 1=emerald , 2=ruby , 3= diamond
+
 """
 import threading
 from time import sleep

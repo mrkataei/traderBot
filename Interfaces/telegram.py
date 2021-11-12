@@ -1,3 +1,6 @@
+"""
+    Mr.Kataei 11/12/2021
+"""
 import telebot
 from time import sleep
 from Inc import functions

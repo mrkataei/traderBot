@@ -1,3 +1,12 @@
+"""
+    Mr.Kataei 11/12/2021
+    this is bot dictionary for added language you need just add your lang in bellow of 'fa' lang
+            ex:     'C_please_start': {
+                    'en': 'Please /start bot again',
+                    'fa': 'لطفا دوباره بات را استارت کنید /start'
+                    'la' : 'lka kdsa '  <------ new
+                    },
+"""
 _lang = 'en'
 
 

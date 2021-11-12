@@ -1,3 +1,8 @@
+"""
+    Mr.Kataei 11/12/2021
+    need risk profile for users - this work just for Aran account
+"""
+
 from Account.clients import BitfinexClient
 
 

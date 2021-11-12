@@ -1,21 +1,9 @@
 """
-Arman hajimirza & Mr.Kataei
-
-database configure :
-        coin_id -> 1=BTCUSDT , 2=ETHUSDT
-        timeframe_id -> 1=30min , 2=1hour ,3=4hour ,4=1day
-        analysis_id -> 1=ichimoku
-use this query for get user who have this signal with this coin and time:
-        users = functions.get_user_recommendation(connection, coin_id=1,analysis_id=1, timeframe_id=1)
-and get chat_id for notify them with this query :
-        chat_id = functions.get_user_chat_id(connection , user[0])
-all of this in Telegram/message just use broadcast method
-for insert new signal :
-        functions.set_recommendation(connection, 1, 1, 1, "sell", 2500, 2300, 2, "high")
-        broadcast_message(*args)
+Mr.Kataei 11/12/2021
 """
 import pandas as pd
 from Libraries.patterns import *
+from Libraries.patterns import last_limit_data as last
 from Inc.functions import get_recommendations, set_recommendation
 from Telegram.Client.message import broadcast_messages
 import datetime
@@ -24,6 +12,10 @@ import datetime
 def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, bot_ins,
             symbol: str, timeframe: str):
     print(str(datetime.datetime.now()), "emerald checking ..." + symbol, timeframe)
+    c2_open, c2_high, c2_close, c2_low = last(candles=data, limit=2)
+    c3_open, c3_high, c3_close, c3_low = last(candles=data, limit=3)
+    c4_open, c4_high, c4_close, c4_low = last(candles=data, limit=4)
+    c5_open, c5_high, c5_close, c5_low = last(candles=data, limit=5)
     try:
         query = get_recommendations(analysis_id=1, timeframe_id=timeframe_id, coin_id=coin_id)
         old_position = query[0][2]
@@ -33,28 +25,77 @@ def signal(data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe
         # print(e)
 
     def check():
-        if hammer(data) or inverted_hammer(data) or belt_hold_bullish(data, 0.05) or engulfing_bullish(data) \
-                or harami_bullish(data) or harami_cross_bullish(data) or piercing_line(data) \
-                or doji_star_bullish(data, 20) or meeting_line_bullish(data, 0.05) or three_white_soldiers(data) \
-                or morning_star(data) or morning_doji_star(data, 20) or abandoned_baby_bullish(data, 20) \
-                or tri_star_bullish(data, 20) or breakaway_bullish(data) or three_inside_up(data) \
-                or three_outside_up(data) or kicking_bullish(data, 0.05) or three_stars_in_the_south(data, 0.05) \
-                or concealing_baby(data) or stick_sandwich(data, 0.05) or matching_low(data) or homing_pigeon(data) \
-                or ladder_bottom(data) or separating_lines_bullish(data, 0.05) or rising_three_methods(data) \
-                or upside_tasuki_gap(data) or sidebyside_white_lines_bullish(data) \
-                or three_line_strike_bullish(data, 0.05) or upside_gap_three_methods(data) \
-                or on_neck_line_bullish(data, 0.05) or in_neck_line_bullish(data):
+        if hammer(c_open=c2_open, c_high=c2_high, c_close=c2_close, c_low=c2_low) \
+                or inverted_hammer(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or belt_hold_bullish(c_open=c2_open, c_close=c2_close, c_low=c2_low, tolerance=0.05) \
+                or engulfing_bullish(c_open=c3_open, c_high=c3_high, c_close=c3_low, c_low=c3_low) \
+                or harami_bullish(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or harami_cross_bullish(c_open=c2_open, c_high=c2_high, c_close=c2_close, c_low=c2_low) \
+                or piercing_line(c_open=c3_open, c_close=c3_close, c_low=c3_low) \
+                or doji_star_bullish(c_open=c2_open, c_high=c2_high, c_close=c2_close, limit=20) \
+                or meeting_line_bullish(c_open=c3_open, c_high=c3_high, c_close=c3_close, tolerance=0.05) \
+                or three_white_soldiers(c_open=c4_open, c_high=c4_high, c_close=c4_close) \
+                or morning_star(c_open=c4_open, c_close=c4_close) \
+                or morning_doji_star(c_open=c3_open, c_close=c3_close, c_low=c3_low, limit=20) \
+                or abandoned_baby_bullish(c_open=c3_open, c_high=c3_high, c_close=c3_close, limit=20) \
+                or tri_star_bullish(c_open=c3_open, c_close=c3_close, limit=20) \
+                or breakaway_bullish(c_open=c5_open, c_close=c5_close) \
+                or three_inside_up(c_open=c3_open, c_close=c3_close, c_low=c3_low) \
+                or three_outside_up(c_open=c3_open, c_close=c3_close) \
+                or kicking_bullish(c_open=c2_open, c_high=c2_high, c_close=c2_close, c_low=c2_low, tolerance=0.05) \
+                or three_stars_in_the_south(c_open=c4_open, c_high=c4_high, c_close=c4_close,
+                                            c_low=c4_low, tolerance=0.05) \
+                or concealing_baby(c_open=c4_open, c_high=c4_high, c_close=c4_close) \
+                or stick_sandwich(c_open=c3_open, c_close=c3_close, tolerance=0.05) \
+                or matching_low(c_open=c2_open, c_high=c2_high, c_close=c2_close) \
+                or homing_pigeon(c_open=c2_open, c_high=c2_high, c_close=c2_close, c_low=c2_low) \
+                or ladder_bottom(c_open=c5_open, c_close=c5_close, c_low=c5_low) \
+                or separating_lines_bullish(c_open=c2_open, c_high=c2_high, c_close=c2_close,
+                                            c_low=c2_low, tolerance=0.05) \
+                or rising_three_methods(c_open=c4_open, c_high=c4_high, c_close=c4_close, c_low=c4_low) \
+                or upside_tasuki_gap(c_open=c3_open, c_close=c3_close) \
+                or sidebyside_white_lines_bullish(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or three_line_strike_bullish(c_open=c4_open, c_high=c4_high, c_close=c4_close, tolerance=0.05) \
+                or upside_gap_three_methods(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or on_neck_line_bullish(c_open=c2_open, c_high=c2_high, c_close=c2_close,
+                                        c_low=c2_low, tolerance=0.05) \
+                or in_neck_line_bullish(c_open=c2_open, c_close=c2_close):
+
             return True
-        elif hanging_man(data) or shooting_star(data) or belt_hold_bearish(data, 0.05) or engulfing_bearish(data) \
-                or harami_bearish(data) or harami_cross_bearish(data) or dark_cloud_cover(data) \
-                or doji_star_bearish(data) or meeting_line_bearish(data, 0.05) or three_black_crows(data) \
-                or evening_star(data) or evening_doji_star(data, 20) or abandoned_baby_bearish(data, 20) \
-                or tri_star_bearish(data, 20) or three_inside_down(data) or three_outside_down(data) \
-                or kicking_bearish(data, 0.05) or loentical_three_cross(data) or deliberation(data) \
-                or matching_high(data) or upside_gap_two_crows(data) or advance_block(data) or two_crows(data) \
-                or separating_lines_bearish(data, 0.05) or falling_three_methods(data) or downside_tasuki_gap(data) \
-                or sidebyside_white_lines_bearish(data) or three_line_strike_bearish(data, 0.05) \
-                or on_neck_line_bearish(data) or in_neck_line_bearish(data):
+
+        elif hanging_man(c_open=c2_open, c_high=c2_high, c_close=c2_close, c_low=c2_low) \
+                or shooting_star(c_open=c2_open, c_high=c2_high, c_close=c2_close) \
+                or belt_hold_bearish(c_open=c2_open, c_high=c2_high, c_close=c2_close, tolerance=0.05) \
+                or engulfing_bearish(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or harami_bearish(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or harami_cross_bearish(c_open=c2_open, c_high=c2_high, c_close=c2_close, c_low=c2_low) \
+                or dark_cloud_cover(c_open=c3_open, c_high=c3_high, c_close=c3_close) \
+                or doji_star_bearish(c_open=c2_open, c_close=c2_close) \
+                or meeting_line_bearish(c_open=c3_open, c_close=c3_close, c_low=c3_low, tolerance=0.05) \
+                or three_black_crows(c_open=c4_open, c_close=c4_close, c_low=c4_low) \
+                or evening_star(c_open=c4_open, c_close=c4_close) \
+                or evening_doji_star(c_open=c3_open, c_high=c3_high, c_close=c3_close, limit=20) \
+                or abandoned_baby_bearish(c_open=c3_open, c_high=c3_high, c_close=c3_close, limit=20) \
+                or tri_star_bearish(c_open=c3_open, c_close=c3_close, limit=20) \
+                or three_inside_down(c_open=c3_open, c_close=c3_close) \
+                or three_outside_down(c_open=c3_open, c_high=c3_high, c_close=c3_close) \
+                or kicking_bearish(c_open=c2_open, c_high=c2_high, c_close=c2_close, c_low=c2_low, tolerance=0.05) \
+                or loentical_three_cross(c_open=c3_open, c_close=c3_close) \
+                or deliberation(c_open=c3_open, c_close=c3_close, c_low=c3_low) \
+                or matching_high(c_open=c2_open, c_close=c2_close, c_low=c2_low) \
+                or upside_gap_two_crows(c_open=c3_open, c_high=c3_high, c_close=c3_close) \
+                or advance_block(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or two_crows(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or separating_lines_bearish(c_open=c2_open, c_high=c2_high, c_close=c2_close,
+                                            c_low=c2_low, tolerance=0.005) \
+                or falling_three_methods(c_open=c5_open, c_close=c5_close, c_low=c5_low) \
+                or downside_tasuki_gap(c_open=c3_open, c_close=c3_close) \
+                or sidebyside_white_lines_bearish(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low) \
+                or three_line_strike_bearish(c_open=c4_open, c_high=c4_high, c_close=c4_close, tolerance=0.05) \
+                or downside_gap_three_methods(c_open=c3_open, c_high=c3_high, c_close=c3_close, c_low=c3_low)\
+                or on_neck_line_bearish(c_open=c2_open, c_close=c2_close, c_low=c2_low) \
+                or in_neck_line_bearish(c_open=c2_open, c_close=c2_close) \
+                or breakaway_bearish(c_open=c5_open, c_close=c5_close):
             return False
         else:
             return None

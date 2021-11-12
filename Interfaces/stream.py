@@ -1,3 +1,6 @@
+"""
+    Mr.Kataei 11/12/2021
+"""
 import threading
 from Inc.functions import get_coin_id, get_analysis_setting
 
