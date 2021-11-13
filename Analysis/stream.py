@@ -17,7 +17,7 @@ database configure :
 import threading
 from time import sleep
 import telebot
-from Analysis.emerald import signal as emerald
+from Analysis.emerald import Emerald
 from Analysis.diamond import signal as diamond
 from Analysis.ruby import signal as ruby
 from Interfaces.stream import Stream
@@ -39,8 +39,9 @@ class StreamIStrategies(Stream):
     def stream_1min_candle(self):
         while True:
             data = candles(symbol=self.symbol, timeframe='1m', limit=10)
-            emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id, timeframe_id=5, bot_ins=_bot_ins,
-                    symbol=self.symbol, timeframe='1min')
+            emerald = Emerald(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id, timeframe_id=5,
+                              bot_ins=_bot_ins)
+            emerald.signal()
             sleep(60)
 
     def stream_30min_candle(self):
