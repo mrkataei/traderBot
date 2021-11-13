@@ -1,11 +1,10 @@
 """
 Mr.Kataei 11/12/2021
 """
-import pandas as pd
-from Libraries.pattern import *
+from pandas import pd
 from Inc.functions import get_recommendations, set_recommendation
 from Telegram.Client.message import broadcast_messages
-from Libraries.pattern import Patterns
+from Analysis.pattern import Patterns
 
 
 class Emerald(Patterns):
@@ -18,13 +17,11 @@ class Emerald(Patterns):
         self.bot = bot_ins
 
     def get_old_position(self):
-        try:
-            query = get_recommendations(analysis_id=1, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+        query = get_recommendations(analysis_id=1, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+        if query is not None:
             old_position = query[0][2]
-            # when no rows in database
-        except Exception as e:
+        else:
             old_position = 'sell'
-            # print(e)
         return old_position
 
     def broadcast(self, position: str, current_price: float, target_price: float):
@@ -49,4 +46,3 @@ class Emerald(Patterns):
                 target_price = -close * self.gain + close
                 self.broadcast(position=position, current_price=close, target_price=target_price)
                 self.insert_database(position=position, current_price=close, target_price=target_price)
-
