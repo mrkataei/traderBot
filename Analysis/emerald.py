@@ -1,7 +1,7 @@
 """
 Mr.Kataei 11/12/2021
 """
-from pandas import pd
+import pandas as pd
 from Inc.functions import get_recommendations, set_recommendation
 from Telegram.Client.message import broadcast_messages
 from Analysis.pattern import Patterns
