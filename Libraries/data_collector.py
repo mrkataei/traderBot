@@ -42,6 +42,7 @@ def get_candle_binance(symbol: str, timeframe: str, limit: int):
         return data
     except Exception as e:
         print('something wrong on get data from binance:\n', e)
+        return False
 
 
 def get_all_candles_binance(symbol: str, timeframe: str):

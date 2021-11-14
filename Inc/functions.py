@@ -423,15 +423,21 @@ def get_recommendations(analysis_id: int = None, timeframe_id: int = None, coin_
                   "timeframe_id={timeframe_id} order by timestmp DESC LIMIT 1".format(coin_id=coin_id,
                                                                                       analysis_id=analysis_id,
                                                                                       timeframe_id=timeframe_id)
-        else:
+        elif timeframe_id is None and analysis_id and coin_id:
+            sql = "SELECT * FROM recommendations WHERE coin_id={coin_id} AND  analysis_id={analysis_id}" \
+                  " order by timestmp DESC LIMIT 1".format(coin_id=coin_id, analysis_id=analysis_id)
+        elif timeframe_id is None and coin_id is None and analysis_id is None:
             sql = "SELECT * FROM recommendations order by timestmp DESC LIMIT 1"
+        else:
+            return None
         connection = con_db()
         cursor = connection.cursor()
         cursor.execute(sql)
         record = cursor.fetchall()
         return record
     except Error as err:
-        return "Something went wrong: {}".format(err)
+        print("Something went wrong: {}".format(err))
+        return None
 
 
 def set_recommendation(analysis_id: int, coin_id: int, timeframe_id: int, position: str, target_price: float,

@@ -40,7 +40,7 @@ class ClientBot(Telegram):
 
         def command_interface_words(message):
             request = message.text.split()
-            commands_emoji = ['➕', '🆕', '📊', '🕯', '📺', '🧐', '❌', '🙏🏽', '⏱', '👋🏽']
+            commands_emoji = ['➕', '🤔', '🆕', '📊', '🕯', '📺', '🧐', '❌', '🙏🏽', '⏱', '👋🏽']
             if len(request) <= 2 or request[0] not in commands_emoji:
                 return False
             else:
@@ -66,6 +66,8 @@ class ClientBot(Telegram):
                 help_me(message)
             elif message.text == trans('C_frame_keyboard'):
                 update_timeframe(message)
+            elif message.text == trans('C_last_keyboard'):
+                get_last_recommendation(message)
             elif message.text == trans('C_logout_keyboard'):
                 logout(message)
 
@@ -445,6 +447,37 @@ class ClientBot(Telegram):
                 else:
                     self.bot.reply_to(message, trans('C_create_watchlist_first'))
 
+        """
+            get last recommendation
+        """
+
+        @self.bot.message_handler(commands=['last'])
+        def get_last_recommendation(message):
+            if self.check_login(message):
+                user = self.user_dict[message.chat.id]
+                watchlists = functions.get_user_watchlist(user.username)
+                user_analysis = functions.get_user_analysis(user.username)[0][2]
+                analysis_name = functions.get_analysis(user_analysis)[0][0]
+                signals = ""
+                if watchlists:
+                    for watchlist in watchlists:
+                        if watchlist[1]:
+                            coin = functions.get_coin_name(watchlist[1])
+                            recom = functions.get_recommendations(analysis_id=user_analysis, coin_id=watchlist[1])
+                            if recom:
+                                recom = recom[0]
+                                timeframe = functions.get_timeframe(recom[5])[0][0]
+                                risk = recom[7]
+                                position = recom[2]
+                                current_price = recom[4]
+                                target_price = recom[3]
+                                signals += f'💥*{analysis_name}*!!!\n' \
+                                          f'*{coin}* {trans("M_in")} *{position}* {trans("M_position")}\n' \
+                                          f'{trans("M_current_price")}: {current_price}$\n' \
+                                          f'{trans("M_target_price")}: {target_price}$\n' \
+                                          f'{trans("M_risk")}: *{risk}*\n' \
+                                          f'{trans("C_timeframe")}: {timeframe}\n\n'
+                self.bot.send_message(chat_id=message.chat.id, text=signals, parse_mode='Markdown')
         """
             timeframe command handler update 
         """

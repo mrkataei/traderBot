@@ -47,30 +47,32 @@ class StreamIStrategies(Stream):
     def stream_30min_candle(self):
         while True:
             data = candles(symbol=self.symbol, timeframe='30m', limit=200)
-            setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
-            diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                    timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='30m')
+            if data:
+                setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
+                diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                        timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='30m')
             sleep(1800)
 
     def stream_1hour_candle(self):
         while True:
-            data = candles(symbol=self.symbol, timeframe='1h', limit=200)
+            # 1 hour strategies implement here
             sleep(3600)
 
     def stream_4hour_candle(self):
         while True:
             data = candles(symbol=self.symbol, timeframe='4h', limit=200)
-            setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
-            ruby(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                 timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
-            setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
-            diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                    timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
+            if data:
+                setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
+                ruby(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                     timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
+                setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
+                diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
+                        timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
             sleep(14400)
 
     def stream_1day_candle(self):
         while True:
-            data = candles(symbol=self.symbol, timeframe='1D', limit=200)
+            # 1 Day strategies implement here
             sleep(86400)
 
     def set_cost(self, cost: float):

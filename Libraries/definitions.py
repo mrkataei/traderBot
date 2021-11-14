@@ -33,6 +33,7 @@ TRANSLATIONS = {
               '/candle - show your coins details \n'
               '/recommendation - show you indicators recommendations \n'
               '/show - Show all details \n'
+              '/last - get all last recommendation \n'
               '/remove - Remove coins ,watchlist or analysis \n'
               '/logout  - Logout from account\n',
         'fa': '/start - ورود یا ایجاد حساب کاربری'
@@ -43,6 +44,7 @@ TRANSLATIONS = {
               '\n/recommendation - نمایش پیشنهادات خرید و فروش اندیکاتورها'
               '\n/analysis - اضافه کردن آنالیز'
               '\n/show - نمایش اطلاعات حساب'
+              '\n/last - نمایش تمام آخرین پیشنهادات'
               '\n/remove - حذف رمزارز ، واچلیست یا آنالیز '
               '\n/logout  - خروج از حساب کاربری',
     },
@@ -64,6 +66,10 @@ TRANSLATIONS = {
         'en': '➕ add coin',
         'fa': '➕ اضافه کردن رمزارز'
     },
+    'C_last_keyboard': {
+        'en': '🤔 last recom',
+        'fa': '🤔 آخرین پیشنهادات'
+    },
     'C_new_keyboard': {
         'en': '🆕 new watchlist',
         'fa': '🆕 واچلیست جدید'
@@ -81,7 +87,7 @@ TRANSLATIONS = {
         'fa': '📺 نمایش حساب کاربری'
     },
     'C_recommendation_keyboard': {
-        'en': '🧐 show recommendation',
+        'en': '🧐 show recomm',
         'fa': '🧐 نمایش پیشنهادات'
     },
     'C_remove_keyboard': {

@@ -111,10 +111,11 @@ class Telegram:
         key_analysis = telebot.types.KeyboardButton(trans('C_analysis_keyboard'))
         key_candle = telebot.types.KeyboardButton(trans('C_candle_keyboard'))
         key_show = telebot.types.KeyboardButton(trans('C_show_keyboard'))
+        key_last = telebot.types.KeyboardButton(trans('C_last_keyboard'))
         key_recommendation = telebot.types.KeyboardButton(trans('C_recommendation_keyboard'))
         key_remove = telebot.types.KeyboardButton(trans('C_remove_keyboard'))
         key_logout = telebot.types.KeyboardButton(trans('C_logout_keyboard'))
         key_help = telebot.types.KeyboardButton(trans('C_help_keyboard'))
-        key_markup.add(key_add, key_new, key_frame, key_analysis, key_candle, key_show, key_recommendation,
+        key_markup.add(key_add, key_new, key_frame, key_analysis, key_candle, key_show, key_last, key_recommendation,
                        key_remove, key_logout, key_help)
         self.bot.send_message(message.chat.id, trans('C_what_can_i_do'), reply_markup=key_markup)
