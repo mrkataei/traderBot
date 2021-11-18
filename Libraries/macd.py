@@ -6,7 +6,7 @@ from pandas_ta.utils import get_offset, verify_series, signals
 
 
 
-def macd(close, fast=None, slow=None, signal=None, talib=None, offset=None, matype=None, **kwargs):
+def macd_indicator(close, fast=None, slow=None, signal=None, talib=None, offset=None, matype=None, **kwargs):
     """Indicator: Moving Average, Convergence/Divergence (MACD)"""
     # Validate arguments
     fast = int(fast) if fast and fast > 0 else 12
@@ -115,7 +115,7 @@ def macd(close, fast=None, slow=None, signal=None, talib=None, offset=None, maty
         return df
 
 
-macd.__doc__ = \
+macd_indicator.__doc__ = \
     """Moving Average Convergence Divergence (MACD)
 
 The MACD is a popular indicator to that is used to identify a security's trend.
