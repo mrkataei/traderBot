@@ -7,28 +7,25 @@ need hash function for password - any registration in app for now needs username
 
 from Inc import functions
 from Libraries.definitions import *
-from Inc.db import con_db
+from datetime import timedelta, datetime
 
 
-def register(username: str, chat_id: str, password: str, password2: str, question_id: int, answer: str):
-    connection = con_db()
+def register(username: str, chat_id: str, password: str, password2: str, plan_id: int,  question_id: int, answer: str):
     # check_password return tuple (bool,Error:str)
-    chek_pass = functions.chek_password(password=password, password2=password2)
+    result, error = functions.chek_password(password=password, password2=password2)
     # check_username function return True if username not exists
-    if not functions.check_username(username):
+    if functions.check_username_exist(username):
         return trans('R_username_exist')
-    elif not chek_pass[0]:
-        return chek_pass[1]
+    elif not result:
+        return error
     else:
-        password = functions.hash_pass(password=password)
-        try:
-            sql = "INSERT INTO users (username, chat_id ,password , salt, role , question_id , question_answer ) " \
-                  "VALUES (%s, %s , %s , %s , %s , %s , %s)"
-            val = (username, chat_id, password[0], password[1], 'user', question_id, answer)
-            cursor = connection.cursor()
-            cursor.execute(sql, val)
-            # insert into database
-            connection.commit()
-            return "🥳" + trans('R_welcome')
-        except functions.Error as err:
-            print("Something went wrong: {}".format(err))
+        key, salt = functions.hash_pass(password=password)
+        duration_days = functions.get_duration_plan(plan_id=plan_id)
+        today_time = datetime.now()
+        valid_time_plan = today_time + timedelta(days=duration_days)
+        query = "INSERT INTO users (username, chat_id , password, salt, plan_id," \
+                " valid_time_plan, question_id , answer) " \
+                "VALUES (%s, %s , %s , %s , %s , %s , %s, %s)"
+        val = (username, chat_id, key, salt, plan_id, valid_time_plan, question_id, answer)
+        functions.insert_query(query=query, values=val)
+        return True, trans('R_welcome')

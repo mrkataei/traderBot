@@ -6,49 +6,48 @@ is private and inner def in reset password for security
 """
 from Inc import functions
 from Libraries.definitions import *
-from Inc.db import con_db
 
 
 def reset_password(username: str, answer: str, new_password: str, new_password2: str):
-    connection = con_db()
-
+    """
+    :param username:
+    :param answer:
+    :param new_password:
+    :param new_password2:
+    :return:
+    """
     def check_answer():
-        try:
-            query = "SELECT * FROM users WHERE username='{username}' AND question_answer='{answer}' " \
-                    "LIMIT 1".format(username=username, answer=answer)
-            cursor = connection.cursor()
-            cursor.execute(query)
-            record = cursor.fetchall()
-            # if false wrong answer
-            if record:
-                return True
-            else:
-                return False
-        except functions.Error as err:
-            return "Something went wrong: {}".format(err)
+        """
+        :return:
+        """
+        query = "SELECT * FROM users WHERE username='{username}' AND question_answer='{answer}' " \
+                "LIMIT 1".format(username=username, answer=answer)
+        record = functions.execute_query(query=query)
+        # if false wrong answer
+        if record:
+            return True
+        else:
+            return False
 
     def set_password():
+        """
+        :return:
+        """
         # check 2 password input same and correct pattern
-        chek_pass = functions.chek_password(password=new_password, password2=new_password2)
-        if not chek_pass[0]:
-            print(chek_pass[1])
-            return False
+        result, error = functions.chek_password(password=new_password, password2=new_password2)
+        if not result:
+            print(error)
+            return result
         else:
-            try:
-                # new pass hash with random salt return 2 elements password[pass][salt]
-                password = functions.hash_pass(password=new_password)
-                sql = "UPDATE users SET password='{password}', salt='{salt}' " \
-                      "WHERE username='{username}'".format(password=password[0], salt=password[1], username=username)
-                cursor = connection.cursor()
-                cursor.execute(sql)
-                connection.commit()
-                return True
-            except functions.Error as err:
-                print("Something went wrong: {}".format(err))
-                return False
+            # new pass hash with random salt return 2 elements password[pass][salt]
+            key, salt = functions.hash_pass(password=new_password)
+            query = "UPDATE users SET password='{password}', salt={salt} " \
+                    "WHERE username='{username}'".format(password=key, salt=salt, username=username)
+            functions.update_query(query=query)
+            return True
 
-    if functions.check_username(username):
-        return trans('C_username_exist')
+    if not functions.check_username_exist(username):
+        return 'username not exist'
     elif not check_answer():
         return trans('R_wrong_answer') + "\n" + trans('C_please_start')
     elif set_password():
