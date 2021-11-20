@@ -10,22 +10,13 @@ from Libraries.definitions import *
 from datetime import timedelta, datetime
 
 
-def register(username: str, chat_id: str, password: str, password2: str, plan_id: int,  question_id: int, answer: str):
-    # check_password return tuple (bool,Error:str)
-    result, error = functions.chek_password(password=password, password2=password2)
-    # check_username function return True if username not exists
-    if functions.check_username_exist(username):
-        return trans('R_username_exist')
-    elif not result:
-        return error
-    else:
-        key, salt = functions.hash_pass(password=password)
-        duration_days = functions.get_duration_plan(plan_id=plan_id)
-        today_time = datetime.now()
-        valid_time_plan = today_time + timedelta(days=duration_days)
-        query = "INSERT INTO users (username, chat_id , password, salt, plan_id," \
-                " valid_time_plan, question_id , answer) " \
-                "VALUES (%s, %s , %s , %s , %s , %s , %s, %s)"
-        val = (username, chat_id, key, salt, plan_id, valid_time_plan, question_id, answer)
-        functions.insert_query(query=query, values=val)
-        return True, trans('R_welcome')
+def register(username: str, chat_id: str, phone: str):
+    # free account plan id is 1
+    duration_days = functions.get_duration_plan(plan_id=1)
+    today_time = datetime.now()
+    valid_time_plan = today_time + timedelta(days=duration_days)
+    query = "INSERT INTO users (username, chat_id, phone, valid_time_plan) VALUES (%s, %s , %s, %s)"
+    val = (username, chat_id, phone, valid_time_plan)
+    error, detail = functions.insert_query(query=query, values=val)
+    return error, trans('R_welcome')
+

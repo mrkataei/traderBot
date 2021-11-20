@@ -190,6 +190,3 @@ class Ruby:
                 self.broadcast(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
                 self.insert_database(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
 
-
-
-help(Ruby)

@@ -14,7 +14,7 @@ import mysql.connector
 # DB_PASSWORD = config('DB_PASSWORD')
 
 DB_HOST = "localhost"
-DB_NAME = "algowatch"
+DB_NAME = "aitrader"
 DB_USERNAME = "root"
 DB_PASSWORD = ""
 

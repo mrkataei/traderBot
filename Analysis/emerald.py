@@ -18,7 +18,7 @@ class Emerald(Patterns):
 
     def get_old_position(self):
         query = get_recommendations(analysis_id=1, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
-        if query is not None:
+        if query:
             old_position = query[0][2]
         else:
             old_position = 'sell'

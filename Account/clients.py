@@ -1,37 +1,20 @@
 """
 Mr.Kataei 8/4/2021
-use for telegram bot to register and login and logout
+use for telegram bot to register
+and exchanges account implement here
 """
 import hashlib
 import hmac
 import json
 import time
-
 import requests
 
 
 class User:
-    def __init__(self):
-        self.username = None
-        self.session = False
-        self.watchlist = []
-        self.temp_watch = None
-        self.coin = None
-        self.analysis = None
-        self.timeframe = None
-        self.temp = None
-        self.login = False
-
-
-class Register:
     def __init__(self, chat_id):
         self.chat_id = chat_id
         self.username: str
-        self.password1: str
-        self.password2: str
-        self.security_question_id: int
-        self.security_question: str
-        self.security_answer: str
+        self.number: str
 
 
 class BitfinexClient:
@@ -127,4 +110,29 @@ class BitfinexClient:
         else:
             print('error, status_code = ', response.status_code)
             print(response.text)
+            return ''
+
+    def get_assets(self):
+        """
+        :arg:
+            None
+        :return:
+                [
+                  [
+                    WALLET_TYPE,
+                    CURRENCY,
+                    BALANCE,
+                    UNSETTLED_INTEREST,
+                    AVAILABLE_BALANCE,
+                    LAST_CHANGE,
+                    TRADE_DETAILS
+                  ],
+                  ...
+                ]
+        """
+        response = self.req('v2/auth/r/wallets')
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print('error, status_code = ', response.status_code)
             return ''
