@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pandas import concat, DataFrame
-from pandas_ta import Imports
+# from pandas_ta import Imports
 from pandas_ta.overlap import ema, sma
 from pandas_ta.utils import get_offset, verify_series, signals
 

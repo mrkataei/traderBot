@@ -2,14 +2,13 @@ import pandas as pd
 
 from Analysis.diamond import Diamond
 
-#%%
-
+from Analysis.ruby import Ruby
 name='ETHUSDT4h'
+#%% create dataset with label
+
+
 
 file = pd.read_csv('Static/'+name+'.csv')
-file.head()
-
-#%%
 
 print(len(file))
 result=[]
@@ -25,16 +24,13 @@ for i in range(len(file)-1):
 file=file[:-1]
 file['result']=result
 
-# for index, row in testFile.iterrows():
-#     print(row['close'])
-#%%
 file.to_csv('Static/'+name+'-withLable'+'.csv')
 #%%
 
 
-name='ETHUSDT4h-withLable'
+name_label='ETHUSDT4h-withLable'
 
-file = pd.read_csv('Static/'+name+'.csv')
+file = pd.read_csv('Static/'+name_label+'.csv')
 file.head()
 
 #%% diamond_output
@@ -51,8 +47,19 @@ diamond=Diamond(data=file, coin_id=2, timeframe_id=3, gain=1, bot_ins=1, setting
 
 diamond_output=diamond.get_recommendations()
 
+diamond_output.to_csv('Static/'+name+'-diamond-output'+'.csv')
 
 
 
-#%%
+#%% ruby_output
+settings = {'analysis_setting': {'delay':13 ,'safe_line':-8603 ,'hist_line':0 },
+            'indicators_setting': {'MACD': {'slow': 17, 'signal': 9, 'fast': 4, 'source': 'close', 'matype': 'sma'}}}
+
+
+ruby=Ruby(data=file,gain=1,cost=1,coin_id=2,timeframe_id=3,bot_ins=1,setting=settings)
+ruby_output=ruby.get_recommendations()
+ruby_output.to_csv('Static/'+name+'-ruby-output'+'.csv')
+
+#%% concat_all_data
+
 

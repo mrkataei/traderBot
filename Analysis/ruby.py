@@ -1,11 +1,11 @@
 import pandas as pd
 import pandas_ta as ta
 
-from Inc.functions import set_recommendation
-from Libraries.tools import get_source
+# from Inc.functions import set_recommendation
+# from Libraries.tools import get_source
 from Libraries.macd import macd_indicator
 
-from Telegram.Client.message import broadcast_messages
+# from Telegram.Client.message import broadcast_messages
 
 valid_coins_and_times = {
     'coins':
@@ -14,7 +14,16 @@ valid_coins_and_times = {
         }
 }
 
-
+def get_source(data: pd.DataFrame, source: str = 'close'):
+    return {
+        'hl2': data.ta.hl2(),
+        'hlc3': data.ta.hlc3(),
+        'ohlc4': data.ta.ohlc4(),
+        'close': data['close'],
+        'high': data['high'],
+        'low': data['low'],
+        'open': data['open']
+    }.get(source, data['close'])
 class Ruby:
     """
     A class that generate and broadcast ruby signal
@@ -128,29 +137,29 @@ class Ruby:
         temp["crossover"] = ta.cross(series_a=temp["histogram"], series_b=pd.Series(self.hist_line, index=temp.index))
         self.data = temp
 
-    def get_old_position(self):
-        query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
-        if query:
-            old_position = query[0][2]
-        else:
-            old_position = 'sell'
-        return old_position
+    # def get_old_position(self):
+    #     query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+    #     if query:
+    #         old_position = query[0][2]
+    #     else:
+    #         old_position = 'sell'
+    #     return old_position
 
-    def get_old_price(self):
-        query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
-        if query:
-            old_price = query[0][4]
-        else:
-            old_price = 0
-        return old_price
+    # def get_old_price(self):
+    #     # query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+    #     if query:
+    #         old_price = query[0][4]
+    #     else:
+    #         old_price = 0
+    #     return old_price
 
-    def broadcast(self, position: str, current_price: float, target_price: float, risk: str):
-        broadcast_messages(coin_id=self.coin_id, analysis_id=2, timeframe_id=self.timeframe_id, position=position,
-                           target_price=target_price, current_price=current_price, risk=risk, bot_ins=self.bot)
+    # def broadcast(self, position: str, current_price: float, target_price: float, risk: str):
+    #     broadcast_messages(coin_id=self.coin_id, analysis_id=2, timeframe_id=self.timeframe_id, position=position,
+    #                        target_price=target_price, current_price=current_price, risk=risk, bot_ins=self.bot)
 
-    def insert_database(self, position: str, current_price: float, target_price: float, risk: str):
-        set_recommendation(analysis_id=2, coin_id=self.coin_id, timeframe_id=self.timeframe_id, position=position,
-                           target_price=target_price, current_price=current_price, cost_price=self.cost, risk=risk)
+    # def insert_database(self, position: str, current_price: float, target_price: float, risk: str):
+    #     set_recommendation(analysis_id=2, coin_id=self.coin_id, timeframe_id=self.timeframe_id, position=position,
+    #                        target_price=target_price, current_price=current_price, cost_price=self.cost, risk=risk)
 
     def _set_recommendation(self, position: str, index):
         self.data.loc[index, 'recommendation'] = position
@@ -174,19 +183,19 @@ class Ruby:
     def signal_detector(self):
         self.data.apply(lambda row: self.ruby(row), axis=1)
 
-    def signal(self):
-        last_row_ruby_detector = self.get_recommendations().tail(1)
-        position = last_row_ruby_detector['recommendation'].values[0]
-        old_position = self.get_old_position()
-        old_price = self.get_old_price()
-        if old_position != position:
-            close = float(last_row_ruby_detector['close'].values[0])
-            if position == 'buy':
-                target_price = close * self.gain + close
-                self.broadcast(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
-            elif position == 'sell' and old_price < close:
-                target_price = -close * self.gain + close
-                self.broadcast(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
+    # def signal(self):
+    #     last_row_ruby_detector = self.get_recommendations().tail(1)
+    #     position = last_row_ruby_detector['recommendation'].values[0]
+    #     old_position = self.get_old_position()
+    #     old_price = self.get_old_price()
+    #     if old_position != position:
+    #         close = float(last_row_ruby_detector['close'].values[0])
+    #         if position == 'buy':
+    #             target_price = close * self.gain + close
+    #             self.broadcast(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
+    #             self.insert_database(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
+    #         elif position == 'sell' and old_price < close:
+    #             target_price = -close * self.gain + close
+    #             self.broadcast(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
+    #             self.insert_database(position=position, current_price=close, target_price=target_price, risk=last_row_ruby_detector['risk'].values[0])
 
