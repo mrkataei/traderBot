@@ -62,4 +62,19 @@ ruby_output.to_csv('Static/'+name+'-ruby-output'+'.csv')
 
 #%% concat_all_data
 
+ruby_without_na=ruby_output.dropna()
+ruby_without_na = ruby_without_na.reset_index(drop=True)
+diamond_without_na=diamond_output.dropna()
+diamond_without_na = diamond_without_na.reset_index(drop=True)
 
+
+#%%
+
+# korosh= diamond_without_na[diamond_without_na['date'] == ruby_without_na['date']]
+b=0
+for i in range(len(diamond_without_na)):
+    for j in range(len(ruby_without_na)):
+        if (diamond_without_na.iloc[i])['date'] == (ruby_without_na.iloc[j])['date']:
+            b+=1
+            print(b)
+print(b)
