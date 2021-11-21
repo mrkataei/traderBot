@@ -24,13 +24,23 @@ all of this in Telegram/message just use broadcast method
 
 import pandas as pd
 import pandas_ta as ta
-import numpy as np
-from Libraries.tools import Tools, get_source, cross_over, cross_under
-from Telegram.Client.message import broadcast_messages
-from Trade import spot
+# import numpy as np
+# from Libraries.tools import get_source
+# from Telegram.Client.message import broadcast_messages
+# from Trade import spot
 from Libraries.macd import macd_indicator
-import datetime
-from Inc.functions import get_recommendations, set_recommendation
+# import datetime
+# from Inc.functions import get_recommendations, set_recommendation
+def get_source(data: pd.DataFrame, source: str = 'close'):
+    return {
+        'hl2': data.ta.hl2(),
+        'hlc3': data.ta.hlc3(),
+        'ohlc4': data.ta.ohlc4(),
+        'close': data['close'],
+        'high': data['high'],
+        'low': data['low'],
+        'open': data['open']
+    }.get(source, data['close'])
 
 symbols_bitfinix = {'BTCUSDT': 'tBTCUSD', 'ETHUSDT': 'tETHUSD', 'ADAUSDT': 'tADAUSD', 'DOGEUSDT': 'tDOGE:USD',
                     'BCHUSDT': 'tBCHN:USD', 'ETCUSDT': 'tETCUSD'}
@@ -121,29 +131,29 @@ class Diamond:
         self.data = temp
 
     #
-    def get_old_position(self):
-        query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
-        if query:
-            old_position = query[0][2]
-        else:
-            old_position = 'sell'
-        return old_position
+    # def get_old_position(self):
+    #     query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+    #     if query:
+    #         old_position = query[0][2]
+    #     else:
+    #         old_position = 'sell'
+    #     return old_position
+    #
+    # def get_old_price(self):
+    #     query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+    #     if query:
+    #         old_price = query[0][4]
+    #     else:
+    #         old_price = 0
+    #     return old_price
 
-    def get_old_price(self):
-        query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
-        if query:
-            old_price = query[0][4]
-        else:
-            old_price = 0
-        return old_price
-
-    def broadcast(self, position: str, current_price: float, target_price: float, risk: str):
-        broadcast_messages(coin_id=self.coin_id, analysis_id=3, timeframe_id=self.timeframe_id, position=position,
-                           target_price=target_price, current_price=current_price, risk='risk', bot_ins=self.bot)
-
-    def insert_database(self, position: str, current_price: float, target_price: float, risk: str):
-        set_recommendation(analysis_id=3, coin_id=self.coin_id, timeframe_id=self.timeframe_id, position=position,
-                           target_price=target_price, current_price=current_price, cost_price=self.cost, risk=risk)
+    # def broadcast(self, position: str, current_price: float, target_price: float, risk: str):
+    #     broadcast_messages(coin_id=self.coin_id, analysis_id=3, timeframe_id=self.timeframe_id, position=position,
+    #                        target_price=target_price, current_price=current_price, risk='risk', bot_ins=self.bot)
+    #
+    # def insert_database(self, position: str, current_price: float, target_price: float, risk: str):
+    #     set_recommendation(analysis_id=3, coin_id=self.coin_id, timeframe_id=self.timeframe_id, position=position,
+    #                        target_price=target_price, current_price=current_price, cost_price=self.cost, risk=risk)
 
     def _set_recommendation(self, position: str, risk: str, index):
         self.data.loc[index, 'recommendation'] = position
@@ -206,48 +216,48 @@ class Diamond:
     def signal_detector(self):
         self.data.apply(lambda row: self.diamond(row), axis=1)
 
-    def signal(self):
-        last_row_diamond_detector = self.get_recommendations().tail(1)
-        position = last_row_diamond_detector['recommendation'].values[0]
-        old_position = self.get_old_position()
-        old_price = self.get_old_price()
-        if old_position != position:
-            close = float(last_row_diamond_detector['close'].values[0])
-            if position == 'buy':
-                target_price = close * self.gain + close
-                self.broadcast(position=position, current_price=close, target_price=target_price,
-                               risk=last_row_diamond_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close, target_price=target_price,
-                                     risk=last_row_diamond_detector['risk'].values[0])
-            elif position == 'sell' and old_price < close:
-                target_price = -close * self.gain + close
-                self.broadcast(position=position, current_price=close, target_price=target_price,
-                               risk=last_row_diamond_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close, target_price=target_price,
-                                     risk=last_row_diamond_detector['risk'].values[0])
+    # def signal(self):
+    #     last_row_diamond_detector = self.get_recommendations().tail(1)
+    #     position = last_row_diamond_detector['recommendation'].values[0]
+    #     old_position = self.get_old_position()
+    #     old_price = self.get_old_price()
+    #     if old_position != position:
+    #         close = float(last_row_diamond_detector['close'].values[0])
+    #         if position == 'buy':
+    #             target_price = close * self.gain + close
+    #             self.broadcast(position=position, current_price=close, target_price=target_price,
+    #                            risk=last_row_diamond_detector['risk'].values[0])
+    #             self.insert_database(position=position, current_price=close, target_price=target_price,
+    #                                  risk=last_row_diamond_detector['risk'].values[0])
+    #         elif position == 'sell' and old_price < close:
+    #             target_price = -close * self.gain + close
+    #             self.broadcast(position=position, current_price=close, target_price=target_price,
+    #                            risk=last_row_diamond_detector['risk'].values[0])
+    #             self.insert_database(position=position, current_price=close, target_price=target_price,
+    #                                  risk=last_row_diamond_detector['risk'].values[0])
 
 
-df = pd.read_csv(r"C:\Users\Asus\Downloads\bitcoin-pattern-reco-1min.csv")
-df = df[['date', 'open', 'high', 'close', 'low', "volume"]]
-df = df.tail(10000)
-print(df)
-settings = {'analysis_setting': {'stoch_k_oversell': 29, 'stoch_k_overbuy': 86, 'stoch_rsi_k_oversell': 16,
-                                 'stoch_rsi_k_overbuy': 86, 'rsi_oversell': 39, 'rsi_overbuy': 64},
-            'indicators_setting': {'RSI': {'length': 4, 'source': 'close'}, 'stoch': {'k': 22, 'd': 3, 'smooth': 3},
-                                   'stochrsi': {'k': 3, 'd': 3, 'rsi_length': 22, 'length': 11, 'source': 'ohlc4'},
-                                   'MACD': {'slow': 26, 'signal': 20, 'fast': 10, 'source': 'low', 'matype': 'ema'}}}
-# df = df.iloc[::-1]
-# # df = df.drop(columns=["tradecount"])
-# df = df.reset_index(drop=True)
+# df = pd.read_csv(r"C:\Users\Asus\Downloads\bitcoin-pattern-reco-1min.csv")
+# df = df[['date', 'open', 'high', 'close', 'low', "volume"]]
+# df = df.tail(10000)
 # print(df)
-pd.set_option('display.max_columns', None)
-a = Diamond(data=df, coin_id=1, timeframe_id=1, gain=1, bot_ins=1, setting=settings, cost=1)
-# print(a.data)
-# print(a.preprocess_data)
-# a.preprocess()
+# settings = {'analysis_setting': {'stoch_k_oversell': 29, 'stoch_k_overbuy': 86, 'stoch_rsi_k_oversell': 16,
+#                                  'stoch_rsi_k_overbuy': 86, 'rsi_oversell': 39, 'rsi_overbuy': 64},
+#             'indicators_setting': {'RSI': {'length': 4, 'source': 'close'}, 'stoch': {'k': 22, 'd': 3, 'smooth': 3},
+#                                    'stochrsi': {'k': 3, 'd': 3, 'rsi_length': 22, 'length': 11, 'source': 'ohlc4'},
+#                                    'MACD': {'slow': 26, 'signal': 20, 'fast': 10, 'source': 'low', 'matype': 'ema'}}}
+# # df = df.iloc[::-1]
+# # # df = df.drop(columns=["tradecount"])
+# # df = df.reset_index(drop=True)
+# # print(df)
+# pd.set_option('display.max_columns', None)
+# a = Diamond(data=df, coin_id=1, timeframe_id=1, gain=1, bot_ins=1, setting=settings, cost=1)
+# # print(a.data)
+# # print(a.preprocess_data)
+# # a.preprocess()
+#
+# a.signal_detector()
+#
+# df = a.get_recommendations()
 
-a.signal_detector()
-
-df = a.get_recommendations()
-
-print(df)
+# print(df)

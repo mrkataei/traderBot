@@ -1,19 +1,10 @@
 import pandas as pd
 import pandas_ta as ta
 from Inc.functions import get_recommendations, set_recommendation
-from Telegram.Client.message import broadcast_messages
+# from Telegram.Client.message import broadcast_messages
 
 
-def get_source(data: pd.DataFrame, source: str = 'close'):
-    return {
-        'hl2': data.ta.hl2(),
-        'hlc3': data.ta.hlc3(),
-        'ohlc4': data.ta.ohlc4(),
-        'close': data['close'],
-        'high': data['high'],
-        'low': data['low'],
-        'open': data['open']
-    }.get(source, data['close'])
+
 
 
 def cross_over(x, y):
