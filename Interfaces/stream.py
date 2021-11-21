@@ -2,7 +2,8 @@
     Mr.Kataei 11/12/2021
 """
 import threading
-from Inc.functions import get_coin_id, get_analysis_setting
+from Inc.functions import get_coin_id
+from Conf.analysis_settings import get_analysis_setting
 
 
 class Stream:

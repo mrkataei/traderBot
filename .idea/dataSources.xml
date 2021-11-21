@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="algowatch@localhost" uuid="ebe97a2c-6aad-468b-b794-252355fe302e">
-      <driver-ref>mysql.8</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://localhost:3306/algowatch</jdbc-url>
-    </data-source>
     <data-source source="LOCAL" name="aitrader@localhost" uuid="272fd3cd-f9b1-4f6f-bc71-d7cbe9a72eea">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>

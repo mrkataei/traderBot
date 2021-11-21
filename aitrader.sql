@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 20, 2021 at 07:27 AM
+-- Generation Time: Nov 21, 2021 at 03:05 PM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -45,20 +45,6 @@ INSERT INTO `analysis` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `analysis_settings`
---
-
-CREATE TABLE `analysis_settings` (
-  `coin_id` int(5) NOT NULL,
-  `timeframe_id` int(5) NOT NULL,
-  `analysis_id` int(5) NOT NULL,
-  `indicator_settings_id` int(12) NOT NULL,
-  `settings` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `coins`
 --
 
@@ -95,43 +81,7 @@ CREATE TABLE `exchanges` (
 --
 
 INSERT INTO `exchanges` (`id`, `exchange`) VALUES
-(1, 'bitfinex'),
-(2, 'kukoin'),
-(3, 'coinex'),
-(4, 'binance');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `indicators`
---
-
-CREATE TABLE `indicators` (
-  `id` int(5) NOT NULL,
-  `indicator` char(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `indicators`
---
-
-INSERT INTO `indicators` (`id`, `indicator`) VALUES
-(1, 'macd'),
-(2, 'rsi'),
-(3, 'stoch'),
-(4, 'stochrsi');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `indicator_settings`
---
-
-CREATE TABLE `indicator_settings` (
-  `id` int(12) NOT NULL,
-  `indicator_id` int(5) NOT NULL,
-  `settings` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+(1, 'bitfinex');
 
 -- --------------------------------------------------------
 
@@ -145,18 +95,17 @@ CREATE TABLE `plans` (
   `cost` double NOT NULL,
   `duration` int(5) NOT NULL,
   `description` text NOT NULL,
-  `coin_number` int(5) NOT NULL,
-  `account_number` int(5) NOT NULL,
-  `analysis_number` int(5) NOT NULL
+  `strategy_number` int(5) NOT NULL,
+  `account_number` int(5) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `plans`
 --
 
-INSERT INTO `plans` (`id`, `plan`, `cost`, `duration`, `description`, `coin_number`, `account_number`, `analysis_number`) VALUES
-(1, 'freemium', 0, 30, 'for test', 1, 1, 1),
-(2, 'beginner', 10000000, 30, 'first plan', 0, 0, 0);
+INSERT INTO `plans` (`id`, `plan`, `cost`, `duration`, `description`, `strategy_number`, `account_number`) VALUES
+(1, 'freemium', 0, 30, 'for test', 1, 1),
+(2, 'beginner', 10000000, 30, 'first plan', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -182,14 +131,13 @@ CREATE TABLE `recommendations` (
   `id` int(11) NOT NULL,
   `analysis_id` int(5) NOT NULL,
   `coin_id` int(5) NOT NULL,
-  `timframe_id` int(5) NOT NULL,
+  `timeframe_id` int(5) NOT NULL,
   `position` char(8) NOT NULL,
   `price` double NOT NULL,
   `risk` char(10) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- --------------------------------------------------------
 
 --
 -- Table structure for table `timeframes`
@@ -235,7 +183,7 @@ CREATE TABLE `transactions` (
 CREATE TABLE `users` (
   `username` char(12) NOT NULL,
   `chat_id` varchar(15) NOT NULL,
-  `roll` char(10) NOT NULL DEFAULT 'user',
+  `role` char(10) NOT NULL DEFAULT 'user',
   `email` varchar(30) DEFAULT NULL,
   `phone` char(13) NOT NULL,
   `signup_time` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -251,10 +199,8 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`username`, `chat_id`, `roll`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
-('kourosh', '121321132', 'user', NULL, '', '2021-11-19 13:34:22', NULL, 0, 0, '2021-12-19 13:34:22', 1, 1),
-('kouroshataei', '1210507821', 'user', NULL, '+989036928421', '2021-11-19 14:08:07', NULL, 0, 0, '2021-12-19 14:08:07', 1, 1),
-('newkouosh', '1978824576', 'user', NULL, '+17076562131', '2021-11-19 14:57:11', '2021-11-19 14:57:11', 1, 0, '2020-12-19 14:57:11', 1, 1);
+INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
+('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-21 05:18:12', 1, 1, '2021-12-20 15:13:22', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -263,7 +209,6 @@ INSERT INTO `users` (`username`, `chat_id`, `roll`, `email`, `phone`, `signup_ti
 --
 
 CREATE TABLE `user_settings` (
-  `id` int(12) NOT NULL,
   `username` char(12) NOT NULL,
   `public` varchar(30) NOT NULL,
   `secret` varchar(30) NOT NULL,
@@ -278,10 +223,10 @@ CREATE TABLE `user_settings` (
 
 CREATE TABLE `watchlists` (
   `id` int(15) NOT NULL,
-  `coin_id` int(5) DEFAULT NULL,
+  `coin_id` int(5) NOT NULL,
   `username` char(12) NOT NULL,
-  `analysis_id` int(5) DEFAULT NULL,
-  `amount` double DEFAULT NULL
+  `analysis_id` int(5) NOT NULL,
+  `amount` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -295,15 +240,6 @@ ALTER TABLE `analysis`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `analysis_settings`
---
-ALTER TABLE `analysis_settings`
-  ADD KEY `analysis_settings_coin_id` (`coin_id`),
-  ADD KEY `analysis_settings_analysis_id` (`analysis_id`),
-  ADD KEY `analysis_settings_indicator_settings_id` (`indicator_settings_id`),
-  ADD KEY `analysis_settings_timeframe_id` (`timeframe_id`);
-
---
 -- Indexes for table `coins`
 --
 ALTER TABLE `coins`
@@ -314,19 +250,6 @@ ALTER TABLE `coins`
 --
 ALTER TABLE `exchanges`
   ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `indicators`
---
-ALTER TABLE `indicators`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `indicator_settings`
---
-ALTER TABLE `indicator_settings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `indicator_settings_indicator_id` (`indicator_id`);
 
 --
 -- Indexes for table `plans`
@@ -347,7 +270,7 @@ ALTER TABLE `plan_payments`
 ALTER TABLE `recommendations`
   ADD PRIMARY KEY (`id`),
   ADD KEY `recommendations_coin_id` (`coin_id`),
-  ADD KEY `recommendations_timeframe_id` (`timframe_id`),
+  ADD KEY `recommendations_timeframe_id` (`timeframe_id`),
   ADD KEY `recommendations_analysis_id` (`analysis_id`);
 
 --
@@ -378,16 +301,15 @@ ALTER TABLE `users`
 -- Indexes for table `user_settings`
 --
 ALTER TABLE `user_settings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_setting_exchange_id` (`exchange_id`),
-  ADD KEY `user_setting_username` (`username`);
+  ADD UNIQUE KEY `username` (`username`,`exchange_id`),
+  ADD KEY `user_setting_exchange_id` (`exchange_id`);
 
 --
 -- Indexes for table `watchlists`
 --
 ALTER TABLE `watchlists`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `whatchlists_coin_id` (`coin_id`),
+  ADD UNIQUE KEY `coin_id` (`coin_id`,`username`,`analysis_id`),
   ADD KEY `whatchlists_analysis_id` (`analysis_id`),
   ADD KEY `whatchlists_username` (`username`);
 
@@ -414,18 +336,6 @@ ALTER TABLE `exchanges`
   MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `indicators`
---
-ALTER TABLE `indicators`
-  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `indicator_settings`
---
-ALTER TABLE `indicator_settings`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `plans`
 --
 ALTER TABLE `plans`
@@ -435,7 +345,7 @@ ALTER TABLE `plans`
 -- AUTO_INCREMENT for table `recommendations`
 --
 ALTER TABLE `recommendations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `timeframes`
@@ -444,35 +354,14 @@ ALTER TABLE `timeframes`
   MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `user_settings`
---
-ALTER TABLE `user_settings`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `watchlists`
 --
 ALTER TABLE `watchlists`
-  MODIFY `id` int(15) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(15) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `analysis_settings`
---
-ALTER TABLE `analysis_settings`
-  ADD CONSTRAINT `analysis_settings_analysis_id` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`),
-  ADD CONSTRAINT `analysis_settings_coin_id` FOREIGN KEY (`coin_id`) REFERENCES `coins` (`id`),
-  ADD CONSTRAINT `analysis_settings_indicator_settings_id` FOREIGN KEY (`indicator_settings_id`) REFERENCES `indicator_settings` (`id`),
-  ADD CONSTRAINT `analysis_settings_timeframe_id` FOREIGN KEY (`timeframe_id`) REFERENCES `timeframes` (`id`);
-
---
--- Constraints for table `indicator_settings`
---
-ALTER TABLE `indicator_settings`
-  ADD CONSTRAINT `indicator_settings_indicator_id` FOREIGN KEY (`indicator_id`) REFERENCES `indicators` (`id`);
 
 --
 -- Constraints for table `plan_payments`
@@ -487,7 +376,7 @@ ALTER TABLE `plan_payments`
 ALTER TABLE `recommendations`
   ADD CONSTRAINT `recommendations_analysis_id` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`),
   ADD CONSTRAINT `recommendations_coin_id` FOREIGN KEY (`coin_id`) REFERENCES `coins` (`id`),
-  ADD CONSTRAINT `recommendations_timeframe_id` FOREIGN KEY (`timframe_id`) REFERENCES `timeframes` (`id`);
+  ADD CONSTRAINT `recommendations_timeframe_id` FOREIGN KEY (`timeframe_id`) REFERENCES `timeframes` (`id`);
 
 --
 -- Constraints for table `transactions`
@@ -510,7 +399,7 @@ ALTER TABLE `users`
 --
 ALTER TABLE `user_settings`
   ADD CONSTRAINT `user_setting_exchange_id` FOREIGN KEY (`exchange_id`) REFERENCES `exchanges` (`id`),
-  ADD CONSTRAINT `user_setting_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`);
+  ADD CONSTRAINT `user_setting_username_fk` FOREIGN KEY (`username`) REFERENCES `users` (`username`);
 
 --
 -- Constraints for table `watchlists`

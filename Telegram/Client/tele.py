@@ -19,6 +19,7 @@ from Inc import functions
 from Account.clients import User
 from Libraries.definitions import *
 from Interfaces.telegram import Telegram
+import numpy as np
 
 apihelper.ENABLE_MIDDLEWARE = True
 
@@ -26,9 +27,27 @@ apihelper.ENABLE_MIDDLEWARE = True
 API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 
 
+def start_keyboard(bot_ins=None, message=None):
+    key_markup = types.ReplyKeyboardMarkup(row_width=1)
+    key_add_account = types.KeyboardButton('add exchange account')
+    key_add_strategy = types.KeyboardButton('add strategy')
+    key_tutorials = types.KeyboardButton('tutorials')
+    key_plans = types.KeyboardButton('plans')
+    key_profile = types.KeyboardButton('profile')
+    key_help = types.KeyboardButton('help')
+    key_markup.add(key_add_account, key_add_strategy, key_tutorials, key_plans, key_profile, key_help)
+    if message:
+        markup = types.ReplyKeyboardRemove(selective=False)
+        bot_ins.send_message(message.chat.id, message, reply_markup=markup)
+    return key_markup
+
+
 class ClientBot(Telegram):
     def __init__(self):
         Telegram.__init__(self, API_KEY=API_KEY)
+        self.exchanges = np.array(functions.get_exchanges())
+        self.coins = np.array(functions.get_coins())
+        self.analysis = np.array(functions.get_analysis())
 
     def plan_keyboard(self, message):
         key_markup = types.ReplyKeyboardMarkup(row_width=3)
@@ -45,63 +64,204 @@ class ClientBot(Telegram):
     def check_is_valid_user(self, message):
         result = functions.check_expire_plan(chat_id=message.chat.id)
         if result:
-            self.bot.send_message(message.chat.id, 'your plan  is expire!\n'
+            self.bot.send_message(message.chat.id, 'your plan is expire!\n'
                                                    'recharge your plan please.')
             return False
         else:
             return True
 
+    def is_start_bot(self, message):
+        if message.chat.id in self.user_dict:
+            return False
+        else:
+            self.bot.send_message(message.chat.id, 'Please /start Bot')
+            return True
+
+    def command_is_valid(self, message):
+        if self.is_start_bot(message=message) and self.check_is_valid_user(message=message):
+            return False
+        else:
+            return True
+
+    def check_add_command(self, message):
+        if self.command_is_valid(message=message):
+            user = self.user_dict[message.chat.id]
+            user.update_user_plan_limit()
+            if user.strategy > len(functions.get_user_watchlist(username=user.username)):
+                return True
+            else:
+                self.bot.send_message(message.chat.id, 'your strategies is full\n'
+                                                       'upgrade your plan or edit it')
+                return False
+
+    def check_setup_command(self, message):
+        if self.command_is_valid(message=message):
+            user = self.user_dict[message.chat.id]
+            user.update_user_plan_limit()
+            if user.account > len(functions.get_user_settings(username=user.username)):
+                return True
+            else:
+                self.bot.send_message(message.chat.id, 'your accounts is full\n'
+                                                       'upgrade your account or edit it')
+                return False
+
     def bot_actions(self):
-        @self.bot.message_handler(commands=['start'])
+        @self.bot.message_handler(commands=['start'], func=self.is_start_bot)
         def welcome(message):
             user = functions.get_user(message.chat.id)
+
+            # is typing bot ..
             self.bot.send_chat_action(chat_id=message.chat.id, action="typing")
             sleep(1)
+
             self.bot.reply_to(message, trans('C_hello') + message.chat.first_name + "!\n" + trans('C_welcome'))
-            if message.chat.id not in self.user_dict:
-                self.user_dict[message.chat.id] = User(chat_id=message.chat.id)  # create object for register user
+            self.user_dict[message.chat.id] = User(chat_id=message.chat.id)  # create object for register user session
             if not user:
-                keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+                # if user deleted telegram account need develop
+                keyboard = types.ReplyKeyboardMarkup()
                 reg_button = types.KeyboardButton(text="Share your phone number", request_contact=True)
                 keyboard.add(reg_button)
-                self.bot.send_message(message.chat.id,
-                                      "You should share your phone number",
-                                      reply_markup=keyboard)
+                self.bot.send_message(message.chat.id, "Sign up", reply_markup=keyboard)
             else:
+                self.user_dict[message.chat.id].username = user[0][0]
                 if self.check_is_valid_user(message=message):
+                    functions.update_user_online(username=user[0][0], online=True)
+                    # markup_key = start_keyboard()
                     self.bot.send_message(message.chat.id, 'Welcome back')
-                    # if user deleted telegram account need develop
 
-        @self.bot.message_handler(content_types=['contact'])
-        def register_handler(message):
+        @self.bot.callback_query_handler(func=lambda call: True)
+        def query_handler(call):
+            if '_select_exchange' in call.data:
+                query = str(call.data).split('_')
+                self.bot.send_message(call.message.chat.id, 'Please enter your public API')
+                self.bot.register_next_step_handler(message=call.message, callback=setup_exchange_step_1,
+                                                    exchange_id=int(query[0]))
+            elif '_select_coin' in call.data:
+                query = str(call.data).split('_')
+                analysis_keyboard = types.InlineKeyboardMarkup()
+                for index, analysis, description in self.analysis:
+                    analysis_keyboard.add(types.InlineKeyboardButton(analysis,
+                                                                     callback_data=str(index) +
+                                                                                   '_select_analysis_' +
+                                                                                   query[0]))
+                self.bot.send_message(chat_id=call.message.chat.id, text='Please Select your analysis',
+                                      reply_markup=analysis_keyboard)
+            elif '_select_analysis_' in call.data:
+                query = str(call.data).split('_')
+                self.bot.send_message(call.message.chat.id, 'Please enter percent of coin \n'
+                                                            'you want to trade (between 0 - 100)')
+                self.bot.register_next_step_handler(message=call.message, callback=add_coin_step_1,
+                                                    coin_id=int(query[3]), analysis_id=int(query[0]))
+            # delete markup keyboard
+            self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+
+        def add_coin_step_1(message, coin_id: int, analysis_id: int):
             user = self.user_dict[message.chat.id]
-            user.number = message.contact.phone_number
-            markup = types.ReplyKeyboardRemove(selective=False)
-            self.bot.send_message(message.chat.id, 'please enter your username', reply_markup=markup)
-            self.bot.register_next_step_handler(message, callback=reg_step_1)
+            try:
+                percent = float(message.text)
+                if not 0 < percent < 100:
+                    self.bot.send_message(message.chat.id, 'percent must be between 0 - 100')
+                    self.bot.register_next_step_handler(message=message, callback=add_coin_step_1,
+                                                        coin_id=coin_id, analysis_id=analysis_id)
+                else:
+                    error, result = functions.set_watchlist(coin_id=coin_id, username=user.username,
+                                                            analysis_id=analysis_id, amount=percent)
+                    if error:
+                        self.bot.send_message(message.chat.id, 'you have already have this strategy '
+                                                               'with coin and analysis')
+                    else:
+                        self.bot.send_message(message.chat.id, 'success')
 
-        def reg_step_1(message):
+            except ValueError:
+                self.bot.send_message(message.chat.id, 'percent must be between 0 - 100')
+                self.bot.register_next_step_handler(message=message, callback=add_coin_step_1,
+                                                    coin_id=coin_id, analysis_id=analysis_id)
+
+        def setup_exchange_step_1(message, exchange_id: int):
+            try:
+                self.bot.send_message(message.chat.id, 'Please enter your secret API')
+                self.bot.register_next_step_handler(message=message, callback=setup_exchange_step_2,
+                                                    exchange_id=exchange_id, public=message.text)
+                self.bot.delete_message(message.chat.id, message.message_id)
+            except Exception as e:
+                self.bot.reply_to(message, 'Error')
+                print(e)
+
+        def setup_exchange_step_2(message, exchange_id: int, public: str):
+            user = self.user_dict[message.chat.id]
+            try:
+                self.bot.register_next_step_handler(message, callback=setup_exchange_step_2)
+                error, result = functions.set_user_setting(username=user.username, public=public, secret=message.text,
+                                                           exchange_id=exchange_id)
+                self.bot.delete_message(message.chat.id, message.message_id)
+                if error:
+                    self.bot.send_message(message.chat.id, 'you cant add same exchange account')
+                else:
+                    self.bot.send_message(message.chat.id, 'Success')
+            except Exception as e:
+                self.bot.reply_to(message, 'Error')
+                print(e)
+
+        @self.bot.message_handler(content_types=['contact'],
+                                  func=lambda message: functions.is_user_signup(message.chat.id))
+        def register_handler(message):
+            markup = types.ReplyKeyboardRemove(selective=False)
+            self.bot.send_message(message.chat.id, 'Please enter your username', reply_markup=markup)
+            self.bot.register_next_step_handler(message=message, callback=reg_step_1,
+                                                phone=message.contact.phone_number)
+
+        def reg_step_1(message, phone: str):
             user = self.user_dict[message.chat.id]
             try:
                 if functions.check_username_exist(username=message.text):
-                    self.bot.send_message(message.chat.id, 'username already exist!\nTry again!')
-                    self.bot.register_next_step_handler(message, reg_step_1)
+                    self.bot.send_message(message.chat.id, 'Username already exist!\nTry again!')
+                    self.bot.register_next_step_handler(message=message, callback=reg_step_1,
+                                                        phone=phone)
                 else:
                     user.username = message.text
-                    error, detail = register(username=user.username, chat_id=user.chat_id, phone=user.number)
+                    error, detail = register(username=user.username, chat_id=user.chat_id, phone=phone)
                     if error:
-                        self.bot.reply_to(message, trans('C_please_start'))
+                        self.bot.reply_to(message, 'Try again')
                     else:
                         functions.update_user_online(username=user.username, online=True)
                         self.bot.reply_to(message, 'Welcome!\n'
-                                                   'your account created!\n'
-                                                   'free plan is available for 30 day\n'
-                                                   'enjoy!')
+                                                   'Your account created!\n'
+                                                   'Free plan is available for 30 day\n'
+                                                   'Enjoy!')
             except Exception as e:
                 self.bot.reply_to(message, trans('C_please_start'))
                 print(e)
 
-        @self.bot.message_handler(commands=['help'], func=self.check_is_valid_user)
+        @self.bot.message_handler(commands=['setup'], func=self.check_setup_command)
+        def setup(message):
+            try:
+                exchanges_keyboard = types.InlineKeyboardMarkup()
+                for index, exchange in self.exchanges:
+                    exchanges_keyboard.add(types.InlineKeyboardButton(exchange,
+                                                                      callback_data=str(index) +
+                                                                                    '_select_exchange'))
+                self.bot.send_message(chat_id=message.chat.id, text='Choose your exchange:',
+                                      reply_markup=exchanges_keyboard)
+            except Exception as e:
+                self.bot.reply_to(message, 'Error')
+                print(e)
+
+        @self.bot.message_handler(commands=['add'], func=self.check_add_command)
+        def add_coin(message):
+            try:
+                coins_keyboard = types.InlineKeyboardMarkup()
+                for index, coins in self.coins:
+                    coins_keyboard.add(types.InlineKeyboardButton(coins,
+                                                                  callback_data=str(index) +
+                                                                                '_select_coin'))
+
+                self.bot.send_message(chat_id=message.chat.id, text='Choose your Coin:',
+                                      reply_markup=coins_keyboard)
+            except Exception as e:
+                self.bot.reply_to(message, 'Error')
+                print(e)
+
+        @self.bot.message_handler(commands=['help'])
         def help_me(message):
             try:
                 self.bot.reply_to(message, trans('C_help'))
@@ -110,14 +270,6 @@ class ClientBot(Telegram):
                 self.bot.reply_to(message, trans('C_unsuccessful_operation'))
                 print(e)
 
-        @self.bot.message_handler(commands=['guide'])
-        def guide_me(message):
-            try:
-                self.bot.reply_to(message, trans('C_guide'))
-
-            except Exception as e:
-                self.bot.reply_to(message, trans('C_unsuccessful_operation'))
-                print(e)
 
 # def bot_actions(self):
 # def bot_actions(self):
@@ -701,4 +853,3 @@ class ClientBot(Telegram):
 #             except Exception as e:
 #                 self.bot.reply_to(message, trans('C_unsuccessful_logout'))
 #                 print(e)
-

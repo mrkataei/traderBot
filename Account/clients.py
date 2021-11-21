@@ -9,20 +9,31 @@ import json
 import time
 import requests
 
+from Inc import functions
+
 
 class User:
     def __init__(self, chat_id):
         self.chat_id = chat_id
-        self.username: str
-        self.number: str
+        self.username = None
+        self.user_setting = None
+        self.strategy = None
+        self.account = None
+
+    def update_user_plan_limit(self):
+        if self.username is not None:
+            plan_id = functions.get_user_plan(username=self.username)
+            plan = functions.record_dictionary(record=functions.get_plans(plan_id=plan_id)[0], table='plans')
+            self.strategy = plan['strategy_number']
+            self.account = plan['account_number']
 
 
 class BitfinexClient:
     BASE_URL = "https://api.bitfinex.com/"
-    # __KEY = "KeRPcVqCQQw37SekGlPf37Am6DhzdCeqHBfgyieNNra"
-    __KEY = "sUYAU0Yk6WaiI3KIVLn7gg69RrKD5P2VKISjnWT7Cdp"
-    # __SECRET = "b2pYpIXMdfpZgP0F8sXWiWRgcrkHNY6BmnfMtYe7BsI"
-    __SECRET = "TXkcX8lpiYvpFJZEaw1X7lQeuMsDCnx8FqS17O72m0y"
+
+    def __init__(self, public: str, secret: str):
+        self.__KEY = public
+        self.__SECRET = secret
 
     def _nonce(self):
         # Returns a nonce
