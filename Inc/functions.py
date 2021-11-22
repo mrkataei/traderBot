@@ -74,21 +74,11 @@ def record_dictionary(record, table: str):
     elif table == 'analysis':
         return {'id': record[0], 'name': record[1], 'description': record[2]}
 
-    elif table == 'analysis_settings':
-        return {'coin_id': record[0], 'timeframe_id': record[1], 'analysis_id': record[2],
-                'indicator_settings_id': record[3], 'settings': record[4]}
-
     elif table == 'coins':
         return {'id': record[0], 'coin': record[1]}
 
     elif table == 'exchanges':
         return {'id': record[0], 'exchange': record[1]}
-
-    elif table == 'indicators':
-        return {'id': record[0], 'indicator': record[1]}
-
-    elif table == 'indicator_settings':
-        return {'id': record[0], 'indicator_id': record[1], 'settings': record[2]}
 
     elif table == 'plans':
         return {'id': record[0], 'plan': record[1], 'cost': record[2], 'duration': record[3], 'description': record[4],
@@ -219,29 +209,6 @@ def update_user_online(username: str, online: bool):
     update_query(query)
 
 
-def get_coins(coin_id: int = -1):
-    """
-    :param coin_id: coin_id in already set in database
-    :return: all coins if coin_id equal -1
-    :return: coin name if coin_id
-    :rtype: List of coins
-    """
-    if coin_id < 0:
-        query = 'SELECT * from coins'
-    else:
-        query = "SELECT coin from coins WHERE id={coin_id}".format(coin_id=coin_id)
-    return execute_query(query=query)
-
-
-def get_coin_id(coin: str):
-    """
-    :param coin:
-    :return:
-    """
-    query = "SELECT id from coins WHERE coin='{coin}'".format(coin=coin)
-    return execute_query(query=query)[0][0]
-
-
 def get_timeframes(timeframe_id: int = -1):
     """
     :param timeframe_id: coin_id in already set in database
@@ -267,11 +234,6 @@ def get_analysis(analysis_id: int = -1):
         query = "SELECT * from analysis"
     else:
         query = "SELECT * from analysis WHERE id={analysis_id}".format(analysis_id=analysis_id)
-    return execute_query(query=query)
-
-
-def get_coin_name(coin_id: int):
-    query = "SELECT coin FROM coins WHERE id={coin_id}".format(coin_id=coin_id)
     return execute_query(query=query)
 
 
@@ -416,3 +378,36 @@ def get_last_recommendations(analysis_id: int, coin_id: int, timeframe_id: int =
                                                                                       timeframe_id=timeframe_id)
     return execute_query(query=query)
 
+
+# coin queries
+
+def get_coins(coin_id: int = -1):
+    """
+    :param coin_id: coin_id in already set in database
+    :return: all coins if coin_id equal -1
+    :return: coin name if coin_id
+    :rtype: List of coins
+    """
+    if coin_id < 0:
+        query = 'SELECT * from coins'
+    else:
+        query = "SELECT coin from coins WHERE id={coin_id}".format(coin_id=coin_id)
+    return execute_query(query=query)
+
+
+def get_coin_id(coin: str):
+    """
+    :param coin:
+    :return:
+    """
+    query = "SELECT id from coins WHERE coin='{coin}'".format(coin=coin)
+    return execute_query(query=query)[0][0]
+
+
+def get_coin_name(coin_id: int):
+    """
+    :param coin_id:
+    :return:
+    """
+    query = "SELECT coin FROM coins WHERE id={coin_id}".format(coin_id=coin_id)
+    return execute_query(query=query)

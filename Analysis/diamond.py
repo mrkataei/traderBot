@@ -25,24 +25,10 @@ all of this in Telegram/message just use broadcast method
 import pandas as pd
 import pandas_ta as ta
 
-from Inc.functions import get_recommendations, set_recommendation, record_dictionary
+from Inc.functions import get_last_recommendations, set_recommendation, record_dictionary
 from Libraries.macd import macd_indicator
 from Libraries.tools import get_source
 from Telegram.Client.message import broadcast_messages
-
-symbols_bitfinix = {'BTCUSDT': 'tBTCUSD', 'ETHUSDT': 'tETHUSD', 'ADAUSDT': 'tADAUSD', 'DOGEUSDT': 'tDOGE:USD',
-                    'BCHUSDT': 'tBCHN:USD', 'ETCUSDT': 'tETCUSD'}
-valid_coins_and_times = {
-    'coins':
-        {
-            1: {'timeframes': {3}},
-            2: {'timeframes': {3}},
-            3: {'timeframes': {3}},
-            4: {'timeframes': {1}},
-            5: {'timeframes': {3}},
-            6: {'timeframes': {3}}
-        }
-}
 
 
 class Diamond:
@@ -55,9 +41,6 @@ class Diamond:
          A dataframe made of candles with  specific coin and timeframe
          at least must have 100 rows
          dataframe columns: date , close , open , high , volume
-     gain: float
-
-     cost: float
 
      coin_id : int
          the id of coin that dataframe made of
@@ -94,8 +77,7 @@ class Diamond:
      signal():
          check last row recommendations to generate new signal
      """
-    def __init__(self, data: pd.DataFrame, gain: float, cost: float, coin_id: int, timeframe_id: int, bot_ins,
-                 setting: dict):
+    def __init__(self, data: pd.DataFrame, coin_id: int, timeframe_id: int, bot_ins, setting: dict):
         """
          parameters
          ----------
@@ -103,15 +85,12 @@ class Diamond:
              A dataframe made of candles with  specific coin and timeframe
              at least must have 100 rows
              dataframe columns: date , close , open , high , volume
-         gain: float
-
-         cost: float
 
          coin_id : int
              the id of coin that dataframe made of
          timeframe_id :
              the id of coin that dataframe made of
-         bot:
+         bot_ins:
 
          setting: dict
              A setting include signal(analysis) settings and indicators settings
@@ -124,8 +103,6 @@ class Diamond:
                                 'MACD': {'slow': int, 'signal': int, 'fast': int, 'source': str, 'matype': str}}}
         """
         self.data = data
-        self.gain = gain
-        self.cost = cost
         self.coin_id = coin_id
         self.timeframe_id = timeframe_id
         self.bot = bot_ins
@@ -200,7 +177,7 @@ class Diamond:
         old position by default is 'sell'
         :return: old_position
         """
-        query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+        query = get_last_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
         if query:
             old_position = record_dictionary(query[0], "recommendations")["position"]
         else:
@@ -213,35 +190,33 @@ class Diamond:
         old position by default is 'sell'
         :return: last_price
         """
-        query = get_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
+        query = get_last_recommendations(analysis_id=3, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
         if query:
             old_price = record_dictionary(query[0], "recommendations")["price"]
         else:
             old_price = 0
         return old_price
 
-    def broadcast(self, position: str, current_price: float, target_price: float, risk: str):
+    def broadcast(self, position: str, current_price: float, risk: str):
         """
         broadcast signal to users
         :param position: recommendation of signal
         :param current_price: close of selected candle
-        :param target_price: ----
         :param risk: risk of signal
 
         """
         broadcast_messages(coin_id=self.coin_id, analysis_id=3, timeframe_id=self.timeframe_id, position=position,
-                           target_price=target_price, current_price=current_price, risk=risk, bot_ins=self.bot)
+                           current_price=current_price, risk=risk, bot_ins=self.bot)
 
-    def insert_database(self, position: str, current_price: float, target_price: float, risk: str):
+    def insert_database(self, position: str, current_price: float, risk: str):
         """
         insert signal to database
         :param position: recommendation of signal
         :param current_price: close of selected candle
-        :param target_price: ----
         :param risk: risk of signal
         """
         set_recommendation(analysis_id=3, coin_id=self.coin_id, timeframe_id=self.timeframe_id, position=position,
-                           target_price=target_price, current_price=current_price, cost_price=self.cost, risk=risk)
+                           price=current_price, risk=risk)
 
     def _set_recommendation(self, position: str, risk: str, index):
         # set recommendation and risk in dataframe
@@ -326,16 +301,12 @@ class Diamond:
         if old_position != position:
             close = float(last_row_diamond_detector['close'].values[0])
             if position == 'buy':
-                target_price = close * self.gain + close
-                self.broadcast(position=position, current_price=close, target_price=target_price,
-                               risk=last_row_diamond_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close, target_price=target_price,
+                self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
+                self.insert_database(position=position, current_price=close,
                                      risk=last_row_diamond_detector['risk'].values[0])
             elif position == 'sell' and old_price < close:
-                target_price = -close * self.gain + close
-                self.broadcast(position=position, current_price=close, target_price=target_price,
-                               risk=last_row_diamond_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close, target_price=target_price,
+                self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
+                self.insert_database(position=position, current_price=close,
                                      risk=last_row_diamond_detector['risk'].values[0])
 
 # test case:

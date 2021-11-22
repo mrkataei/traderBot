@@ -48,8 +48,7 @@ class StreamIStrategies(Stream):
             data = candles(symbol=self.symbol, timeframe='30m', limit=200)
             if data:
                 setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
-                diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                        timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='30m')
+                Diamond(data=data, coin_id=self.coin_id, timeframe_id=1, setting=setting_diamond, bot_ins=_bot_ins)
             sleep(1800)
 
     def stream_1hour_candle(self):
@@ -62,11 +61,9 @@ class StreamIStrategies(Stream):
             data = candles(symbol=self.symbol, timeframe='4h', limit=200)
             if data:
                 setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
-                ruby(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                     timeframe_id=3, settings=setting_ruby, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
+                Ruby(data=data, coin_id=self.coin_id, timeframe_id=3, setting=setting_ruby, bot_ins=_bot_ins)
                 setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
-                diamond(data=data, gain=self.gain, cost=self.cost, coin_id=self.coin_id,
-                        timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins, symbol=self.symbol, timeframe='4hour')
+                Diamond(data=data, coin_id=self.coin_id, timeframe_id=3, setting=setting_diamond, bot_ins=_bot_ins)
             sleep(14400)
 
     def stream_1day_candle(self):

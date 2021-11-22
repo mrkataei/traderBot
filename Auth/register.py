@@ -6,7 +6,6 @@ need hash function for password - any registration in app for now needs username
 """
 
 from Inc import functions
-from Libraries.definitions import *
 from datetime import timedelta, datetime
 
 
@@ -18,5 +17,5 @@ def register(username: str, chat_id: str, phone: str):
     query = "INSERT INTO users (username, chat_id, phone, valid_time_plan) VALUES (%s, %s , %s, %s)"
     val = (username, chat_id, phone, valid_time_plan)
     error, detail = functions.insert_query(query=query, values=val)
-    return error, trans('R_welcome')
+    return error, detail
 
