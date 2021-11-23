@@ -27,12 +27,6 @@ class Stream:
     def stream_1day_candle(self):
         raise Exception("NotImplementedException")
 
-    def set_cost(self, cost: float):
-        raise Exception("NotImplementedException")
-
-    def set_gain(self, gain: float):
-        raise Exception("NotImplementedException")
-
     def stream(self):
         stream_1m_candle = threading.Thread(target=self.stream_1min_candle)
         stream_30min_candle = threading.Thread(target=self.stream_30min_candle)
