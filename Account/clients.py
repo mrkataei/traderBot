@@ -19,6 +19,7 @@ class User:
         self.user_setting = None
         self.strategy = None
         self.account = None
+        self.lang = 'en'
 
     def update_user_plan_limit(self):
         if self.username is not None:

@@ -66,10 +66,9 @@ def record_dictionary(record, table: str):
     """
     if table == 'users':
         return {'username': record[0], 'chat_id': record[1],
-                'role': record[2], 'phone': record[3], 'email': record[4], 'signup_time': record[5],
-                'last_login': record[6],
-                'is_online': record[7], 'is_use_freemium': record[8], 'valid_time_plan': record[9],
-                'plan_id': record[10], 'timeframe_id': record[11]}
+                'role': record[2], 'email': record[3], 'phone': record[4], 'signup_time': record[5],
+                'last_login': record[6], 'is_online': record[7], 'is_use_freemium': record[8],
+                'valid_time_plan': record[9], 'plan_id': record[10], 'timeframe_id': record[11]}
 
     elif table == 'analysis':
         return {'id': record[0], 'name': record[1], 'description': record[2]}
@@ -99,9 +98,9 @@ def record_dictionary(record, table: str):
         return {'username': record[0], 'public': record[1], 'secret': record[2],
                 'exchange_id': record[3]}
 
-    elif table == 'watchlists':
-        return {'id': record[0], 'coin_id': record[1], 'username': record[2], 'analysis_id': record[3],
-                'amount': record[4]}
+    elif table == 'watchlist':
+        return {'id': record[0], 'user_setting_id': [1], 'coin_id': record[2], 'username': record[3],
+                'analysis_id': record[4], 'amount': record[5]}
 
     elif table == 'plan_payments':
         return {'username': record[0], 'plan_id': record[1], 'timestamp': record[2], 'cost': record[3],
@@ -193,6 +192,19 @@ def get_user_settings(username: str):
     return execute_query(query=query)
 
 
+def get_user_settings_id(chat_id: str, exchange_id: int):
+    """
+    :param chat_id:
+    :param exchange_id:
+    :return:
+    """
+    query = "SELECT user_settings.id FROM users, user_settings, exchanges " \
+            "WHERE users.username = user_settings.username and exchanges.id = user_settings.exchange_id " \
+            "and users.chat_id = '{chat_id}' " \
+            "and user_settings.exchange_id = {exchange_id}".format(chat_id=chat_id, exchange_id=exchange_id)
+    return execute_query(query=query)
+
+
 def update_user_online(username: str, online: bool):
     """
     :param username:
@@ -265,16 +277,30 @@ def set_user_setting(username: str, public: str, secret: str, exchange_id: int):
     return error, result
 
 
-def set_watchlist(coin_id: int, username: str, analysis_id: int, amount: float):
+def get_user_exchanges(chat_id: str):
     """
+    :param chat_id:
+    :return:
+    """
+    query = "SELECT exchanges.exchange FROM users, user_settings, exchanges " \
+            "WHERE users.username = user_settings.username and exchanges.id = user_settings.exchange_id " \
+            "and users.chat_id = '{chat_id}'".format(chat_id=chat_id)
+    return execute_query(query=query)
+
+
+
+def set_watchlist(user_setting_id: int, coin_id: int, username: str, analysis_id: int, amount: float):
+    """
+    :param user_setting_id:
     :param coin_id:
     :param username:
     :param analysis_id:
     :param amount:
     :return:
     """
-    query = "INSERT INTO watchlists(coin_id, username, analysis_id, amount) VALUES (%s, %s , %s ,%s)"
-    val = (coin_id, username, analysis_id, amount)
+    query = "INSERT INTO watchlist(user_setting_id, coin_id, username, analysis_id, amount) " \
+            "VALUES (%s, %s, %s , %s ,%s)"
+    val = (user_setting_id, coin_id, username, analysis_id, amount)
     error, result = insert_query(query=query, values=val)
     return error, result
 
@@ -296,7 +322,7 @@ def get_user_watchlist(username: str):
     :param username:
     :return:
     """
-    query = "SELECT * from watchlists WHERE username='{username}'".format(username=username)
+    query = "SELECT * from watchlist WHERE username='{username}'".format(username=username)
     return execute_query(query=query)
 
 
@@ -306,7 +332,7 @@ def get_user_strategy(coin_id: int = None, analysis_id: int = None):
     :param analysis_id:
     :return:
     """
-    query = "SELECT username FROM watchlists WHERE coin_id ={coin_id}" \
+    query = "SELECT username FROM watchlist WHERE coin_id ={coin_id}" \
             " AND analysis_id={analysis_id}".format(coin_id=coin_id,
                                                     analysis_id=analysis_id)
     return execute_query(query=query)
@@ -411,3 +437,4 @@ def get_coin_name(coin_id: int):
     """
     query = "SELECT coin FROM coins WHERE id={coin_id}".format(coin_id=coin_id)
     return execute_query(query=query)
+

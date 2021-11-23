@@ -259,8 +259,8 @@ that check conditions of each candle
 #
 
 class StrategyTaster:
-    def __init__(self, name: str, symbol: str, timeframe: str, dataframe, starttime: str, endtime: str,
-                 intial_value: int):
+    def __init__(self, name: str, symbol: str, timeframe: str, dataframe, endtime: str,
+                 intial_value: int, starttime: str = '2000 1 1'):
         self.symbol = symbol
         self.name = name
         self.timeframe = timeframe
