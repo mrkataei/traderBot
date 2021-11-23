@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 21, 2021 at 03:05 PM
+-- Generation Time: Nov 23, 2021 at 08:11 PM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -138,6 +138,7 @@ CREATE TABLE `recommendations` (
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `timeframes`
@@ -177,6 +178,40 @@ CREATE TABLE `transactions` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tutorials`
+--
+
+CREATE TABLE `tutorials` (
+  `name` char(10) NOT NULL,
+  `category` int(5) NOT NULL,
+  `media` longblob NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tutorials_category`
+--
+
+CREATE TABLE `tutorials_category` (
+  `id` int(5) NOT NULL,
+  `name` char(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `tutorials_category`
+--
+
+INSERT INTO `tutorials_category` (`id`, `name`) VALUES
+(1, 'exchange'),
+(2, 'wallet'),
+(3, 'technical'),
+(4, 'bot');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -200,7 +235,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
-('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-21 05:18:12', 1, 1, '2021-12-20 15:13:22', 1, 1);
+('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-23 18:40:52', 1, 1, '2021-12-20 15:13:22', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -209,6 +244,7 @@ INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_ti
 --
 
 CREATE TABLE `user_settings` (
+  `id` int(12) NOT NULL,
   `username` char(12) NOT NULL,
   `public` varchar(30) NOT NULL,
   `secret` varchar(30) NOT NULL,
@@ -218,13 +254,14 @@ CREATE TABLE `user_settings` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `watchlists`
+-- Table structure for table `watchlist`
 --
 
-CREATE TABLE `watchlists` (
-  `id` int(15) NOT NULL,
+CREATE TABLE `watchlist` (
+  `id` int(12) NOT NULL,
+  `user_setting_id` int(12) NOT NULL,
   `coin_id` int(5) NOT NULL,
-  `username` char(12) NOT NULL,
+  `username` char(30) NOT NULL,
   `analysis_id` int(5) NOT NULL,
   `amount` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -288,6 +325,20 @@ ALTER TABLE `transactions`
   ADD KEY `transactions_reccomendation_id_close` (`recommendation_id_close`);
 
 --
+-- Indexes for table `tutorials`
+--
+ALTER TABLE `tutorials`
+  ADD PRIMARY KEY (`name`),
+  ADD UNIQUE KEY `name` (`name`),
+  ADD KEY `fk_category_id` (`category`);
+
+--
+-- Indexes for table `tutorials_category`
+--
+ALTER TABLE `tutorials_category`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -301,17 +352,19 @@ ALTER TABLE `users`
 -- Indexes for table `user_settings`
 --
 ALTER TABLE `user_settings`
+  ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`,`exchange_id`),
   ADD KEY `user_setting_exchange_id` (`exchange_id`);
 
 --
--- Indexes for table `watchlists`
+-- Indexes for table `watchlist`
 --
-ALTER TABLE `watchlists`
+ALTER TABLE `watchlist`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `coin_id` (`coin_id`,`username`,`analysis_id`),
-  ADD KEY `whatchlists_analysis_id` (`analysis_id`),
-  ADD KEY `whatchlists_username` (`username`);
+  ADD UNIQUE KEY `user_setting_id` (`user_setting_id`,`coin_id`,`username`,`analysis_id`),
+  ADD KEY `whatchlist_coin_id` (`coin_id`),
+  ADD KEY `whatchlits_analysis_id` (`analysis_id`),
+  ADD KEY `whatchlist_username` (`username`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -333,7 +386,7 @@ ALTER TABLE `coins`
 -- AUTO_INCREMENT for table `exchanges`
 --
 ALTER TABLE `exchanges`
-  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `plans`
@@ -354,10 +407,22 @@ ALTER TABLE `timeframes`
   MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `watchlists`
+-- AUTO_INCREMENT for table `tutorials_category`
 --
-ALTER TABLE `watchlists`
-  MODIFY `id` int(15) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+ALTER TABLE `tutorials_category`
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `user_settings`
+--
+ALTER TABLE `user_settings`
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `watchlist`
+--
+ALTER TABLE `watchlist`
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
@@ -385,7 +450,13 @@ ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_reccomendation_id_close` FOREIGN KEY (`recommendation_id_close`) REFERENCES `recommendations` (`id`),
   ADD CONSTRAINT `transactions_reccomendation_id_open` FOREIGN KEY (`recommendation_id_close`) REFERENCES `recommendations` (`id`),
   ADD CONSTRAINT `transactions_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`),
-  ADD CONSTRAINT `transactions_whatchlist_id` FOREIGN KEY (`watchlist_id`) REFERENCES `watchlists` (`id`);
+  ADD CONSTRAINT `transactions_whatchlist_id` FOREIGN KEY (`watchlist_id`) REFERENCES `watchlist` (`id`);
+
+--
+-- Constraints for table `tutorials`
+--
+ALTER TABLE `tutorials`
+  ADD CONSTRAINT `fk_category_id` FOREIGN KEY (`category`) REFERENCES `tutorials_category` (`id`);
 
 --
 -- Constraints for table `users`
@@ -399,15 +470,17 @@ ALTER TABLE `users`
 --
 ALTER TABLE `user_settings`
   ADD CONSTRAINT `user_setting_exchange_id` FOREIGN KEY (`exchange_id`) REFERENCES `exchanges` (`id`),
+  ADD CONSTRAINT `user_setting_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`),
   ADD CONSTRAINT `user_setting_username_fk` FOREIGN KEY (`username`) REFERENCES `users` (`username`);
 
 --
--- Constraints for table `watchlists`
+-- Constraints for table `watchlist`
 --
-ALTER TABLE `watchlists`
-  ADD CONSTRAINT `whatchlists_analysis_id` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`),
-  ADD CONSTRAINT `whatchlists_coin_id` FOREIGN KEY (`coin_id`) REFERENCES `coins` (`id`),
-  ADD CONSTRAINT `whatchlists_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`);
+ALTER TABLE `watchlist`
+  ADD CONSTRAINT `whatchlist_coin_id` FOREIGN KEY (`coin_id`) REFERENCES `coins` (`id`),
+  ADD CONSTRAINT `whatchlist_user_setting_id` FOREIGN KEY (`user_setting_id`) REFERENCES `user_settings` (`id`),
+  ADD CONSTRAINT `whatchlist_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`),
+  ADD CONSTRAINT `whatchlits_analysis_id` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
