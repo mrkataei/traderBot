@@ -183,12 +183,14 @@ def get_user_plan(username: str):
         return False
 
 
-def get_user_settings(username: str):
+def get_user_exchange(chat_id: str):
     """
-    :param username:
+    :param chat_id:
     :return:
     """
-    query = "SELECT * from user_settings WHERE username='{username}'".format(username=username)
+    query = "SELECT exchanges.exchange from user_settings, users, exchanges WHERE chat_id='{chat_id}' " \
+            "and users.username = user_settings.username " \
+            "and exchanges.id = user_settings.exchange_id".format(chat_id=chat_id)
     return execute_query(query=query)
 
 
@@ -436,5 +438,28 @@ def get_coin_name(coin_id: int):
     :return:
     """
     query = "SELECT coin FROM coins WHERE id={coin_id}".format(coin_id=coin_id)
+    return execute_query(query=query)
+
+
+def get_user_plan_profile(chat_id: str):
+    query = "SELECT plans.plan, users.valid_time_plan from users, plans " \
+            "where users.plan_id = plans.id and users.chat_id = '{chat_id}'".format(chat_id=chat_id)
+    plan, valid_date = execute_query(query=query)[0]
+    return plan, valid_date.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def get_user_exchanges_strategies_profile(chat_id: str):
+    """
+    :param chat_id:
+    :return:
+    """
+    query = "SELECT coins.coin , analysis.name, watchlist.amount , exchanges.exchange " \
+            "FROM watchlist inner join users on watchlist.username = users.username " \
+            "inner join user_settings ON watchlist.user_setting_id = user_settings.id " \
+            "inner join coins on watchlist.coin_id = coins.id " \
+            "inner join analysis on watchlist.analysis_id = analysis.id " \
+            "inner join exchanges on user_settings.exchange_id = exchanges.id " \
+            "where users.chat_id = '{chat_id}'".format(chat_id=chat_id)
+
     return execute_query(query=query)
 

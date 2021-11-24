@@ -12,6 +12,7 @@ from Account.clients import User
 # from Libraries.definitions import *
 from Interfaces.telegram import Telegram
 import numpy as np
+
 # from Libraries.data_collector import get_candle_binance as candles
 # from Analysis.emerald import Emerald
 # from Test.strategy_tester import StrategyTaster
@@ -97,13 +98,6 @@ def exchanges_keyboard():
     return key_markup
 
 
-def check_keyboards_input(keyboard: str):
-    if '🏛 add exchange' == keyboard:
-        return True
-    elif '📊 add strategy' == keyboard:
-        return True
-
-
 class ClientBot(Telegram):
     def __init__(self):
         Telegram.__init__(self, API_KEY=API_KEY)
@@ -157,8 +151,7 @@ class ClientBot(Telegram):
         if self.is_valid_command(message=message):
             user = self.user_dict[message.chat.id]
             user.update_user_plan_limit()
-            if user.account > len(functions.get_user_settings(username=user.username)):
-                # if message.text == '🏛 add exchange' and not user.is_in_process:
+            if user.account > len(functions.get_user_exchange(chat_id=message.chat.id)):
                 return True
             else:
                 self.bot.send_message(message.chat.id, '❌ Your exchange accounts is full\n'
@@ -442,6 +435,34 @@ class ClientBot(Telegram):
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_4,
                                                     exchange_id=exchange_id, coin_id=coin_id,
                                                     analysis_id=analysis_id)
+
+        @self.bot.message_handler(commands=['profile'])
+        def profile(message):
+            profile_option = types.InlineKeyboardMarkup()
+            plan, valid = functions.get_user_plan_profile(chat_id=message.chat.id)
+            strategies = functions.get_user_exchanges_strategies_profile(chat_id=message.chat.id)
+            accounts = functions.get_user_exchange(chat_id=message.chat.id)
+            accounts_dict = "\n"
+            strategies_dict = "\n"
+            for i, strategy in enumerate(strategies, 1):
+                strategies_dict += f"{i}-\t 🪙Coin : {strategy[0]}  📊Analysis: {strategy[1]}\n\t\t" \
+                                   f"  💰Amount: {strategy[2]}  🏛Exchange: {strategy[3]}\n\n"
+
+            for account in accounts:
+                accounts_dict += f"🔹 {account[0]}\n"
+
+            profile_option.add(types.InlineKeyboardButton('strategies',
+                                                          callback_data="user_strategies"),
+                               types.InlineKeyboardButton('exchanges',
+                                                          callback_data="user_exchanges"),
+                               types.InlineKeyboardButton('trade history',
+                                                          callback_data="user_history")
+                               )
+
+            self.bot.send_message(chat_id=message.chat.id, text=f'💳 Plan:\n🔹{plan}\n⏱ Valid date:  {valid}\n\n'
+                                                                f'📊 Strategies: \t{strategies_dict}\n'
+                                                                f'🏛 Exchanges: \t{accounts_dict}',
+                                  reply_markup=profile_option)
 
         @self.bot.message_handler(commands=['help'])
         def help_me(message):
