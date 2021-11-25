@@ -170,6 +170,25 @@ def check_expire_plan(chat_id: str):
         return True
 
 
+def get_tutorials_categories():
+    """
+    :return:
+    """
+    query = "SELECT * from tutorials_category"
+    return execute_query(query=query)
+
+
+def get_tutorials_with_category(category: str):
+    """
+    :param category:
+    :return:
+    """
+    query = "SELECT tutorials.name, tutorials.media from tutorials, tutorials_category " \
+            "where tutorials_category.name='{category}' " \
+            "and tutorials.category = tutorials_category.id".format(category=category)
+    return execute_query(query=query)
+
+
 def get_user_plan(username: str):
     """
     :param username:
@@ -288,7 +307,6 @@ def get_user_exchanges(chat_id: str):
             "WHERE users.username = user_settings.username and exchanges.id = user_settings.exchange_id " \
             "and users.chat_id = '{chat_id}'".format(chat_id=chat_id)
     return execute_query(query=query)
-
 
 
 def set_watchlist(user_setting_id: int, coin_id: int, username: str, analysis_id: int, amount: float):

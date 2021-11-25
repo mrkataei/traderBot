@@ -31,16 +31,25 @@ timeframe_binance_dictionary = {
 }
 
 
+def write_file(data, filename):
+    # Convert binary data to proper format and write it on Hard Disk
+
+        with open(filename, 'wb') as file:
+            file.write(data)
+
+
 def start_keyboard():
-    key_markup = types.ReplyKeyboardMarkup(row_width=2)
+    key_markup = types.ReplyKeyboardMarkup(row_width=1)
     key_add_account = types.KeyboardButton('🏛 add exchange')
     key_add_strategy = types.KeyboardButton('📊 add strategy')
     key_tutorials = types.KeyboardButton('📚 tutorials')
     key_plans = types.KeyboardButton('💳 plans')
     key_profile = types.KeyboardButton('🙍🏻‍♂️profile')
     key_back_test = types.KeyboardButton('🧭 back test')
+    key_social = types.KeyboardButton('📬 social media')
     key_help = types.KeyboardButton('🤔 help')
-    key_markup.add(key_add_account, key_add_strategy, key_tutorials, key_plans, key_profile, key_back_test, key_help)
+    key_markup.add(key_add_account, key_add_strategy, key_tutorials,
+                   key_plans, key_profile, key_back_test, key_social, key_help)
     return key_markup
 
 
@@ -62,6 +71,47 @@ def coins_keyboard():
     key_markup = types.ReplyKeyboardMarkup(row_width=3)
     key_markup.add(*coins[:, 1])
     return key_markup
+
+
+def tut_cat_keyboard():
+    """
+    :return:
+    """
+    categories = np.array(functions.get_tutorials_categories())
+    key_markup = types.ReplyKeyboardMarkup(row_width=1)
+    key_markup.add(*categories[:, 1])
+    return key_markup
+
+
+def back_home_tut():
+    key_markup = types.ReplyKeyboardMarkup(row_width=1)
+    key_markup.add('categories', 'back home')
+    return key_markup
+
+
+def tut_medias_keyboard(category: str):
+    """
+    :return:
+    """
+    medias = np.array(functions.get_tutorials_with_category(category=category))
+    keyboard = types.InlineKeyboardMarkup(row_width=3)
+    keys = []
+    for media in medias:
+        keys.append(types.InlineKeyboardButton(text=media[0], url=media[1]))
+    keyboard.add(*keys)
+    return keyboard
+
+
+def social_keyboard():
+    """
+    :return:
+    """
+    keyboard = types.InlineKeyboardMarkup(row_width=4)
+    keyboard.add(types.InlineKeyboardButton(text='instagram', url='instagram.com'),
+                 types.InlineKeyboardButton(text='telegram', url='telegram.com'),
+                 types.InlineKeyboardButton(text='twitter', url='twitter.com'),
+                 types.InlineKeyboardButton(text='linkedin', url='linkedin.com'),)
+    return keyboard
 
 
 def timeframe_keyboard():
@@ -105,6 +155,7 @@ class ClientBot(Telegram):
         self.coins = np.array(functions.get_coins())
         self.analysis = np.array(functions.get_analysis())
         self.timeframes = np.array(functions.get_timeframes())
+        self.tut_cat = np.array(functions.get_tutorials_categories())
 
     def is_valid_user(self, message):
         user = functions.get_user(message.chat.id)
@@ -167,6 +218,14 @@ class ClientBot(Telegram):
             return False
 
     def bot_actions(self):
+        @self.bot.callback_query_handler(func=lambda call: True)
+        def query_handler(call):
+            print('salam')
+            if call.data == "media_selected":
+                key_markup = types.ReplyKeyboardRemove(selective=False)
+                self.bot.send_message(call.message.chat.id, '😎 Wellplayed',
+                                      reply_markup=key_markup)
+
         @self.bot.message_handler(commands=['start'], func=self.can_start_bot)
         def welcome(message):
             user = functions.get_user(message.chat.id)
@@ -436,9 +495,9 @@ class ClientBot(Telegram):
                                                     exchange_id=exchange_id, coin_id=coin_id,
                                                     analysis_id=analysis_id)
 
-        @self.bot.message_handler(commands=['profile'])
+        @self.bot.message_handler(commands=['profile'], func=self.is_valid_command)
         def profile(message):
-            profile_option = types.InlineKeyboardMarkup()
+            profile_option = types.InlineKeyboardMarkup(row_width=2)
             plan, valid = functions.get_user_plan_profile(chat_id=message.chat.id)
             strategies = functions.get_user_exchanges_strategies_profile(chat_id=message.chat.id)
             accounts = functions.get_user_exchange(chat_id=message.chat.id)
@@ -463,6 +522,55 @@ class ClientBot(Telegram):
                                                                 f'📊 Strategies: \t{strategies_dict}\n'
                                                                 f'🏛 Exchanges: \t{accounts_dict}',
                                   reply_markup=profile_option)
+
+        @self.bot.message_handler(commands=['tutorial'], func=self.is_valid_command)
+        def tutorials(message):
+            try:
+                key_markup = tut_cat_keyboard()
+                self.bot.send_message(message.chat.id, '📚  Please Select tutorial category',
+                                      reply_markup=key_markup)
+                self.bot.register_next_step_handler(message=message, callback=show_tutorial_step_1)
+
+            except Exception as e:
+                self.bot.reply_to(message, '⛔️ Error')
+                print(e)
+
+        def show_tutorial_step_1(message):
+            try:
+                category_id = np.where(self.tut_cat[:, 1] == message.text)[0][0]
+                key_markup = tut_medias_keyboard(category=self.tut_cat[category_id][1])
+                self.bot.send_message(message.chat.id, '📼  Download any tutorial you want',
+                                      reply_markup=key_markup)
+                back_tut_keyboard = back_home_tut()
+                self.bot.send_message(message.chat.id, '🤓  Enjoy',
+                                      reply_markup=back_tut_keyboard)
+                self.bot.register_next_step_handler(message=message, callback=back_tut)
+
+            except IndexError:
+                self.bot.send_message(message.chat.id, '⛔️ wrong category')
+                self.bot.register_next_step_handler(message=message, callback=show_tutorial_step_1)
+
+        def back_tut(message):
+            if message.text == 'back home':
+                home_keyboard = start_keyboard()
+                self.bot.send_message(message.chat.id, 'backing home',
+                                      reply_markup=home_keyboard)
+            elif message.text == 'categories':
+                self.bot.register_next_step_handler(message=message, callback=tutorials)
+
+            else:
+                self.bot.register_next_step_handler(message=message, callback=back_tut)
+
+        @self.bot.message_handler(commands=['social'])
+        def help_me(message):
+            try:
+                key_markup = social_keyboard()
+                self.bot.send_message(message.chat.id, '📬 Follow us on social media',
+                                      reply_markup=key_markup)
+
+            except Exception as e:
+                self.bot.reply_to(message, '⛔️ Try again')
+                print(e)
 
         @self.bot.message_handler(commands=['help'])
         def help_me(message):
