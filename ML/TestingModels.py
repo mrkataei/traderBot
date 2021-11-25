@@ -9,7 +9,7 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.layers import Dense, Dropout, LSTM
 from tensorflow.keras.models import Sequential
 from sklearn import preprocessing
-#%%
+
 from tensorflow.python.keras import Input
 from tensorflow.python.keras.layers import BatchNormalization
 
@@ -24,20 +24,27 @@ data.head()
 # data = data.values
 # X = data[['open', 'high', 'low', 'volume']]
 #SPLIT DATA INTO TEST AND TRAIN
-np.random.seed(7)
+# np.random.seed(7)
 
-X = data[['open', 'high', 'low', 'volume', 'close']]
+
+
+data.sort_values(by=['date'],ascending=[True],inplace=True)
+data.head(10)
+
+#%%
+#X = data[['open', 'high', 'low', 'volume', 'close']]
+X = data[['high', 'low', 'volume', 'close']]
 Y = data[['close']]
 #X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, shuffle = False)
 
 
 #NORMALIZATION
-f_transformer = preprocessing.MinMaxScaler((-1,1))
+f_transformer = preprocessing.MinMaxScaler((-1, 1))
 f_transformer = f_transformer.fit(X)
 #X_train_trans = f_transformer.transform(X_train)
 #X_test_trans = f_transformer.transform(X_test)
 
-cnt_transformer = preprocessing.MinMaxScaler((-1,1))
+cnt_transformer = preprocessing.MinMaxScaler((0, 1))
 cnt_transformer = cnt_transformer.fit(Y)
 #y_train_trans = cnt_transformer.transform(y_train)
 #y_test_trans = cnt_transformer.transform(y_test)
@@ -82,7 +89,7 @@ def create_dataset(X, y, time_steps=1):
         ys.append(y[i + time_steps])
     return np.array(Xs), np.array(ys)
 
-time_steps = 24
+time_steps = 48
 # reshape to [samples, time_steps, n_features]
 X_train_f, y_train_f = create_dataset(X_train_trans, y_train_trans, time_steps)
 X_test_f, y_test_f = create_dataset(X_test_trans, y_test_trans, time_steps)
@@ -93,19 +100,35 @@ print(X_test_f.shape, y_test_f.shape)
 #print(X_train_trans.shape, y_train_trans.shape)
 #print(X_test_trans.shape, y_test_trans.shape)
 
-
+#%%
 model = Sequential()
 model.add(Input(shape=((X_train_f.shape[1], X_train_f.shape[2]))))
 #model.add(layers.Bidirectional(layers.LSTM(300, activation = 'tanh', return_sequences=False)))
 #model.add(layers.LSTM(300, return_sequences=False, activation = 'tanh'))
 model.add(LSTM(300, return_sequences=False, activation = 'tanh'))
-model.add(BatchNormalization())
+# model.add(Dropout(0.4))
+# model.add(LSTM(200, return_sequences=True))
+# model.add(Dropout(0.4))
+# model.add(LSTM(100, return_sequences=True))
+# model.add(Dropout(0.4))
+# model.add(LSTM(50))
+# model.add(Dropout(0.4))
+# model.add(Dropout(0.2))
+# model.add(BatchNormalization())
 #model.add(layers.Bidirectional(layers.LSTM(120,activation='relu', return_sequences=True)))
 #model.add(keras.layers.Dropout(rate=0.2))
 #model.add(layers.Flatten())
 #model.add(keras.layers.Dense(units=10, activation = 'relu'))
+
+# model.add(LSTM(50, return_sequences=True, activation = 'tanh'))
+# model.add(Dropout(0.2))
+# model.add(LSTM(50, return_sequences=True, activation = 'tanh'))
+# model.add(Dropout(0.2))
+# model.add(LSTM(50, activation = 'tanh'))
+
 model.add(Dense(units=1))
 model.compile(loss='mean_squared_error', optimizer='adam')
+# model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 model.summary()
 
 # model = Sequential()
@@ -120,9 +143,9 @@ model.summary()
 #
 # model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 # model.fit(x_saeid, y_saeid, epochs= 25 , batch_size = 32)
-#%%
+
 hist = model.fit(X_train_f, y_train_f, batch_size = 200, epochs = 150, shuffle=False, validation_split=0.1)
-#%%
+
 import math
 
 y_pred = model.predict(X_test_f)
