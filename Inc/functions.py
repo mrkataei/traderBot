@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 # queries function : update , insert , delete , fetch
-def update_query(query: str):
+def update_and_delete_query(query: str):
     """
     :param query:
     :return:
@@ -207,7 +207,8 @@ def get_user_exchange(chat_id: str):
     :param chat_id:
     :return:
     """
-    query = "SELECT exchanges.exchange from user_settings, users, exchanges WHERE chat_id='{chat_id}' " \
+    query = "SELECT exchanges.exchange, user_settings.id from user_settings, users, exchanges " \
+            "WHERE chat_id='{chat_id}' " \
             "and users.username = user_settings.username " \
             "and exchanges.id = user_settings.exchange_id".format(chat_id=chat_id)
     return execute_query(query=query)
@@ -236,10 +237,10 @@ def update_user_online(username: str, online: bool):
         now_time = datetime.now()
         query = "UPDATE users SET last_login='{now_time}' WHERE username='{username}'".format(now_time=now_time,
                                                                                               username=username)
-        update_query(query)
+        update_and_delete_query(query)
     online = 1 if online else 0
     query = "UPDATE users SET is_online={online} WHERE username='{username}'".format(online=online, username=username)
-    update_query(query)
+    update_and_delete_query(query)
 
 
 def get_timeframes(timeframe_id: int = -1):
@@ -471,7 +472,7 @@ def get_user_exchanges_strategies_profile(chat_id: str):
     :param chat_id:
     :return:
     """
-    query = "SELECT coins.coin , analysis.name, watchlist.amount , exchanges.exchange " \
+    query = "SELECT coins.coin , analysis.name, watchlist.amount , exchanges.exchange, watchlist.id " \
             "FROM watchlist inner join users on watchlist.username = users.username " \
             "inner join user_settings ON watchlist.user_setting_id = user_settings.id " \
             "inner join coins on watchlist.coin_id = coins.id " \
@@ -481,3 +482,22 @@ def get_user_exchanges_strategies_profile(chat_id: str):
 
     return execute_query(query=query)
 
+
+def delete_strategy(strategy_id: int):
+    query = "DELETE FROM watchlist WHERE id ={strategy_id}".format(strategy_id=strategy_id)
+    update_and_delete_query(query=query)
+
+
+def update_user_exchange(user_setting_id: int, exchange_id: int, public: str, secret: str):
+    query = "UPDATE user_settings SET exchange_id='{exchange_id}', public='{public}', secret='{secret}' " \
+            "WHERE id='{user_setting_id}'".format(exchange_id=exchange_id, public=public, secret=secret,
+                                                  user_setting_id=user_setting_id)
+    return update_and_delete_query(query)
+
+
+def update_user_strategy(user_setting_id: int, coin_id: int, watchlist_id: int, analysis_id: int, amount: float):
+    query = "UPDATE watchlist SET user_setting_id={user_setting_id}, coin_id={coin_id}, analysis_id={analysis_id}," \
+            " amount={amount} WHERE id='{watchlist_id}'".format(user_setting_id=user_setting_id,
+                                                                coin_id=coin_id, analysis_id=analysis_id,
+                                                                amount=amount, watchlist_id=watchlist_id)
+    return update_and_delete_query(query)
