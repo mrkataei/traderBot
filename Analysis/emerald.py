@@ -15,10 +15,10 @@ class Emerald(Patterns):
         self.bot = bot_ins
 
     def get_old_position(self):
-        query = record_dictionary(record=get_last_recommendations(analysis_id=1, timeframe_id=self.timeframe_id,
-                                                                  coin_id=self.coin_id), table='recommendations')
-        if query:
-            old_position = query['position']
+        record = get_last_recommendations(analysis_id=1, timeframe_id=self.timeframe_id,
+                                          coin_id=self.coin_id)[0]
+        if record:
+            old_position = record_dictionary(record=record, table='recommendations')['position']
         else:
             old_position = 'sell'
         return old_position

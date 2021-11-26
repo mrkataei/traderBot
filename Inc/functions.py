@@ -104,6 +104,8 @@ def record_dictionary(record, table: str):
     elif table == 'plan_payments':
         return {'username': record[0], 'plan_id': record[1], 'timestamp': record[2], 'cost': record[3],
                 'is_pay': record[4]}
+    else:
+        return None
 
 
 # check username exist
@@ -352,9 +354,15 @@ def get_user_strategy(coin_id: int = None, analysis_id: int = None):
     :param analysis_id:
     :return:
     """
-    query = "SELECT username FROM watchlist WHERE coin_id ={coin_id}" \
-            " AND analysis_id={analysis_id}".format(coin_id=coin_id,
-                                                    analysis_id=analysis_id)
+    query = "SELECT watchlist.username, users.chat_id, coins.coin , analysis.name " \
+            "FROM watchlist inner join users on watchlist.username = users.username " \
+            "inner join coins on watchlist.coin_id = coins.id " \
+            "inner join analysis on watchlist.analysis_id = analysis.id " \
+            "where watchlist.coin_id = {coin_id} " \
+            "and watchlist.analysis_id = {analysis_id}  " \
+            "group by watchlist.username, users.chat_id, coins.coin, analysis.name".format(analysis_id=analysis_id,
+                                                                                           coin_id=coin_id)
+
     return execute_query(query=query)
 
 
@@ -515,3 +523,4 @@ def get_user_trade_history(chat_id: str):
             "where users.chat_id = '{chat_id}' order by trade_history.timestamp DESC LIMIT 10".format(chat_id=chat_id)
 
     return execute_query(query=query)
+

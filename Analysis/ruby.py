@@ -124,9 +124,10 @@ class Ruby:
         old position by default is 'sell'
         :return: old_position
         """
-        query = get_last_recommendations(analysis_id=2, timeframe_id=self.timeframe_id, coin_id=self.coin_id)
-        if query:
-            old_position = record_dictionary(query[0], "recommendations")["position"]
+        record = get_last_recommendations(analysis_id=2, timeframe_id=self.timeframe_id,
+                                          coin_id=self.coin_id)[0]
+        if record:
+            old_position = record_dictionary(record=record, table='recommendations')['position']
         else:
             old_position = 'sell'
         return old_position

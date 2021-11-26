@@ -30,7 +30,7 @@ timeframe_binance_dictionary = {
     '1min': '1m'
 }
 
-
+start_keyboard = []
 def start_keyboard():
     key_markup = types.ReplyKeyboardMarkup(row_width=1)
     key_add_account = types.KeyboardButton('🏛 add exchange')
@@ -198,35 +198,70 @@ class ClientBot(Telegram):
             return False
 
     def check_add_command(self, message):
-        if self.is_valid_command(message=message):
-            user = self.user_dict[message.chat.id]
-            user.update_user_plan_limit()
-            if user.strategy > len(functions.get_user_watchlist(username=user.username)):
-                # if message.text == '📊 add strategy' and not user.is_in_process:
-                return True
+        if message.text == '📊 add strategy':
+            if self.is_valid_command(message=message):
+                user = self.user_dict[message.chat.id]
+                user.update_user_plan_limit()
+                if user.strategy > len(functions.get_user_watchlist(username=user.username)):
+                    return True
+                else:
+                    self.bot.send_message(message.chat.id, '❌ Your strategies is full\n'
+                                                           '🤓 Upgrade your plan or edit it in your profile')
+                    return False
             else:
-                self.bot.send_message(message.chat.id, '❌ Your strategies is full\n'
-                                                       '🤓 Upgrade your plan or edit it in your profile')
                 return False
         else:
             return False
 
     def check_setup_command(self, message):
-        if self.is_valid_command(message=message):
-            user = self.user_dict[message.chat.id]
-            user.update_user_plan_limit()
-            if user.account > len(functions.get_user_exchange(chat_id=message.chat.id)):
-                return True
+        if message.text == '🏛 add exchange':
+            if self.is_valid_command(message=message):
+                user = self.user_dict[message.chat.id]
+                user.update_user_plan_limit()
+                if user.account > len(functions.get_user_exchange(chat_id=message.chat.id)):
+                    return True
+                else:
+                    self.bot.send_message(message.chat.id, '❌ Your exchange accounts is full\n'
+                                                           '🤓 Upgrade your plan or edit it in your profile')
+                    return False
             else:
-                self.bot.send_message(message.chat.id, '❌ Your exchange accounts is full\n'
-                                                       '🤓 Upgrade your plan or edit it in your profile')
                 return False
         else:
             return False
 
-    def check_test_command(self, message):
-        if self.is_valid_command(message=message):
-            return True
+    def tutorial_command(self, message):
+        if message.text == '📚 tutorials':
+            if self.is_valid_command(message=message):
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def profile_command(self, message):
+        if message.text == '🙍🏻‍♂️profile':
+            if self.is_valid_command(message=message):
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def back_test_command(self, message):
+        if message.text == '🧭 back test':
+            if self.is_valid_command(message=message):
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def plan_command(self, message):
+        if message.text == '💳 plans':
+            if self.is_valid_command(message=message):
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -293,15 +328,16 @@ class ClientBot(Telegram):
         def welcome(message):
             user = functions.get_user(message.chat.id)
             markup = start_keyboard()
-            # is typing bot ..
-            self.bot.send_chat_action(chat_id=message.chat.id, action="typing")
-            sleep(1)
-
-            self.bot.send_message(message.chat.id, '🙋🏽‍♂️ Hey ' + message.chat.first_name + "!\n" +
-                                  'I am AI Trader, your trade assistance\n /help to show what can i do for you😎',
-                                  reply_markup=markup)
             self.user_dict[message.chat.id] = User(chat_id=message.chat.id)  # create object for register user session
+            print(self.user_dict)
             if not user:
+                # is typing bot ..
+                self.bot.send_chat_action(chat_id=message.chat.id, action="typing")
+                sleep(1)
+
+                self.bot.send_message(message.chat.id, '🙋🏽‍♂️ Hey ' + message.chat.first_name + "!\n" +
+                                      'I am AI Trader, your trade assistance\n /help to show what can i do for you😎',
+                                      reply_markup=markup)
                 # if user deleted telegram account need develop
                 keyboard = types.ReplyKeyboardMarkup()
                 reg_button = types.KeyboardButton(text="📞 Share your phone number", request_contact=True)
@@ -312,8 +348,7 @@ class ClientBot(Telegram):
                 self.user_dict[message.chat.id].username = user[0][0]
                 if self.is_valid_user(message=message):
                     functions.update_user_online(username=user[0][0], online=True)
-                    # markup_key = start_keyboard()
-                    self.bot.send_message(message.chat.id, '🤩 Welcome back')
+                    self.bot.send_message(message.chat.id, '🤓 How can i help you', reply_markup=markup)
 
         @self.bot.message_handler(content_types=['contact'],
                                   func=lambda message: functions.is_user_signup(message.chat.id))
@@ -346,7 +381,7 @@ class ClientBot(Telegram):
                 self.bot.reply_to(message, '⛔️ Try again')
                 print(e)
 
-        @self.bot.message_handler(commands=['set'], func=self.check_setup_command)
+        @self.bot.message_handler(func=self.check_setup_command)
         def add_exchange(message, user_setting_id: int = 0):
             try:
                 key_markup = exchanges_keyboard()
@@ -403,7 +438,6 @@ class ClientBot(Telegram):
                                                             exchange_id=int(exchange_id),
                                                             public=str(public), secret=str(message.text))
                     self.bot.delete_message(message.chat.id, message.message_id)
-                    print(result)
                     if result is None:
                         self.bot.send_message(message.chat.id, '✅ success', reply_markup=markup)
                     else:
@@ -414,7 +448,7 @@ class ClientBot(Telegram):
                                                     exchange_id=exchange_id, public=public,
                                                     user_setting_id=user_setting_id)
 
-        @self.bot.message_handler(commands=['test'], func=self.check_test_command)
+        @self.bot.message_handler(func=self.back_test_command)
         def back_test(message):
             try:
                 key_markup = analysis_keyboard()
@@ -455,7 +489,6 @@ class ClientBot(Telegram):
         def back_test_step_3(message, analysis_id: int, coin_id: int):
             try:
                 timeframe_id = np.where(self.timeframes[:, 1] == message.text)[0][0]
-                print(self.timeframes)
                 key_markup = types.ReplyKeyboardRemove(selective=False)
                 self.bot.send_message(message.chat.id, '💰 Please enter amount of founds initially available for'
                                                        ' the strategies for trade(⚠️ greater than 0)',
@@ -478,7 +511,6 @@ class ClientBot(Telegram):
                                                         timeframe_id=timeframe_id)
                 else:
                     # timeframe_id = self.timeframes[timeframe_id[0][0]][0]
-                    print(analysis_id, coin_id, timeframe_id)
                     # symbol = functions.get_coins(coin_id=int(coin_id))[0][0]
                     # timeframe = functions.get_timeframes(timeframe_id=int(timeframe_id))[0][0]
                     # data = candles(symbol=symbol, timeframe=timeframe_binance_dictionary[timeframe], limit=400)
@@ -493,7 +525,7 @@ class ClientBot(Telegram):
                                                     analysis_id=analysis_id, coin_id=coin_id,
                                                     timeframe_id=timeframe_id)
 
-        @self.bot.message_handler(commands=['add'], func=self.check_add_command)
+        @self.bot.message_handler(func=self.check_add_command)
         def add_strategy(message, watchlist_id: int = 0):
             try:
                 key_markup = user_exchanges_account_keyboard(message=message)
@@ -595,7 +627,7 @@ class ClientBot(Telegram):
                                                     exchange_id=exchange_id, coin_id=coin_id,
                                                     analysis_id=analysis_id, watchlist_id=watchlist_id)
 
-        @self.bot.message_handler(commands=['profile'], func=self.is_valid_command)
+        @self.bot.message_handler(func=self.profile_command)
         def profile(message):
             profile_option = types.InlineKeyboardMarkup(row_width=2)
             plan, valid, strategies_dict, accounts_dict = generate_profile_show_message(chat_id=message.chat.id)
@@ -611,7 +643,7 @@ class ClientBot(Telegram):
                                                                 f'🏛 Exchanges: \t{accounts_dict}',
                                   reply_markup=profile_option)
 
-        @self.bot.message_handler(commands=['tutorial'], func=self.is_valid_command)
+        @self.bot.message_handler(func=self.tutorial_command)
         def tutorials(message):
             try:
                 key_markup = tut_cat_keyboard()
@@ -640,16 +672,14 @@ class ClientBot(Telegram):
 
         def back_tut(message):
             if message.text == 'back home':
-                home_keyboard = start_keyboard()
-                self.bot.send_message(message.chat.id, 'backing home',
-                                      reply_markup=home_keyboard)
+                welcome(message=message)
             elif message.text == 'categories':
                 self.bot.register_next_step_handler(message=message, callback=tutorials)
 
             else:
                 self.bot.register_next_step_handler(message=message, callback=back_tut)
 
-        @self.bot.message_handler(commands=['social'])
+        @self.bot.message_handler(func=lambda message: message.text == '📬 social media')
         def help_me(message):
             try:
                 key_markup = social_keyboard()
@@ -660,10 +690,19 @@ class ClientBot(Telegram):
                 self.bot.reply_to(message, '⛔️ Try again')
                 print(e)
 
-        @self.bot.message_handler(commands=['help'])
+        @self.bot.message_handler(func=lambda message: message.text == '🤔 help')
         def help_me(message):
             try:
                 self.bot.reply_to(message, 'Some help')
+
+            except Exception as e:
+                self.bot.reply_to(message, '⛔️ Try again')
+                print(e)
+
+        @self.bot.message_handler(func=self.plan_command)
+        def plan_charge(message):
+            try:
+                self.bot.reply_to(message, 'contact admin to upgrade your plan')
 
             except Exception as e:
                 self.bot.reply_to(message, '⛔️ Try again')
