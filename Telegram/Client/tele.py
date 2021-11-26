@@ -262,7 +262,16 @@ class ClientBot(Telegram):
                                           reply_markup=accounts_option)
 
             elif call.data == "profile_show_history":
-                print('profile_show_history')
+                histories = functions.get_user_trade_history(chat_id=call.message.chat.id)
+                result_message = 'Your last 10 trade history'
+                for history in histories:
+                    result_message += f'🔹\nAction time: {history[0]}\n 🏛Exchange: {history[1]}\n ' \
+                                      f'📊Analysis: {history[2]}\n🪙Coin: {history[3]}\n⏰Timeframe: {history[4]} \n' \
+                                      f'💵Price: {history[5]}\n☢️Action: {history[6]}\n' \
+                                      f'⏰Signal receive time: {history[7]}'
+
+                self.bot.send_message(chat_id=call.message.chat.id, text=result_message,
+                                      reply_markup=start_keyboard())
 
             elif "_delete_strategy" in call.data:
                 query = str(call.data).split('_')
@@ -343,8 +352,8 @@ class ClientBot(Telegram):
                 key_markup = exchanges_keyboard()
                 self.bot.send_message(message.chat.id, '🏛  Please Select your exchange account',
                                       reply_markup=key_markup)
-                self.bot.register_next_step_handler(message=message, callback=add_exchange_step_1
-                                                    , user_setting_id=user_setting_id)
+                self.bot.register_next_step_handler(message=message, callback=add_exchange_step_1,
+                                                    user_setting_id=user_setting_id)
 
             except Exception as e:
                 self.bot.reply_to(message, '⛔️ Error')
@@ -381,7 +390,8 @@ class ClientBot(Telegram):
                 user = self.user_dict[message.chat.id]
                 markup = start_keyboard()
                 if user_setting_id == 0:
-                    error, result = functions.set_user_setting(username=str(user.username), exchange_id=int(exchange_id),
+                    error, result = functions.set_user_setting(username=str(user.username),
+                                                               exchange_id=int(exchange_id),
                                                                public=str(public), secret=str(message.text))
                     self.bot.delete_message(message.chat.id, message.message_id)
                     if error:
@@ -502,12 +512,13 @@ class ClientBot(Telegram):
         def add_strategy_step_1(message, watchlist_id: int = 0):
             try:
                 exchanges_id = np.where(self.exchanges[:, 1] == message.text)[0][0]
-                key_markup = coins_keyboard()
-                self.bot.send_message(message.chat.id, '🪙 Choose Coin',
+
+                key_markup = analysis_keyboard()
+                self.bot.send_message(message.chat.id, '📊 Please Select analysis',
                                       reply_markup=key_markup)
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_2,
-                                                    exchange_id=self.exchanges[exchanges_id][0]
-                                                    , watchlist_id=watchlist_id)
+                                                    exchange_id=self.exchanges[exchanges_id][0],
+                                                    watchlist_id=watchlist_id)
             except IndexError:
                 self.bot.send_message(message.chat.id, '⛔️ wrong exchange')
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_1,
@@ -515,33 +526,35 @@ class ClientBot(Telegram):
 
         def add_strategy_step_2(message, exchange_id: int, watchlist_id: int = 0):
             try:
-                coin_id = np.where(self.coins[:, 1] == message.text)[0][0]
-                key_markup = analysis_keyboard()
-                self.bot.send_message(message.chat.id, '📊 Please Select analysis',
+                analysis_id = np.where(self.analysis[:, 1] == message.text)[0][0]
+                key_markup = coins_keyboard()
+                self.bot.send_message(message.chat.id, '🪙 Choose Coin',
                                       reply_markup=key_markup)
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_3,
-                                                    exchange_id=exchange_id, coin_id=self.coins[coin_id][0],
+                                                    exchange_id=exchange_id, analysis_id=self.analysis[analysis_id][0],
                                                     watchlist_id=watchlist_id)
             except IndexError:
-                self.bot.send_message(message.chat.id, '⛔️ wrong coin')
+                self.bot.send_message(message.chat.id, '⛔️ wrong analysis')
+
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_2,
                                                     exchange_id=exchange_id, watchlist_id=watchlist_id)
 
-        def add_strategy_step_3(message, exchange_id: int, coin_id: int, watchlist_id: int = 0):
+        def add_strategy_step_3(message, exchange_id: int, analysis_id: int, watchlist_id: int = 0):
             try:
-                analysis_id = np.where(self.analysis[:, 1] == message.text)[0][0]
+                coin_id = np.where(self.coins[:, 1] == message.text)[0][0]
                 key_markup = types.ReplyKeyboardRemove(selective=False)
                 self.bot.send_message(message.chat.id, '💰 Please enter percent of coin \n'
                                                        'You want to trade (⚠️ between 0 - 100)',
                                       reply_markup=key_markup)
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_4,
-                                                    exchange_id=exchange_id, coin_id=coin_id,
-                                                    analysis_id=self.analysis[analysis_id][0],
+                                                    exchange_id=exchange_id, analysis_id=analysis_id,
+                                                    coin_id=self.coins[coin_id][0],
                                                     watchlist_id=watchlist_id)
             except IndexError:
-                self.bot.send_message(message.chat.id, '⛔️ wrong analysis')
+                self.bot.send_message(message.chat.id, '⛔️ wrong coin')
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_3,
-                                                    exchange_id=exchange_id, coin_id=coin_id, watchlist_id=watchlist_id)
+                                                    exchange_id=exchange_id, analysis_id=analysis_id,
+                                                    watchlist_id=watchlist_id)
 
         def add_strategy_step_4(message, exchange_id: int, coin_id: int, analysis_id: int, watchlist_id: int = 0):
             user = self.user_dict[message.chat.id]
@@ -576,8 +589,6 @@ class ClientBot(Telegram):
                             self.bot.send_message(message.chat.id, '😥You already have this strategy '
                                                                    'with selected coin and analysis',
                                                   reply_markup=markup)
-
-
             except (ValueError, TypeError):
                 self.bot.send_message(message.chat.id, '⚠️ percent must be between 0 - 100')
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_4,

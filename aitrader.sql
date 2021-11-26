@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 23, 2021 at 08:11 PM
+-- Generation Time: Nov 26, 2021 at 01:50 PM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -81,7 +81,8 @@ CREATE TABLE `exchanges` (
 --
 
 INSERT INTO `exchanges` (`id`, `exchange`) VALUES
-(1, 'bitfinex');
+(1, 'bitfinex'),
+(2, '');
 
 -- --------------------------------------------------------
 
@@ -163,16 +164,13 @@ INSERT INTO `timeframes` (`id`, `timeframe`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `transactions`
+-- Table structure for table `trade_history`
 --
 
-CREATE TABLE `transactions` (
-  `username` char(15) NOT NULL,
-  `watchlist_id` int(15) NOT NULL,
-  `recommendation_id_open` int(15) NOT NULL,
-  `recommendation_id_close` int(15) DEFAULT NULL,
-  `amount` double NOT NULL,
-  `is_open` tinyint(1) NOT NULL DEFAULT 0
+CREATE TABLE `trade_history` (
+  `recom_id` int(12) NOT NULL,
+  `user_setting_id` int(12) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -184,7 +182,7 @@ CREATE TABLE `transactions` (
 CREATE TABLE `tutorials` (
   `name` char(10) NOT NULL,
   `category` int(5) NOT NULL,
-  `media` longblob NOT NULL,
+  `media` text NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -235,7 +233,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
-('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-23 18:40:52', 1, 1, '2021-12-20 15:13:22', 1, 1);
+('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-26 12:47:02', 1, 1, '2021-12-20 15:13:22', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -317,12 +315,11 @@ ALTER TABLE `timeframes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `transactions`
+-- Indexes for table `trade_history`
 --
-ALTER TABLE `transactions`
-  ADD KEY `transactions_username` (`username`),
-  ADD KEY `transactions_whatchlist_id` (`watchlist_id`),
-  ADD KEY `transactions_reccomendation_id_close` (`recommendation_id_close`);
+ALTER TABLE `trade_history`
+  ADD KEY `trade_history_recom_id_fk` (`recom_id`),
+  ADD KEY `trade_history_user_setting_id_fk` (`user_setting_id`);
 
 --
 -- Indexes for table `tutorials`
@@ -386,7 +383,7 @@ ALTER TABLE `coins`
 -- AUTO_INCREMENT for table `exchanges`
 --
 ALTER TABLE `exchanges`
-  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `plans`
@@ -398,7 +395,7 @@ ALTER TABLE `plans`
 -- AUTO_INCREMENT for table `recommendations`
 --
 ALTER TABLE `recommendations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `timeframes`
@@ -416,13 +413,13 @@ ALTER TABLE `tutorials_category`
 -- AUTO_INCREMENT for table `user_settings`
 --
 ALTER TABLE `user_settings`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `watchlist`
 --
 ALTER TABLE `watchlist`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -444,13 +441,11 @@ ALTER TABLE `recommendations`
   ADD CONSTRAINT `recommendations_timeframe_id` FOREIGN KEY (`timeframe_id`) REFERENCES `timeframes` (`id`);
 
 --
--- Constraints for table `transactions`
+-- Constraints for table `trade_history`
 --
-ALTER TABLE `transactions`
-  ADD CONSTRAINT `transactions_reccomendation_id_close` FOREIGN KEY (`recommendation_id_close`) REFERENCES `recommendations` (`id`),
-  ADD CONSTRAINT `transactions_reccomendation_id_open` FOREIGN KEY (`recommendation_id_close`) REFERENCES `recommendations` (`id`),
-  ADD CONSTRAINT `transactions_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`),
-  ADD CONSTRAINT `transactions_whatchlist_id` FOREIGN KEY (`watchlist_id`) REFERENCES `watchlist` (`id`);
+ALTER TABLE `trade_history`
+  ADD CONSTRAINT `trade_history_recom_id_fk` FOREIGN KEY (`recom_id`) REFERENCES `recommendations` (`id`),
+  ADD CONSTRAINT `trade_history_user_setting_id_fk` FOREIGN KEY (`user_setting_id`) REFERENCES `user_settings` (`id`);
 
 --
 -- Constraints for table `tutorials`

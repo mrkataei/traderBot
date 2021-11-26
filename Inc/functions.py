@@ -90,9 +90,8 @@ def record_dictionary(record, table: str):
     elif table == 'timeframes':
         return {'id': record[0], 'timeframe': record[1]}
 
-    elif table == 'transactions':
-        return {'username': record[0], 'watchlist_id': record[1], 'recommendation_id_open': record[2],
-                'recommendation_id_close': record[3], 'amount': record[4], 'is_open': record[5]}
+    elif table == 'trade_history':
+        return {'recom_id': record[0], 'user_setting': record[1], 'timestamp': record[2]}
 
     elif table == 'user_settings':
         return {'username': record[0], 'public': record[1], 'secret': record[2],
@@ -501,3 +500,18 @@ def update_user_strategy(user_setting_id: int, coin_id: int, watchlist_id: int, 
                                                                 coin_id=coin_id, analysis_id=analysis_id,
                                                                 amount=amount, watchlist_id=watchlist_id)
     return update_and_delete_query(query)
+
+
+def get_user_trade_history(chat_id: str):
+    query = "SELECT trade_history.timestamp, exchanges.exchange, analysis.name, coins.coin, timeframes.timeframe" \
+            ", recommendations.price, recommendations.position, recommendations.timestamp from trade_history " \
+            "inner join recommendations  on trade_history.recom_id = recommendations.id " \
+            "inner join user_settings on trade_history.user_setting_id = user_settings.id " \
+            "inner join analysis on recommendations.analysis_id = analysis.id  " \
+            "inner join coins on recommendations.coin_id = coins.id " \
+            "inner join timeframes on recommendations.timeframe_id = timeframes.id " \
+            "inner join exchanges on user_settings.exchange_id = exchanges.id " \
+            "inner join users on user_settings.username = users.username "  \
+            "where users.chat_id = '{chat_id}' order by trade_history.timestamp DESC LIMIT 10".format(chat_id=chat_id)
+
+    return execute_query(query=query)
