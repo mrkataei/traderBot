@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 26, 2021 at 01:50 PM
+-- Generation Time: Nov 27, 2021 at 11:42 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -81,8 +81,7 @@ CREATE TABLE `exchanges` (
 --
 
 INSERT INTO `exchanges` (`id`, `exchange`) VALUES
-(1, 'bitfinex'),
-(2, '');
+(1, 'bitfinex');
 
 -- --------------------------------------------------------
 
@@ -233,7 +232,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
-('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-26 12:47:02', 1, 1, '2021-12-20 15:13:22', 1, 1);
+('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-27 10:32:19', 1, 1, '2021-12-20 15:13:22', 1, 1),
+('kouroshnew', '1978824576', 'user', NULL, '+17076562131', '2021-11-26 19:20:47', '2021-11-26 19:30:39', 1, 1, '2021-12-26 19:20:47', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -244,8 +244,8 @@ INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_ti
 CREATE TABLE `user_settings` (
   `id` int(12) NOT NULL,
   `username` char(12) NOT NULL,
-  `public` varchar(30) NOT NULL,
-  `secret` varchar(30) NOT NULL,
+  `public` text NOT NULL,
+  `secret` text NOT NULL,
   `exchange_id` int(5) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -383,7 +383,7 @@ ALTER TABLE `coins`
 -- AUTO_INCREMENT for table `exchanges`
 --
 ALTER TABLE `exchanges`
-  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `plans`
