@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 # queries function : update , insert , delete , fetch
-def update_query(query: str):
+def update_and_delete_query(query: str):
     """
     :param query:
     :return:
@@ -66,10 +66,9 @@ def record_dictionary(record, table: str):
     """
     if table == 'users':
         return {'username': record[0], 'chat_id': record[1],
-                'role': record[2], 'phone': record[3], 'email': record[4], 'signup_time': record[5],
-                'last_login': record[6],
-                'is_online': record[7], 'is_use_freemium': record[8], 'valid_time_plan': record[9],
-                'plan_id': record[10], 'timeframe_id': record[11]}
+                'role': record[2], 'email': record[3], 'phone': record[4], 'signup_time': record[5],
+                'last_login': record[6], 'is_online': record[7], 'is_use_freemium': record[8],
+                'valid_time_plan': record[9], 'plan_id': record[10], 'timeframe_id': record[11]}
 
     elif table == 'analysis':
         return {'id': record[0], 'name': record[1], 'description': record[2]}
@@ -91,21 +90,22 @@ def record_dictionary(record, table: str):
     elif table == 'timeframes':
         return {'id': record[0], 'timeframe': record[1]}
 
-    elif table == 'transactions':
-        return {'username': record[0], 'watchlist_id': record[1], 'recommendation_id_open': record[2],
-                'recommendation_id_close': record[3], 'amount': record[4], 'is_open': record[5]}
+    elif table == 'trade_history':
+        return {'recom_id': record[0], 'user_setting': record[1], 'timestamp': record[2]}
 
     elif table == 'user_settings':
         return {'username': record[0], 'public': record[1], 'secret': record[2],
                 'exchange_id': record[3]}
 
-    elif table == 'watchlists':
-        return {'id': record[0], 'coin_id': record[1], 'username': record[2], 'analysis_id': record[3],
-                'amount': record[4]}
+    elif table == 'watchlist':
+        return {'id': record[0], 'user_setting_id': [1], 'coin_id': record[2], 'username': record[3],
+                'analysis_id': record[4], 'amount': record[5]}
 
     elif table == 'plan_payments':
         return {'username': record[0], 'plan_id': record[1], 'timestamp': record[2], 'cost': record[3],
                 'is_pay': record[4]}
+    else:
+        return None
 
 
 # check username exist
@@ -171,6 +171,25 @@ def check_expire_plan(chat_id: str):
         return True
 
 
+def get_tutorials_categories():
+    """
+    :return:
+    """
+    query = "SELECT * from tutorials_category"
+    return execute_query(query=query)
+
+
+def get_tutorials_with_category(category: str):
+    """
+    :param category:
+    :return:
+    """
+    query = "SELECT tutorials.name, tutorials.media from tutorials, tutorials_category " \
+            "where tutorials_category.name='{category}' " \
+            "and tutorials.category = tutorials_category.id".format(category=category)
+    return execute_query(query=query)
+
+
 def get_user_plan(username: str):
     """
     :param username:
@@ -184,12 +203,38 @@ def get_user_plan(username: str):
         return False
 
 
-def get_user_settings(username: str):
+def get_user_exchange(chat_id: str):
     """
-    :param username:
+    :param chat_id:
     :return:
     """
-    query = "SELECT * from user_settings WHERE username='{username}'".format(username=username)
+    query = "SELECT exchanges.exchange, user_settings.id, user_settings.exchange_id " \
+            "from user_settings, users, exchanges " \
+            "WHERE chat_id='{chat_id}' " \
+            "and users.username = user_settings.username " \
+            "and exchanges.id = user_settings.exchange_id".format(chat_id=chat_id)
+    return execute_query(query=query)
+
+
+def get_user_api(user_setting_id: int):
+    """
+    :param user_setting_id:
+    :return: public and secret key
+    """
+    query = "SELECT public, secret FROM user_settings " \
+            "WHERE id={user_setting_id}".format(user_setting_id=user_setting_id)
+    return execute_query(query=query)[0]
+
+def get_user_settings_id(chat_id: str, exchange_id: int):
+    """
+    :param chat_id:
+    :param exchange_id:
+    :return:
+    """
+    query = "SELECT user_settings.id FROM users, user_settings, exchanges " \
+            "WHERE users.username = user_settings.username and exchanges.id = user_settings.exchange_id " \
+            "and users.chat_id = '{chat_id}' " \
+            "and user_settings.exchange_id = {exchange_id}".format(chat_id=chat_id, exchange_id=exchange_id)
     return execute_query(query=query)
 
 
@@ -203,10 +248,10 @@ def update_user_online(username: str, online: bool):
         now_time = datetime.now()
         query = "UPDATE users SET last_login='{now_time}' WHERE username='{username}'".format(now_time=now_time,
                                                                                               username=username)
-        update_query(query)
+        update_and_delete_query(query)
     online = 1 if online else 0
     query = "UPDATE users SET is_online={online} WHERE username='{username}'".format(online=online, username=username)
-    update_query(query)
+    update_and_delete_query(query)
 
 
 def get_timeframes(timeframe_id: int = -1):
@@ -265,16 +310,29 @@ def set_user_setting(username: str, public: str, secret: str, exchange_id: int):
     return error, result
 
 
-def set_watchlist(coin_id: int, username: str, analysis_id: int, amount: float):
+def get_user_exchanges(chat_id: str):
     """
+    :param chat_id:
+    :return:
+    """
+    query = "SELECT exchanges.exchange FROM users, user_settings, exchanges " \
+            "WHERE users.username = user_settings.username and exchanges.id = user_settings.exchange_id " \
+            "and users.chat_id = '{chat_id}'".format(chat_id=chat_id)
+    return execute_query(query=query)
+
+
+def set_watchlist(user_setting_id: int, coin_id: int, username: str, analysis_id: int, amount: float):
+    """
+    :param user_setting_id:
     :param coin_id:
     :param username:
     :param analysis_id:
     :param amount:
     :return:
     """
-    query = "INSERT INTO watchlists(coin_id, username, analysis_id, amount) VALUES (%s, %s , %s ,%s)"
-    val = (coin_id, username, analysis_id, amount)
+    query = "INSERT INTO watchlist(user_setting_id, coin_id, username, analysis_id, amount) " \
+            "VALUES (%s, %s, %s , %s ,%s)"
+    val = (user_setting_id, coin_id, username, analysis_id, amount)
     error, result = insert_query(query=query, values=val)
     return error, result
 
@@ -296,7 +354,7 @@ def get_user_watchlist(username: str):
     :param username:
     :return:
     """
-    query = "SELECT * from watchlists WHERE username='{username}'".format(username=username)
+    query = "SELECT * from watchlist WHERE username='{username}'".format(username=username)
     return execute_query(query=query)
 
 
@@ -306,9 +364,15 @@ def get_user_strategy(coin_id: int = None, analysis_id: int = None):
     :param analysis_id:
     :return:
     """
-    query = "SELECT username FROM watchlists WHERE coin_id ={coin_id}" \
-            " AND analysis_id={analysis_id}".format(coin_id=coin_id,
-                                                    analysis_id=analysis_id)
+    query = "SELECT watchlist.username, users.chat_id, coins.coin , analysis.name " \
+            "FROM watchlist inner join users on watchlist.username = users.username " \
+            "inner join coins on watchlist.coin_id = coins.id " \
+            "inner join analysis on watchlist.analysis_id = analysis.id " \
+            "where watchlist.coin_id = {coin_id} " \
+            "and watchlist.analysis_id = {analysis_id}  " \
+            "group by watchlist.username, users.chat_id, coins.coin, analysis.name".format(analysis_id=analysis_id,
+                                                                                           coin_id=coin_id)
+
     return execute_query(query=query)
 
 
@@ -411,3 +475,62 @@ def get_coin_name(coin_id: int):
     """
     query = "SELECT coin FROM coins WHERE id={coin_id}".format(coin_id=coin_id)
     return execute_query(query=query)
+
+
+def get_user_plan_profile(chat_id: str):
+    query = "SELECT plans.plan, users.valid_time_plan from users, plans " \
+            "where users.plan_id = plans.id and users.chat_id = '{chat_id}'".format(chat_id=chat_id)
+    plan, valid_date = execute_query(query=query)[0]
+    return plan, valid_date.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def get_user_exchanges_strategies_profile(chat_id: str):
+    """
+    :param chat_id:
+    :return:
+    """
+    query = "SELECT coins.coin , analysis.name, watchlist.amount , exchanges.exchange, watchlist.id " \
+            "FROM watchlist inner join users on watchlist.username = users.username " \
+            "inner join user_settings ON watchlist.user_setting_id = user_settings.id " \
+            "inner join coins on watchlist.coin_id = coins.id " \
+            "inner join analysis on watchlist.analysis_id = analysis.id " \
+            "inner join exchanges on user_settings.exchange_id = exchanges.id " \
+            "where users.chat_id = '{chat_id}'".format(chat_id=chat_id)
+
+    return execute_query(query=query)
+
+
+def delete_strategy(strategy_id: int):
+    query = "DELETE FROM watchlist WHERE id ={strategy_id}".format(strategy_id=strategy_id)
+    update_and_delete_query(query=query)
+
+
+def update_user_exchange(user_setting_id: int, exchange_id: int, public: str, secret: str):
+    query = "UPDATE user_settings SET exchange_id='{exchange_id}', public='{public}', secret='{secret}' " \
+            "WHERE id='{user_setting_id}'".format(exchange_id=exchange_id, public=public, secret=secret,
+                                                  user_setting_id=user_setting_id)
+    return update_and_delete_query(query)
+
+
+def update_user_strategy(user_setting_id: int, coin_id: int, watchlist_id: int, analysis_id: int, amount: float):
+    query = "UPDATE watchlist SET user_setting_id={user_setting_id}, coin_id={coin_id}, analysis_id={analysis_id}," \
+            " amount={amount} WHERE id='{watchlist_id}'".format(user_setting_id=user_setting_id,
+                                                                coin_id=coin_id, analysis_id=analysis_id,
+                                                                amount=amount, watchlist_id=watchlist_id)
+    return update_and_delete_query(query)
+
+
+def get_user_trade_history(chat_id: str):
+    query = "SELECT trade_history.timestamp, exchanges.exchange, analysis.name, coins.coin, timeframes.timeframe" \
+            ", recommendations.price, recommendations.position, recommendations.timestamp from trade_history " \
+            "inner join recommendations  on trade_history.recom_id = recommendations.id " \
+            "inner join user_settings on trade_history.user_setting_id = user_settings.id " \
+            "inner join analysis on recommendations.analysis_id = analysis.id  " \
+            "inner join coins on recommendations.coin_id = coins.id " \
+            "inner join timeframes on recommendations.timeframe_id = timeframes.id " \
+            "inner join exchanges on user_settings.exchange_id = exchanges.id " \
+            "inner join users on user_settings.username = users.username "  \
+            "where users.chat_id = '{chat_id}' order by trade_history.timestamp DESC LIMIT 10".format(chat_id=chat_id)
+
+    return execute_query(query=query)
+

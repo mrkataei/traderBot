@@ -16,9 +16,9 @@ class User:
     def __init__(self, chat_id):
         self.chat_id = chat_id
         self.username = None
-        self.user_setting = None
         self.strategy = None
         self.account = None
+        self.lang = 'en'
 
     def update_user_plan_limit(self):
         if self.username is not None:
@@ -145,5 +145,4 @@ class BitfinexClient:
         if response.status_code == 200:
             return response.json()
         else:
-            print('error, status_code = ', response.status_code)
-            return ''
+            return None
