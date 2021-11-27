@@ -208,12 +208,22 @@ def get_user_exchange(chat_id: str):
     :param chat_id:
     :return:
     """
-    query = "SELECT exchanges.exchange, user_settings.id from user_settings, users, exchanges " \
+    query = "SELECT exchanges.exchange, user_settings.id, user_settings.exchange_id " \
+            "from user_settings, users, exchanges " \
             "WHERE chat_id='{chat_id}' " \
             "and users.username = user_settings.username " \
             "and exchanges.id = user_settings.exchange_id".format(chat_id=chat_id)
     return execute_query(query=query)
 
+
+def get_user_api(user_setting_id: int):
+    """
+    :param user_setting_id:
+    :return: public and secret key
+    """
+    query = "SELECT public, secret FROM user_settings " \
+            "WHERE id={user_setting_id}".format(user_setting_id=user_setting_id)
+    return execute_query(query=query)[0]
 
 def get_user_settings_id(chat_id: str, exchange_id: int):
     """

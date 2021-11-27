@@ -3,12 +3,11 @@ Mr.Kataei 11/23/2021
 
 """
 from time import sleep
-
 from telebot import types
 from telebot import apihelper
 from Auth.register import register
 from Inc import functions
-from Account.clients import User
+from Account.clients import User, BitfinexClient
 # from Libraries.definitions import *
 from Interfaces.telegram import Telegram
 import numpy as np
@@ -30,7 +29,14 @@ timeframe_binance_dictionary = {
     '1min': '1m'
 }
 
-start_keyboard = []
+
+def get_exchange_class(exchange_id: int, public: str, secret: str):
+    if exchange_id == 1:
+        return BitfinexClient(public=public, secret=secret)
+    else:
+        return None
+
+
 def start_keyboard():
     key_markup = types.ReplyKeyboardMarkup(row_width=1)
     key_add_account = types.KeyboardButton('🏛 add exchange')
@@ -156,7 +162,7 @@ def generate_profile_show_message(chat_id: str):
                            f"💰Amount: {strategy[2]}\n🏛Exchange: {strategy[3]}\n\n"
 
     for account in accounts:
-        accounts_dict += f"🔹 {account[0]}\n"
+        accounts_dict += f"🔹 {account[0]}"
 
     return plan, valid, strategies_dict, accounts_dict
 
@@ -288,12 +294,24 @@ class ClientBot(Telegram):
 
             elif call.data == "profile_edit_exchanges":
                 accounts = functions.get_user_exchange(chat_id=call.message.chat.id)
+
                 for account in accounts:
+                    # for show asset each exchange
+                    public, secret = functions.get_user_api(int(account[1]))
+                    exchange_client = get_exchange_class(exchange_id=int(account[2]), public=public,
+                                                         secret=secret)
+                    result_message = '💰Your assets:\n'
+                    if exchange_client is not None:
+                        assets = exchange_client.get_assets()
+                        if assets is not None:
+                            for asset in assets:
+                                result_message += f'🪙 {asset[1]}\n 💎 {str(asset[2])}\n'
+
                     accounts_option = types.InlineKeyboardMarkup(row_width=1)
                     accounts_option.add(types.InlineKeyboardButton('edit',
                                                                    callback_data=str(account[1]) +
                                                                                  "_edit_account"))
-                    self.bot.send_message(chat_id=call.message.chat.id, text=f"🔹 {account[0]}",
+                    self.bot.send_message(chat_id=call.message.chat.id, text=f"🔹 {account[0]}\n{result_message}",
                                           reply_markup=accounts_option)
 
             elif call.data == "profile_show_history":
@@ -329,7 +347,6 @@ class ClientBot(Telegram):
             user = functions.get_user(message.chat.id)
             markup = start_keyboard()
             self.user_dict[message.chat.id] = User(chat_id=message.chat.id)  # create object for register user session
-            print(self.user_dict)
             if not user:
                 # is typing bot ..
                 self.bot.send_chat_action(chat_id=message.chat.id, action="typing")
@@ -422,26 +439,42 @@ class ClientBot(Telegram):
 
         def add_exchange_step_3(message, exchange_id: int, public: str, user_setting_id: int):
             if message.content_type == 'text':
-                user = self.user_dict[message.chat.id]
-                markup = start_keyboard()
-                if user_setting_id == 0:
-                    error, result = functions.set_user_setting(username=str(user.username),
-                                                               exchange_id=int(exchange_id),
-                                                               public=str(public), secret=str(message.text))
-                    self.bot.delete_message(message.chat.id, message.message_id)
-                    if error:
-                        self.bot.send_message(message.chat.id, '😥 Something is wrong\n Try again! ', markup)
+                exchange_client = get_exchange_class(exchange_id=int(exchange_id), public=public, secret=message.text)
+                if exchange_client is not None:
+                    assets = exchange_client.get_assets()
+                    if assets is None:
+                        self.bot.send_message(message.chat.id, '⛔️ wrong API\nTry again!')
+                        welcome(message=message)
                     else:
-                        self.bot.send_message(message.chat.id, '✅ success', reply_markup=markup)
+                        result_message = '💰Your assets:\n'
+                        for asset in assets:
+                            result_message += f'🪙 {asset[1]}\n 💎 {str(asset[2])}\n\n'
+                        self.bot.send_message(message.chat.id, result_message)
+                        user = self.user_dict[message.chat.id]
+                        markup = start_keyboard()
+                        # insert database
+                        if user_setting_id == 0:
+                            error, result = functions.set_user_setting(username=str(user.username),
+                                                                       exchange_id=int(exchange_id),
+                                                                       public=str(public), secret=str(message.text))
+                            self.bot.delete_message(message.chat.id, message.message_id)
+                            if error:
+                                self.bot.send_message(message.chat.id, '😥 Something is wrong\n Try again! ', markup)
+                            else:
+                                self.bot.send_message(message.chat.id, '✅ success', reply_markup=markup)
+                        else:
+                            result = functions.update_user_exchange(user_setting_id=int(user_setting_id),
+                                                                    exchange_id=int(exchange_id),
+                                                                    public=str(public), secret=str(message.text))
+                            self.bot.delete_message(message.chat.id, message.message_id)
+                            if result is None:
+                                self.bot.send_message(message.chat.id, '✅ success', reply_markup=markup)
+                            else:
+                                self.bot.send_message(message.chat.id, '😥 You cant have same exchange account! ',
+                                                      markup)
                 else:
-                    result = functions.update_user_exchange(user_setting_id=int(user_setting_id),
-                                                            exchange_id=int(exchange_id),
-                                                            public=str(public), secret=str(message.text))
-                    self.bot.delete_message(message.chat.id, message.message_id)
-                    if result is None:
-                        self.bot.send_message(message.chat.id, '✅ success', reply_markup=markup)
-                    else:
-                        self.bot.send_message(message.chat.id, '😥 You cant have same exchange account! ', markup)
+                    self.bot.send_message(message.chat.id, '⛔️ unfortunately this exchange not supported for now')
+                    welcome(message=message)
             else:
                 self.bot.send_message(message.chat.id, '⛔️ wrong API')
                 self.bot.register_next_step_handler(message=message, callback=add_exchange_step_3,
