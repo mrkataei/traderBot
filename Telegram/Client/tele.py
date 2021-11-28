@@ -8,13 +8,14 @@ from telebot import apihelper
 from Auth.register import register
 from Inc import functions
 from Account.clients import User, BitfinexClient
-# from Libraries.definitions import *
 from Interfaces.telegram import Telegram
 import numpy as np
-
-# from Libraries.data_collector import get_candle_binance as candles
-# from Analysis.emerald import Emerald
-# from Test.strategy_tester import StrategyTaster
+from Conf import analysis_settings
+from Analysis.emerald import Emerald
+from Analysis.diamond import Diamond
+from Analysis.ruby import Ruby
+from Libraries.data_collector import get_candle_binance as candles
+from Test.strategy_tester import StrategyTaster
 
 apihelper.ENABLE_MIDDLEWARE = True
 
@@ -22,12 +23,36 @@ apihelper.ENABLE_MIDDLEWARE = True
 API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
 
 timeframe_binance_dictionary = {
-    '30min': '30m',
-    '1hour': '1h',
-    '4hour': '4h',
-    '1day': '1d',
-    '1min': '1m'
+    '30min': ['30m', 1],
+    '1hour': ['1h', 2],
+    '4hour': ['4h', 3],
+    '1day': ['1d', 4],
+    '1min': ['1m', 5],
 }
+
+
+def get_analysis_class(analysis: str, symbol: str, timeframe_id: int, timeframe: str):
+    coin_id = functions.get_coin_id(symbol)
+    if analysis == 'emerald':
+        data = candles(symbol=symbol, timeframe=timeframe, limit=400)
+        return Emerald(data=data, coin_id=coin_id, timeframe_id=timeframe_id, bot_ins=1).get_recommendations()
+    if analysis == 'diamond':
+        setting = analysis_settings.get_analysis_setting(coin_id=coin_id, timeframe_id=timeframe_id, analysis_id=3)
+        if setting:
+            data = candles(symbol=symbol, timeframe=timeframe, limit=400)
+            return Diamond(data=data, coin_id=coin_id, timeframe_id=timeframe_id,
+                           bot_ins=1, setting=setting).get_recommendations()
+        else:
+            return None
+
+    if analysis == 'ruby':
+        setting = analysis_settings.get_analysis_setting(coin_id=coin_id, timeframe_id=timeframe_id, analysis_id=2)
+        if setting:
+            data = candles(symbol=symbol, timeframe=timeframe, limit=400)
+            return Ruby(data=data, coin_id=coin_id, timeframe_id=timeframe_id,
+                        bot_ins=1, setting=setting).get_recommendations()
+        else:
+            return None
 
 
 def get_exchange_class(exchange_id: int, public: str, secret: str):
@@ -316,12 +341,17 @@ class ClientBot(Telegram):
 
             elif call.data == "profile_show_history":
                 histories = functions.get_user_trade_history(chat_id=call.message.chat.id)
-                result_message = 'Your last 10 trade history'
+                result_message = '🔹Your last 10 trade history\n\n'
                 for history in histories:
-                    result_message += f'🔹\nAction time: {history[0]}\n 🏛Exchange: {history[1]}\n ' \
-                                      f'📊Analysis: {history[2]}\n🪙Coin: {history[3]}\n⏰Timeframe: {history[4]} \n' \
-                                      f'💵Price: {history[5]}\n☢️Action: {history[6]}\n' \
-                                      f'⏰Signal receive time: {history[7]}'
+                    result_message += f'🔹Date: {history[0]}\n 🏛Exchange: {history[1]}\n ' \
+                                      f'📊Analysis: {history[2]}\n🪙Coin: {history[3]}\n' \
+                                      f'💵Price: {history[4]}\n' \
+                                      f'🔑Position: {history[5]}\n' \
+                                      f'☢️Order status: {history[6]}\n' \
+                                      f'☢️Status: {history[7]}\n' \
+                                      f'💰 Amount: {history[8]}\n' \
+                                      f'⏰Submit order time: {history[9]}\n' \
+                                      f'⏰Signal receive time: {history[10]}\n\n'
 
                 self.bot.send_message(chat_id=call.message.chat.id, text=result_message,
                                       reply_markup=start_keyboard())
@@ -378,6 +408,10 @@ class ClientBot(Telegram):
         def reg_step_1(message, phone: str):
             user = self.user_dict[message.chat.id]
             try:
+                if message.content_types != 'text':
+                    self.bot.send_message(message.chat.id, '⛔️ Invalid username!\nTry again!')
+                    self.bot.register_next_step_handler(message=message, callback=reg_step_1,
+                                                        phone=phone)
                 if functions.check_username_exist(username=message.text):
                     self.bot.send_message(message.chat.id, '⛔️ Username already exist!\nTry again!')
                     self.bot.register_next_step_handler(message=message, callback=reg_step_1,
@@ -496,30 +530,32 @@ class ClientBot(Telegram):
         def back_test_step_1(message):
             try:
                 analysis_id = np.where(self.analysis[:, 1] == message.text)[0][0]
+                description = functions.get_analysis(analysis_id=int(self.analysis[analysis_id][0]))[0][2]
+                self.bot.send_message(message.chat.id, description)
                 key_markup = coins_keyboard()
                 self.bot.send_message(message.chat.id, '🪙 Choose Coin',
                                       reply_markup=key_markup)
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_2,
-                                                    analysis_id=self.analysis[analysis_id][0])
+                                                    analysis=self.analysis[analysis_id][1])
             except IndexError:
                 self.bot.send_message(message.chat.id, '⛔️ wrong analysis')
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_1)
 
-        def back_test_step_2(message, analysis_id: int):
+        def back_test_step_2(message, analysis: str):
             try:
                 coin_id = np.where(self.coins[:, 1] == message.text)[0][0]
                 key_markup = timeframe_keyboard()
                 self.bot.send_message(message.chat.id, '⏱ Choose timeframe',
                                       reply_markup=key_markup)
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_3,
-                                                    analysis_id=analysis_id, coin_id=self.coins[coin_id][0])
+                                                    analysis=analysis, coin=self.coins[coin_id][1])
 
             except IndexError:
                 self.bot.send_message(message.chat.id, '⛔️ wrong coin')
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_2,
-                                                    analysis_id=analysis_id)
+                                                    analysis=analysis)
 
-        def back_test_step_3(message, analysis_id: int, coin_id: int):
+        def back_test_step_3(message, analysis: str, coin: str):
             try:
                 timeframe_id = np.where(self.timeframes[:, 1] == message.text)[0][0]
                 key_markup = types.ReplyKeyboardRemove(selective=False)
@@ -527,36 +563,47 @@ class ClientBot(Telegram):
                                                        ' the strategies for trade(⚠️ greater than 0)',
                                       reply_markup=key_markup)
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_4,
-                                                    analysis_id=analysis_id, coin_id=coin_id,
-                                                    timeframe_id=self.timeframes[timeframe_id][0])
+                                                    analysis=analysis, coin=coin,
+                                                    timeframe=self.timeframes[timeframe_id][1])
             except IndexError:
                 self.bot.send_message(message.chat.id, '⛔️ wrong timeframe')
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_3,
-                                                    analysis_id=analysis_id, coin_id=coin_id)
+                                                    analysis=analysis, coin=coin)
 
-        def back_test_step_4(message, analysis_id: int, coin_id: int, timeframe_id: int):
+        def back_test_step_4(message, analysis: str, coin: str, timeframe: str):
             try:
                 amount = float(message.text)
                 if not 0 < amount:
                     self.bot.send_message(message.chat.id, '⚠️ Amount must be greater than 0')
                     self.bot.register_next_step_handler(message=message, callback=back_test_step_4,
-                                                        analysis_id=analysis_id, coin_id=coin_id,
-                                                        timeframe_id=timeframe_id)
+                                                        analysis=analysis, coin=coin,
+                                                        timeframe=timeframe)
                 else:
-                    # timeframe_id = self.timeframes[timeframe_id[0][0]][0]
-                    # symbol = functions.get_coins(coin_id=int(coin_id))[0][0]
-                    # timeframe = functions.get_timeframes(timeframe_id=int(timeframe_id))[0][0]
-                    # data = candles(symbol=symbol, timeframe=timeframe_binance_dictionary[timeframe], limit=400)
-                    # data = Emerald(data=data, coin_id=coin_id, timeframe_id=timeframe_id,
-                    #                bot_ins=1).get_recommendations()
+                    timeframe_data = timeframe_binance_dictionary[timeframe]
+                    timeframe_id = timeframe_data[1]
+                    timeframe = timeframe_data[0]
+                    self.bot.send_message(message.chat.id, 'just a moment,processing ...')
+                    recommendation = get_analysis_class(analysis=analysis, symbol=coin,
+                                                        timeframe_id=timeframe_id, timeframe=timeframe)
                     markup = start_keyboard()
-                    self.bot.send_message(message.chat.id, '✅ success', reply_markup=markup)
+                    if recommendation is None:
+                        result = '⛔️This strategy doesnt work with this timeframe and coin'
+                    else:
+                        recommendation.to_csv('test.csv')
+                        result = StrategyTaster(name='telegram', symbol=coin, timeframe=timeframe,
+                                                intial_value=int(amount), dataframe=recommendation).result.values[0]
+                        result = f'🪙 *{result[1]}*\n⏰ *{result[2]}*\n⏲Start time: *{result[3]}*\n' \
+                                 f'⏲End time: *{result[4]}*\n' \
+                                 f'🟢Positive trades: *{result[5]}*\n✅Total trade accuracy percent: *{result[6]}*%\n' \
+                                 f'✅Net profit percent: *{result[7]}*%\n✅Average trade profit: *{result[8]}*%\n' \
+                                 f'✅Profit per coin percent: *{result[9]}*%'
+                    self.bot.send_message(message.chat.id, result, reply_markup=markup, parse_mode='Markdown')
 
             except (ValueError, TypeError):
                 self.bot.send_message(message.chat.id, '⚠️ Amount must be greater than 0')
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_4,
-                                                    analysis_id=analysis_id, coin_id=coin_id,
-                                                    timeframe_id=timeframe_id)
+                                                    analysis=analysis, coin=coin,
+                                                    timeframe=timeframe)
 
         @self.bot.message_handler(func=self.check_add_command)
         def add_strategy(message, watchlist_id: int = 0):

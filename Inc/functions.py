@@ -225,6 +225,7 @@ def get_user_api(user_setting_id: int):
             "WHERE id={user_setting_id}".format(user_setting_id=user_setting_id)
     return execute_query(query=query)[0]
 
+
 def get_user_settings_id(chat_id: str, exchange_id: int):
     """
     :param chat_id:
@@ -521,16 +522,22 @@ def update_user_strategy(user_setting_id: int, coin_id: int, watchlist_id: int, 
 
 
 def get_user_trade_history(chat_id: str):
-    query = "SELECT trade_history.timestamp, exchanges.exchange, analysis.name, coins.coin, timeframes.timeframe" \
-            ", recommendations.price, recommendations.position, recommendations.timestamp from trade_history " \
-            "inner join recommendations  on trade_history.recom_id = recommendations.id " \
-            "inner join user_settings on trade_history.user_setting_id = user_settings.id " \
-            "inner join analysis on recommendations.analysis_id = analysis.id  " \
-            "inner join coins on recommendations.coin_id = coins.id " \
-            "inner join timeframes on recommendations.timeframe_id = timeframes.id " \
+    query = "SELECT trade.timestamp, exchanges.exchange,  analysis.name, trade.coin, trade.price, trade.position," \
+            " trade.order_status, trade.status, trade.amount," \
+            " trade.order_submit_time, trade.signal_time from trade " \
+            "inner join user_settings on trade.user_setting_id = user_settings.id " \
+            "inner join users on user_settings.username = users.username " \
+            "inner join analysis on trade.analysis_id = analysis.id " \
             "inner join exchanges on user_settings.exchange_id = exchanges.id " \
-            "inner join users on user_settings.username = users.username "  \
-            "where users.chat_id = '{chat_id}' order by trade_history.timestamp DESC LIMIT 10".format(chat_id=chat_id)
-
+            "WHERE users.chat_id='{chat_id}' order by trade.timestamp DESC LIMIT 10".format(chat_id=chat_id)
     return execute_query(query=query)
 
+
+def set_trade_history(user_setting_id: int, coin: str, analysis_id, price: float, position: str, order_status,
+                      status: str, amount: str, order_submit_time: str, signal_time: str):
+    query = "INSERT INTO trade (user_setting_id, coin, analysis_id, price, position, order_status, status," \
+            " amount, order_submit_time, signal_time) VALUES (%s, %s , %s ,%s , %s, %s , %s ,%s , %s ,%s)"
+    val = (user_setting_id, coin, analysis_id, price, position, order_status, status, amount, order_submit_time,
+           signal_time)
+    error, result = insert_query(query=query, values=val)
+    return error, result

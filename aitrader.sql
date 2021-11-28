@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2021 at 11:42 AM
+-- Generation Time: Nov 28, 2021 at 06:27 PM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -38,9 +38,9 @@ CREATE TABLE `analysis` (
 --
 
 INSERT INTO `analysis` (`id`, `name`, `description`) VALUES
-(1, 'emerald', NULL),
-(2, 'ruby', NULL),
-(3, 'diamond', NULL);
+(1, 'emerald', 'This analysis optimized for 1min timeframe and work for all coins'),
+(2, 'ruby', 'This analysis optimized for 4hour timeframe and work just for ETHUSDT coin'),
+(3, 'diamond', 'This analysis optimized just for 4hour timeframe and work with BTCUSDT, ETHUSDT, ADAUSDT, BCHUSDT, ETCUDT');
 
 -- --------------------------------------------------------
 
@@ -163,12 +163,21 @@ INSERT INTO `timeframes` (`id`, `timeframe`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `trade_history`
+-- Table structure for table `trade`
 --
 
-CREATE TABLE `trade_history` (
-  `recom_id` int(12) NOT NULL,
+CREATE TABLE `trade` (
+  `id` int(80) NOT NULL,
   `user_setting_id` int(12) NOT NULL,
+  `coin` varchar(10) NOT NULL,
+  `analysis_id` int(5) NOT NULL,
+  `price` double NOT NULL,
+  `position` char(5) NOT NULL,
+  `order_status` varchar(20) NOT NULL,
+  `status` varchar(10) NOT NULL,
+  `amount` double NOT NULL,
+  `order_submit_time` timestamp NULL DEFAULT NULL,
+  `signal_time` timestamp NULL DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -232,7 +241,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
-('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-27 10:32:19', 1, 1, '2021-12-20 15:13:22', 1, 1),
+('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-28 17:17:10', 1, 1, '2021-12-20 15:13:22', 1, 1),
 ('kouroshnew', '1978824576', 'user', NULL, '+17076562131', '2021-11-26 19:20:47', '2021-11-26 19:30:39', 1, 1, '2021-12-26 19:20:47', 1, 1);
 
 -- --------------------------------------------------------
@@ -315,11 +324,12 @@ ALTER TABLE `timeframes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `trade_history`
+-- Indexes for table `trade`
 --
-ALTER TABLE `trade_history`
-  ADD KEY `trade_history_recom_id_fk` (`recom_id`),
-  ADD KEY `trade_history_user_setting_id_fk` (`user_setting_id`);
+ALTER TABLE `trade`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `trade_user_setting_id` (`user_setting_id`),
+  ADD KEY `trade_analysis_id` (`analysis_id`);
 
 --
 -- Indexes for table `tutorials`
@@ -404,6 +414,12 @@ ALTER TABLE `timeframes`
   MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT for table `trade`
+--
+ALTER TABLE `trade`
+  MODIFY `id` int(80) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `tutorials_category`
 --
 ALTER TABLE `tutorials_category`
@@ -441,11 +457,11 @@ ALTER TABLE `recommendations`
   ADD CONSTRAINT `recommendations_timeframe_id` FOREIGN KEY (`timeframe_id`) REFERENCES `timeframes` (`id`);
 
 --
--- Constraints for table `trade_history`
+-- Constraints for table `trade`
 --
-ALTER TABLE `trade_history`
-  ADD CONSTRAINT `trade_history_recom_id_fk` FOREIGN KEY (`recom_id`) REFERENCES `recommendations` (`id`),
-  ADD CONSTRAINT `trade_history_user_setting_id_fk` FOREIGN KEY (`user_setting_id`) REFERENCES `user_settings` (`id`);
+ALTER TABLE `trade`
+  ADD CONSTRAINT `trade_analysis_id` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`id`),
+  ADD CONSTRAINT `trade_user_setting_id` FOREIGN KEY (`user_setting_id`) REFERENCES `user_settings` (`id`);
 
 --
 -- Constraints for table `tutorials`
