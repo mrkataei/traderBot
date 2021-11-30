@@ -1,17 +1,42 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 import pandas_datareader as web
 import datetime as dt
+import pandas_ta as ta
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.layers import Dense, Dropout, LSTM
+from tensorflow.keras.layers import Dense, Dropout, LSTM, GRU
 from tensorflow.keras.models import Sequential
 from sklearn import preprocessing
 
 from tensorflow.python.keras import Input
-from tensorflow.python.keras.layers import BatchNormalization
+
+
+
+import random
+random.seed(42)
+import numpy
+numpy.random.seed(42)
+import tensorflow as tf
+tf.random.set_seed(42)
+
+
+
+def correlation(dataset, threshold):
+    col_corr = set()  # Set of all the names of correlated columns
+    corr_matrix = dataset.corr()
+    for i in range(len(corr_matrix.columns)):
+        for j in range(i):
+            if abs(corr_matrix.iloc[i, j]) > threshold: # we are interested in absolute coeff value
+                colname = corr_matrix.columns[i]  # getting the name of column
+                col_corr.add(colname)
+    return col_corr
+
+
+
 
 name='ETHUSDT4h'
 
@@ -28,13 +53,61 @@ data.head()
 
 
 
+data['hl2'] = (ta.hl2(high=data['high'], low=data['low'])).values
+data['hlc3'] = (ta.hlc3(high=data['high'], low=data['low'], close=data['close'])).values
+data['ohlc4'] = (ta.ohlc4(high=data['high'], low=data['low'], close=data['close'],open_=data['open'])).values
+
+korosh = ta.macd(data['hl2'])
+data['hl2_MD'] = korosh['MACD_12_26_9']
+data['hl2_MDh'] = korosh['MACDh_12_26_9']
+data['hl2_MDs'] = korosh['MACDs_12_26_9']
+
+
+korosh = ta.macd(data['hlc3'])
+data['hlc3_MD'] = korosh['MACD_12_26_9']
+data['hlc3_MDh'] = korosh['MACDh_12_26_9']
+data['hlc3_MDs'] = korosh['MACDs_12_26_9']
+
+
+
+korosh = ta.macd(data['ohlc4'])
+data['ohlc4_MD'] = korosh['MACD_12_26_9']
+data['ohlc4_MDh'] = korosh['MACDh_12_26_9']
+data['ohlc4_MDs'] = korosh['MACDs_12_26_9']
+
+data=data.dropna()
+data = data.reset_index(drop=True)
+
+
+
 data.sort_values(by=['date'],ascending=[True],inplace=True)
 data.head(10)
+#%%
+sns.heatmap(data.corr(), annot=True, cmap='RdYlGn', linewidths=0.1, vmin=0)
+plt.show()
 
 #%%
-#X = data[['open', 'high', 'low', 'volume', 'close']]
-X = data[['high', 'low', 'volume', 'close']]
+# X = data[['open', 'high', 'low', 'volume', 'close', 'hl2', 'hlc3', 'ohlc4']]
+# X = data[['volume', 'close' , 'hl2_MD' , 'hl2_MDh' , 'hl2_MDs', 'hlc3_MD','hlc3_MDh','hlc3_MDs', 'ohlc4_MD' ,'ohlc4_MDh', 'ohlc4_MDs']]
+# X = data[['volume', 'close' , 'hl2_MD' , 'hl2_MDh' , 'hlc3_MD','hlc3_MDh', 'ohlc4_MD' ,'ohlc4_MDh']]
+# X = data[['volume', 'close' , 'hl2_MD' , 'hl2_MDh', 'hl2_MDs']]
+# X = data[['MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9', 'open', 'high', 'low', 'volume', 'close']]
+data = data.drop(['date' , 'open', 'low', 'high'] , axis =1)
 Y = data[['close']]
+
+
+# from matplotlib.pyplot import figure
+#
+# figure(figsize=(10, 8))
+# sns.heatmap(X.corr(), annot=True, cmap='RdYlGn', linewidths=0.1, vmin=0)
+# plt.show()
+
+corr_features = correlation(data, 0.85)
+X = data.drop(corr_features,axis=1)
+
+
+
+#%%
 #X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, shuffle = False)
 
 
@@ -89,7 +162,7 @@ def create_dataset(X, y, time_steps=1):
         ys.append(y[i + time_steps])
     return np.array(Xs), np.array(ys)
 
-time_steps = 48
+time_steps = 90
 # reshape to [samples, time_steps, n_features]
 X_train_f, y_train_f = create_dataset(X_train_trans, y_train_trans, time_steps)
 X_test_f, y_test_f = create_dataset(X_test_trans, y_test_trans, time_steps)
@@ -101,53 +174,62 @@ print(X_test_f.shape, y_test_f.shape)
 #print(X_test_trans.shape, y_test_trans.shape)
 
 #%%
+# model = Sequential()
+# model.add(Input(shape=((X_train_f.shape[1], X_train_f.shape[2]))))
+# # model.add(GRU(90, return_sequences=True, activation = 'tanh'))
+# model.add(GRU(50, return_sequences=True, activation = 'tanh'))
+# model.add(GRU(150, return_sequences=True, activation = 'tanh'))
+# model.add(GRU(250, return_sequences=False, activation = 'tanh'))
+# model.add(Dense(units=1 ,activation='linear'))
+# model.compile(loss='mean_squared_error', optimizer='SGD')
+
+
+
 model = Sequential()
 model.add(Input(shape=((X_train_f.shape[1], X_train_f.shape[2]))))
-#model.add(layers.Bidirectional(layers.LSTM(300, activation = 'tanh', return_sequences=False)))
-#model.add(layers.LSTM(300, return_sequences=False, activation = 'tanh'))
-model.add(LSTM(300, return_sequences=False, activation = 'tanh'))
-# model.add(Dropout(0.4))
-# model.add(LSTM(200, return_sequences=True))
-# model.add(Dropout(0.4))
-# model.add(LSTM(100, return_sequences=True))
-# model.add(Dropout(0.4))
-# model.add(LSTM(50))
-# model.add(Dropout(0.4))
-# model.add(Dropout(0.2))
-# model.add(BatchNormalization())
-#model.add(layers.Bidirectional(layers.LSTM(120,activation='relu', return_sequences=True)))
-#model.add(keras.layers.Dropout(rate=0.2))
-#model.add(layers.Flatten())
-#model.add(keras.layers.Dense(units=10, activation = 'relu'))
+# model.add(GRU(90, return_sequences=True, activation = 'tanh'))
+model.add(GRU(300, return_sequences=False, activation = 'tanh'))
+model.add(Dense(units=1 ,activation='linear'))
+model.compile(loss='mean_squared_error', optimizer='SGD')
 
-# model.add(LSTM(50, return_sequences=True, activation = 'tanh'))
-# model.add(Dropout(0.2))
-# model.add(LSTM(50, return_sequences=True, activation = 'tanh'))
-# model.add(Dropout(0.2))
-# model.add(LSTM(50, activation = 'tanh'))
 
-model.add(Dense(units=1))
-model.compile(loss='mean_squared_error', optimizer='adam')
-# model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+
+#
+# model = Sequential()
+# model.add(Input(shape=((X_train_f.shape[1], X_train_f.shape[2]))))
+# model.add(LSTM(units = 50))
+# # returns a sequence of vectors of dimension 4
+#
+# # Adding the output layer
+# model.add(Dense(units = 1,  kernel_initializer='random_uniform',
+#                 bias_initializer='zeros'))
+#
+# # Compiling the RNN
+# model.compile(optimizer = 'adam', loss = 'mean_squared_error', metrics=['mae', 'acc'])
+
+
+
+
+
 model.summary()
 
-# model = Sequential()
-#
-# model.add(LSTM(units = 50, return_sequences = True, input_shape = (60, 4)))
-# model.add(Dropout(0.2))
-# model.add(LSTM(units = 50, return_sequences = True))
-# model.add(Dropout(0.2))
-# model.add(LSTM(units = 50))
-# model.add(Dropout(0.2))
-# model.add(Dense(units = 1))
-#
 # model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 # model.fit(x_saeid, y_saeid, epochs= 25 , batch_size = 32)
 
-hist = model.fit(X_train_f, y_train_f, batch_size = 200, epochs = 150, shuffle=False, validation_split=0.1)
+# Fitting the RNN to the Training set
+# hist = model.fit(X_train, y_train, batch_size = 5, epochs = 100)
+
+hist = model.fit(X_train_f, y_train_f, batch_size = 64, epochs = 1000, shuffle=False, validation_split=0.1)
+# hist = model.fit(X_train_f, y_train_f, batch_size = 64, epochs = 150, shuffle=False)
+
 
 import math
 
+
+
+
+
+#%%
 y_pred = model.predict(X_test_f)
 
 y_test_inv = cnt_transformer.inverse_transform(y_test_f)
@@ -159,7 +241,7 @@ df_final = pd.DataFrame(data = combined_array, columns=["actual", "predicted"])
 print("size: %d" % (len(combined_array)))
 df_final
 
-#%%
+
 
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_squared_error
@@ -170,5 +252,10 @@ print(results)
 # print(accuracy_score(y_test_inv, y_pred_inv))
 
 #%%
+
+
+#%%
+model.save_weights('E:\Work\\5972.h5')
+df_final.to_csv('E:\Work\\5972.csv')
 print(np.shape(y_test_inv))
 print(np.shape(y_pred_inv))
