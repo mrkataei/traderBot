@@ -46,10 +46,7 @@ data = pd.read_csv('Static/'+name+'.csv')
 data.head()
 
 
-# data = data.values
-# X = data[['open', 'high', 'low', 'volume']]
-#SPLIT DATA INTO TEST AND TRAIN
-# np.random.seed(7)
+
 
 
 
@@ -87,11 +84,7 @@ sns.heatmap(data.corr(), annot=True, cmap='RdYlGn', linewidths=0.1, vmin=0)
 plt.show()
 
 #%%
-# X = data[['open', 'high', 'low', 'volume', 'close', 'hl2', 'hlc3', 'ohlc4']]
-# X = data[['volume', 'close' , 'hl2_MD' , 'hl2_MDh' , 'hl2_MDs', 'hlc3_MD','hlc3_MDh','hlc3_MDs', 'ohlc4_MD' ,'ohlc4_MDh', 'ohlc4_MDs']]
-# X = data[['volume', 'close' , 'hl2_MD' , 'hl2_MDh' , 'hlc3_MD','hlc3_MDh', 'ohlc4_MD' ,'ohlc4_MDh']]
-# X = data[['volume', 'close' , 'hl2_MD' , 'hl2_MDh', 'hl2_MDs']]
-# X = data[['MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9', 'open', 'high', 'low', 'volume', 'close']]
+
 data = data.drop(['date' , 'open', 'low', 'high'] , axis =1)
 Y = data[['close']]
 
@@ -107,50 +100,26 @@ X = data.drop(corr_features,axis=1)
 
 
 
+X = X.iloc[: , :].values
+Y = Y.iloc[: , :].values
+
+
 #%%
-#X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, shuffle = False)
-
-
-#NORMALIZATION
 f_transformer = preprocessing.MinMaxScaler((-1, 1))
 f_transformer = f_transformer.fit(X)
-#X_train_trans = f_transformer.transform(X_train)
-#X_test_trans = f_transformer.transform(X_test)
+X = f_transformer.transform(X)
 
-cnt_transformer = preprocessing.MinMaxScaler((0, 1))
+cnt_transformer = preprocessing.MinMaxScaler((-1, 1))
 cnt_transformer = cnt_transformer.fit(Y)
-#y_train_trans = cnt_transformer.transform(y_train)
-#y_test_trans = cnt_transformer.transform(y_test)
+Y = cnt_transformer.transform(Y)
+
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, shuffle = False)
-
-X_train_trans = f_transformer.transform(X_train)
-X_test_trans = f_transformer.transform(X_test)
-
-y_train_trans = cnt_transformer.transform(y_train)
-y_test_trans = cnt_transformer.transform(y_test)
 
 #dump(f_transformer, '//Users//saad//Desktop//Bitcoin LSTM//minmax_scalar_x.bin', compress=True)
 #dump(cnt_transformer, '//Users//saad//Desktop//Bitcoin LSTM//minmax_scalar_y.bin', compress=True)
 
-print("*** SHAPES")
-print("X_train: %s, %s" % (X_train.shape[0],X_train.shape[1]))
-print("X_test: %s, %s" % (X_test.shape[0],X_test.shape[1]))
-print("y_train: %s, %s" % (y_train.shape[0],y_train.shape[1]))
-print("y_test: %s, %s" % (y_test.shape[0],y_test.shape[1]))
 
-print("\n*** MIN MAX")
-
-print("TRAIN COST: %d, %d" % (X_train.close.min(), X_train.close.max()))
-print("TEST COST: %d, %d" % (X_test.close.min(), X_test.close.max()))
-print("TRAIN VOL: %d, %d" % (X_train['volume'].min(), X_train['volume'].max()))
-print("TEST VOL: %d, %d" % (X_test['volume'].min(), X_test['volume'].max()))
-
-print("\n*** MIN MAX PARAMETER")
-print(f_transformer.data_min_)
-print(f_transformer.data_max_)
-print(cnt_transformer.data_min_)
-print(cnt_transformer.data_max_)
 
 
 #CREATE LAGGING DATASET FOR TIMESERIES
@@ -164,8 +133,11 @@ def create_dataset(X, y, time_steps=1):
 
 time_steps = 90
 # reshape to [samples, time_steps, n_features]
-X_train_f, y_train_f = create_dataset(X_train_trans, y_train_trans, time_steps)
-X_test_f, y_test_f = create_dataset(X_test_trans, y_test_trans, time_steps)
+
+
+
+X_train_f, y_train_f = create_dataset(X_train, y_train, time_steps)
+X_test_f, y_test_f = create_dataset(X_test, y_test, time_steps)
 
 print("*** SHAPES")
 print(X_train_f.shape, y_train_f.shape)
@@ -174,15 +146,6 @@ print(X_test_f.shape, y_test_f.shape)
 #print(X_test_trans.shape, y_test_trans.shape)
 
 #%%
-# model = Sequential()
-# model.add(Input(shape=((X_train_f.shape[1], X_train_f.shape[2]))))
-# # model.add(GRU(90, return_sequences=True, activation = 'tanh'))
-# model.add(GRU(50, return_sequences=True, activation = 'tanh'))
-# model.add(GRU(150, return_sequences=True, activation = 'tanh'))
-# model.add(GRU(250, return_sequences=False, activation = 'tanh'))
-# model.add(Dense(units=1 ,activation='linear'))
-# model.compile(loss='mean_squared_error', optimizer='SGD')
-
 
 
 model = Sequential()
@@ -194,18 +157,6 @@ model.compile(loss='mean_squared_error', optimizer='SGD')
 
 
 
-#
-# model = Sequential()
-# model.add(Input(shape=((X_train_f.shape[1], X_train_f.shape[2]))))
-# model.add(LSTM(units = 50))
-# # returns a sequence of vectors of dimension 4
-#
-# # Adding the output layer
-# model.add(Dense(units = 1,  kernel_initializer='random_uniform',
-#                 bias_initializer='zeros'))
-#
-# # Compiling the RNN
-# model.compile(optimizer = 'adam', loss = 'mean_squared_error', metrics=['mae', 'acc'])
 
 
 
@@ -213,21 +164,9 @@ model.compile(loss='mean_squared_error', optimizer='SGD')
 
 model.summary()
 
-# model.compile(optimizer = 'adam', loss = 'mean_squared_error')
-# model.fit(x_saeid, y_saeid, epochs= 25 , batch_size = 32)
-
-# Fitting the RNN to the Training set
-# hist = model.fit(X_train, y_train, batch_size = 5, epochs = 100)
-
-hist = model.fit(X_train_f, y_train_f, batch_size = 64, epochs = 1000, shuffle=False, validation_split=0.1)
-# hist = model.fit(X_train_f, y_train_f, batch_size = 64, epochs = 150, shuffle=False)
 
 
-import math
-
-
-
-
+hist = model.fit(X_train_f, y_train_f, batch_size = 64, epochs = 1000, shuffle=False)
 
 #%%
 y_pred = model.predict(X_test_f)
@@ -235,7 +174,7 @@ y_pred = model.predict(X_test_f)
 y_test_inv = cnt_transformer.inverse_transform(y_test_f)
 y_pred_inv = cnt_transformer.inverse_transform(y_pred)
 combined_array = np.concatenate((y_test_inv,y_pred_inv),axis=1)
-combined_array2 = np.concatenate((X_test.iloc[time_steps:],combined_array),axis=1)
+combined_array2 = np.concatenate((X_test[time_steps:],combined_array),axis=1)
 
 df_final = pd.DataFrame(data = combined_array, columns=["actual", "predicted"])
 print("size: %d" % (len(combined_array)))
@@ -255,7 +194,7 @@ print(results)
 
 
 #%%
-model.save_weights('E:\Work\\5972.h5')
-df_final.to_csv('E:\Work\\5972.csv')
+model.save_weights('E:\Work\\5571.h5')
+df_final.to_csv('E:\Work\\5571.csv')
 print(np.shape(y_test_inv))
 print(np.shape(y_pred_inv))
