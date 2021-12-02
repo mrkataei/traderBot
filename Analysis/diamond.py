@@ -178,8 +178,9 @@ class Diamond:
         :return: old_position
         """
         record = get_last_recommendations(analysis_id=3, timeframe_id=self.timeframe_id,
-                                          coin_id=self.coin_id)[0]
+                                          coin_id=self.coin_id)
         if record:
+            record = record[0]
             old_position = record_dictionary(record=record, table='recommendations')['position']
         else:
             old_position = 'sell'
@@ -295,20 +296,22 @@ class Diamond:
         """
         check last row of processed dataframe to generate signal
         """
+        print('salam')
         last_row_diamond_detector = self.get_recommendations().tail(1)
+        print(last_row_diamond_detector)
         position = last_row_diamond_detector['recommendation'].values[0]
         old_position = self.get_old_position()
         old_price = self.get_old_price()
-        if old_position != position:
-            close = float(last_row_diamond_detector['close'].values[0])
-            if position == 'buy':
-                self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close,
-                                     risk=last_row_diamond_detector['risk'].values[0])
-            elif position == 'sell' and old_price < close:
-                self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close,
-                                     risk=last_row_diamond_detector['risk'].values[0])
+        # if old_position != position:
+        close = float(last_row_diamond_detector['close'].values[0])
+        # if position == 'buy':
+        self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
+        self.insert_database(position=position, current_price=close,
+                             risk=last_row_diamond_detector['risk'].values[0])
+            # elif position == 'sell' and old_price < close:
+            #     self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
+            #     self.insert_database(position=position, current_price=close,
+            #                          risk=last_row_diamond_detector['risk'].values[0])
 
 # test case:
 # df = pd.read_csv(r"C:\Users\Asus\Downloads\bitcoin-pattern-reco-1min.csv")

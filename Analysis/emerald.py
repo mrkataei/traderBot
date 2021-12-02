@@ -1,10 +1,13 @@
 """
 Mr.Kataei 11/12/2021
 """
+from datetime import datetime
+
 import pandas as pd
 from Inc.functions import get_last_recommendations, set_recommendation, record_dictionary
 from Telegram.Client.message import broadcast_messages
 from Analysis.pattern import Patterns
+# from Trade.spot import submit_order
 
 
 class Emerald(Patterns):
@@ -13,11 +16,13 @@ class Emerald(Patterns):
         self.coin_id = coin_id
         self.timeframe_id = timeframe_id
         self.bot = bot_ins
+        self.time = datetime.now()
 
     def get_old_position(self):
         record = get_last_recommendations(analysis_id=1, timeframe_id=self.timeframe_id,
-                                          coin_id=self.coin_id)[0]
+                                          coin_id=self.coin_id)
         if record:
+            record = record[0]
             old_position = record_dictionary(record=record, table='recommendations')['position']
         else:
             old_position = 'sell'
@@ -38,8 +43,10 @@ class Emerald(Patterns):
         if old_position != position:
             close = float(last_row_pattern_detector['close'].values[0])
             if position == 'buy':
+                # submit_order(coin_id=self.coin_id, analysis_id=1, position='buy', time_receive_signal=self.time)
                 self.broadcast(position=position, current_price=close)
                 self.insert_database(position=position, current_price=close)
             elif position == 'sell':
+                # submit_order(coin_id=self.coin_id, analysis_id=1, position='sell', time_receive_signal=self.time)
                 self.broadcast(position=position, current_price=close)
                 self.insert_database(position=position, current_price=close)

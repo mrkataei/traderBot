@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 28, 2021 at 06:27 PM
+-- Generation Time: Dec 02, 2021 at 08:49 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -68,6 +68,24 @@ INSERT INTO `coins` (`id`, `coin`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `demo_account`
+--
+
+CREATE TABLE `demo_account` (
+  `id` int(15) NOT NULL,
+  `username` char(15) NOT NULL,
+  `BTC` float NOT NULL DEFAULT 100,
+  `ETH` float NOT NULL DEFAULT 100,
+  `BCH` float NOT NULL DEFAULT 100,
+  `ETC` float NOT NULL DEFAULT 100,
+  `ADA` float NOT NULL DEFAULT 100,
+  `DOGE` float NOT NULL DEFAULT 100,
+  `USDT` float NOT NULL DEFAULT 100
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `exchanges`
 --
 
@@ -81,7 +99,8 @@ CREATE TABLE `exchanges` (
 --
 
 INSERT INTO `exchanges` (`id`, `exchange`) VALUES
-(1, 'bitfinex');
+(1, 'bitfinex'),
+(2, 'demo');
 
 -- --------------------------------------------------------
 
@@ -171,11 +190,11 @@ CREATE TABLE `trade` (
   `user_setting_id` int(12) NOT NULL,
   `coin` varchar(10) NOT NULL,
   `analysis_id` int(5) NOT NULL,
-  `price` double NOT NULL,
+  `price` double DEFAULT NULL,
   `position` char(5) NOT NULL,
-  `order_status` varchar(20) NOT NULL,
-  `status` varchar(10) NOT NULL,
-  `amount` double NOT NULL,
+  `order_status` varchar(20) DEFAULT NULL,
+  `status` text NOT NULL,
+  `amount` double DEFAULT NULL,
   `order_submit_time` timestamp NULL DEFAULT NULL,
   `signal_time` timestamp NULL DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
@@ -241,7 +260,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
-('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-11-28 17:17:10', 1, 1, '2021-12-20 15:13:22', 1, 1),
+('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-12-02 07:05:49', 1, 1, '2021-12-20 15:13:22', 1, 1),
 ('kouroshnew', '1978824576', 'user', NULL, '+17076562131', '2021-11-26 19:20:47', '2021-11-26 19:30:39', 1, 1, '2021-12-26 19:20:47', 1, 1);
 
 -- --------------------------------------------------------
@@ -270,7 +289,8 @@ CREATE TABLE `watchlist` (
   `coin_id` int(5) NOT NULL,
   `username` char(30) NOT NULL,
   `analysis_id` int(5) NOT NULL,
-  `amount` double NOT NULL
+  `amount` double NOT NULL,
+  `sell_amount` double DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -288,6 +308,13 @@ ALTER TABLE `analysis`
 --
 ALTER TABLE `coins`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `demo_account`
+--
+ALTER TABLE `demo_account`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
 
 --
 -- Indexes for table `exchanges`
@@ -390,10 +417,16 @@ ALTER TABLE `coins`
   MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `demo_account`
+--
+ALTER TABLE `demo_account`
+  MODIFY `id` int(15) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `exchanges`
 --
 ALTER TABLE `exchanges`
-  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `plans`
@@ -440,6 +473,12 @@ ALTER TABLE `watchlist`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `demo_account`
+--
+ALTER TABLE `demo_account`
+  ADD CONSTRAINT `demo_account_username_fk` FOREIGN KEY (`username`) REFERENCES `users` (`username`);
 
 --
 -- Constraints for table `plan_payments`

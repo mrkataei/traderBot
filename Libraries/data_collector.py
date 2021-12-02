@@ -39,10 +39,10 @@ def get_candle_binance(symbol: str, timeframe: str, limit: int):
         data.date = pd.DatetimeIndex(pd.to_datetime(data['date'], unit='ms', yearfirst=True)).tz_localize(
             'UTC').tz_convert(
             'Asia/Tehran')
-        return data
+        return True, data
     except Exception as e:
-        print('something wrong on get data from binance:\n', e)
-        return False
+        result = 'something wrong getting data from binance:\n' + str(e)
+        return False, result
 
 
 def get_all_candles_binance(symbol: str, timeframe: str):

@@ -8,7 +8,7 @@ import hmac
 import json
 import time
 import requests
-
+from Interfaces.exchange import Exchange
 from Inc import functions
 
 
@@ -28,12 +28,11 @@ class User:
             self.account = plan['account_number']
 
 
-class BitfinexClient:
+class BitfinexClient(Exchange):
     BASE_URL = "https://api.bitfinex.com/"
 
     def __init__(self, public: str, secret: str):
-        self.__KEY = public
-        self.__SECRET = secret
+        Exchange.__init__(self, public=public, secret=secret)
 
     def _nonce(self):
         # Returns a nonce
@@ -41,14 +40,14 @@ class BitfinexClient:
         return str(int(round(time.time() * 10000)))
 
     def _headers(self, path, nonce, body):
-        secbytes = self.__SECRET.encode(encoding='UTF-8')
+        secbytes = self.SECRET.encode(encoding='UTF-8')
         signature = "/api/" + path + nonce + body
         sigbytes = signature.encode(encoding='UTF-8')
         h = hmac.new(secbytes, sigbytes, hashlib.sha384)
         hexstring = h.hexdigest()
         return {
             "bfx-nonce": nonce,
-            "bfx-apikey": self.__KEY,
+            "bfx-apikey": self.KEY,
             "bfx-signature": hexstring,
             "content-type": "application/json"
         }
@@ -89,7 +88,19 @@ class BitfinexClient:
             return response.json()
         else:
             print('error, status_code = ', response.status_code)
-            return ''
+            return None
+
+    def buy_market(self, symbol: str, percent: float):
+        amount = self.get_balance_available(symbol=symbol, direction=1)
+        amount = amount * percent
+        result = self.submit_market_order(symbol=symbol, amount=str(amount))
+        return result
+
+    def sell_market(self, symbol: str, percent: float):
+        amount = self.get_balance_available(symbol=symbol, direction=-1)
+        amount = amount * percent
+        result = self.submit_market_order(symbol=symbol, amount=str(amount))
+        return result
 
     def order_history(self, symbol: str, limit: int):
         # Amount of order (positive for buy, negative for sell)
@@ -146,3 +157,28 @@ class BitfinexClient:
             return response.json()
         else:
             return None
+
+
+class DemoClient(Exchange):
+    def __init__(self, chat_id: str):
+        Exchange.__init__(self, public='public', secret='secret')
+        self.chat_id = chat_id
+
+    def submit_market_order(self, symbol: str, amount: str):
+        print()
+
+    def get_balance_available(self, symbol: str, direction: int):
+        print()
+
+    def buy_market(self, symbol: str, percent: float):
+        print()
+
+    def sell_market(self, symbol: str, percent: float):
+        print()
+
+    def get_assets(self):
+        assets = functions.get_demo_account_assets(chat_id=self.chat_id)
+        assets = [['exchange', 'BTC', assets[0]], ['exchange', 'ETH', assets[1]], ['exchange', 'BCH', assets[2]],
+                  ['exchange', 'ETC', assets[3]], ['exchange', 'ADA', assets[4]], ['exchange', 'DOGE', assets[5]],
+                  ['exchange', 'USDT', assets[5]]]
+        return assets

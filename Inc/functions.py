@@ -99,7 +99,7 @@ def record_dictionary(record, table: str):
 
     elif table == 'watchlist':
         return {'id': record[0], 'user_setting_id': [1], 'coin_id': record[2], 'username': record[3],
-                'analysis_id': record[4], 'amount': record[5]}
+                'analysis_id': record[4], 'amount': record[5], 'sell_amount': record[6]}
 
     elif table == 'plan_payments':
         return {'username': record[0], 'plan_id': record[1], 'timestamp': record[2], 'cost': record[3],
@@ -533,11 +533,68 @@ def get_user_trade_history(chat_id: str):
     return execute_query(query=query)
 
 
-def set_trade_history(user_setting_id: int, coin: str, analysis_id, price: float, position: str, order_status,
-                      status: str, amount: str, order_submit_time: str, signal_time: str):
-    query = "INSERT INTO trade (user_setting_id, coin, analysis_id, price, position, order_status, status," \
+def set_trade_history(user_setting_id: int, coin: str, analysis_id, position: str, status: str,
+                      signal_time, price: float = None, order_status: str = None, amount: str = None,
+                      order_submit_time: str = None):
+    """
+    :param user_setting_id:
+    :param coin:
+    :param analysis_id:
+    :param price:
+    :param position:
+    :param order_status:
+    :param status:
+    :param amount:
+    :param order_submit_time:
+    :param signal_time:
+    :return:
+    """
+    if order_submit_time and amount and order_status and price:
+        query = "INSERT INTO trade (user_setting_id, coin, analysis_id, price, position, order_status, status," \
             " amount, order_submit_time, signal_time) VALUES (%s, %s , %s ,%s , %s, %s , %s ,%s , %s ,%s)"
-    val = (user_setting_id, coin, analysis_id, price, position, order_status, status, amount, order_submit_time,
-           signal_time)
+        val = (user_setting_id, coin, analysis_id, price, position, order_status, status, amount, order_submit_time,
+               signal_time)
+    else:
+        query = "INSERT INTO trade (user_setting_id, coin, analysis_id, position, status," \
+                " signal_time) VALUES (%s, %s , %s ,%s , %s, %s)"
+        val = (user_setting_id, coin, analysis_id, position, status, signal_time)
     error, result = insert_query(query=query, values=val)
     return error, result
+
+
+def get_users_submit_order_detail(analysis_id: int, coin_id: int):
+    """
+    :param analysis_id:
+    :param coin_id:
+    :return:user_setting_id , public, secret, exchange_id, symbol, percent
+    """
+    query = "SELECT watchlist.user_setting_id, user_settings.public, user_settings.secret," \
+            "user_settings.exchange_id, coins.coin, watchlist.amount FROM watchlist " \
+            "inner join user_settings on watchlist.user_setting_id = user_settings.id " \
+            "inner join coins on watchlist.coin_id = coins.id " \
+            "WHERE watchlist.coin_id={coin_id} and watchlist.analysis_id={analysis_id}".format(coin_id=coin_id,
+                                                                                               analysis_id=analysis_id)
+    return execute_query(query=query)
+
+
+def get_demo_account_assets(chat_id: str):
+    query = "SELECT BTC, ETH, BCH, ETC, ADA, DOGE, USDT FROM demo_account, users " \
+            "WHERE users.username=demo_account.username and users.chat_id='{chat_id}'".format(chat_id=chat_id)
+    return execute_query(query=query)[0]
+
+
+def create_demo_account(username: str):
+    query = "INSERT INTO demo_account (username) VALUES (%s)"
+    val = (username, )
+    error, result = insert_query(query=query, values=val)
+    return error, result
+
+
+# r = ['MTS', 'TYPE', 'MESSAGE_ID', 'ID' ,'GID']
+# result = [1567590617.442, "on-req", None, None,
+#            [[30630788061, None, 1567590617439, "tBTCUSD", 1567590617439, 1567590617439,
+#              0.001, 0.001, "LIMIT", None, None, None, 0, "ACTIVE", None, None, 15, 0, 0, 0, None,
+#              None, None, 0, None, None, None, None, "API>BFX", None, None, None],
+#             None, "SUCCESS", "Submitting 1 orders."]]
+#
+# print(result[4][2])

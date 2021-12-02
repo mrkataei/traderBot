@@ -7,7 +7,7 @@ in check_patterns first mange row wit _get_ohcl and get us series of c_open c_hi
 and start use candle  stick patterns function already define in pattern.py  at end patterns_detector with apply
 function apply check_patterns for all rows
 
-you can use last_limit_data for handle 2 , 3 , 4 and 5 candle problem
+you can use last_limit_0ta for handle 2 , 3 , 4 and 5 candle problem
 
 """
 import pandas as pd
@@ -116,7 +116,7 @@ class Patterns:
             if recom:
                 self._set_recommendation(pattern_name='harami_cross_bearish', index=candles.name)
 
-        if doji_star_bullish(c_open=c_open, c_high=c_high, c_close=c_close, limit=20):
+        if doji_star_bullish(c_open=c_open, c_high=c_high, c_close=c_close, limit=0):
             self.data.loc[candles.name, 'doji_star_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='doji_star_bullish', index=candles.name)
@@ -141,16 +141,16 @@ class Patterns:
             if recom:
                 self._set_recommendation(pattern_name='homing_pigeon', index=candles.name)
 
-        if separating_lines_bullish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if separating_lines_bullish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'separating_lines_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='separating_lines_bullish', index=candles.name)
-        if separating_lines_bearish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if separating_lines_bearish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'separating_lines_bearish'] = True
             if recom:
                 self._set_recommendation(pattern_name='separating_lines_bearish', index=candles.name)
 
-        if on_neck_line_bullish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if on_neck_line_bullish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'on_neck_line_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='on_neck_line_bullish', index=candles.name)
@@ -170,22 +170,22 @@ class Patterns:
             if recom:
                 self._set_recommendation(pattern_name='in_neck_line_bearish', index=candles.name)
 
-        if belt_hold_bullish(c_open=c_open, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if belt_hold_bullish(c_open=c_open, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'belt_hold_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='belt_hold_bullish', index=candles.name)
 
-        if belt_hold_bearish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0.005):
+        if belt_hold_bearish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0):
             self.data.loc[candles.name, 'belt_hold_bearish'] = True
             if recom:
                 self._set_recommendation(pattern_name='belt_hold_bearish', index=candles.name)
 
-        if kicking_bullish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if kicking_bullish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'kicking_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='kicking_bullish', index=candles.name)
 
-        if kicking_bearish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if kicking_bearish(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'kicking_bearish'] = True
             if recom:
                 self._set_recommendation(pattern_name='kicking_bearish', index=candles.name)
@@ -202,27 +202,27 @@ class Patterns:
             if recom:
                 self._set_recommendation(pattern_name='morning_doji_star', index=candles.name)
 
-        if evening_doji_star(c_open=c_open, c_high=c_high, c_close=c_close, limit=20):
+        if evening_doji_star(c_open=c_open, c_high=c_high, c_close=c_close, limit=0):
             self.data.loc[candles.name, 'evening_doji_star'] = True
             if recom:
                 self._set_recommendation(pattern_name='evening_doji_star', index=candles.name)
 
-        if abandoned_baby_bullish(c_open=c_open, c_high=c_high, c_close=c_close, limit=20):
+        if abandoned_baby_bullish(c_open=c_open, c_high=c_high, c_close=c_close, limit=0):
             self.data.loc[candles.name, 'abandoned_baby_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='abandoned_baby_bullish', index=candles.name)
 
-        if abandoned_baby_bearish(c_open=c_open, c_high=c_high, c_close=c_close, limit=20):
+        if abandoned_baby_bearish(c_open=c_open, c_high=c_high, c_close=c_close, limit=0):
             self.data.loc[candles.name, 'abandoned_baby_bearish'] = True
             if recom:
                 self._set_recommendation(pattern_name='abandoned_baby_bearish', index=candles.name)
 
-        if tri_star_bullish(c_open=c_open, c_close=c_close, limit=20):
+        if tri_star_bullish(c_open=c_open, c_close=c_close, limit=0):
             self.data.loc[candles.name, 'tri_star_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='tri_star_bullish', index=candles.name)
 
-        if tri_star_bearish(c_open=c_open, c_close=c_close, limit=20):
+        if tri_star_bearish(c_open=c_open, c_close=c_close, limit=0):
             self.data.loc[candles.name, 'tri_star_bearish'] = True
             if recom:
                 self._set_recommendation(pattern_name='tri_star_bearish', index=candles.name)
@@ -336,17 +336,17 @@ class Patterns:
             if recom:
                 self._set_recommendation(pattern_name='dark_cloud_cover', index=candles.name)
 
-        if stick_sandwich(c_open=c_open, c_close=c_close, tolerance=0.005):
+        if stick_sandwich(c_open=c_open, c_close=c_close, tolerance=0):
             self.data.loc[candles.name, 'stick_sandwich'] = True
             if recom:
                 self._set_recommendation(pattern_name='stick_sandwich', index=candles.name)
 
-        if meeting_line_bullish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0.005):
+        if meeting_line_bullish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0):
             self.data.loc[candles.name, 'meeting_line_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='meeting_line_bullish', index=candles.name)
 
-        if meeting_line_bearish(c_open=c_open, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if meeting_line_bearish(c_open=c_open, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'meeting_line_bearish'] = True
             if recom:
                 self._set_recommendation(pattern_name='meeting_line_bearish', index=candles.name)
@@ -363,12 +363,12 @@ class Patterns:
             if recom:
                 self._set_recommendation(pattern_name='rising_three_methods', index=candles.name)
 
-        if three_line_strike_bullish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0.005):
+        if three_line_strike_bullish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0):
             self.data.loc[candles.name, 'three_line_strike_bullish'] = True
             if recom:
                 self._set_recommendation(pattern_name='three_line_strike_bullish', index=candles.name)
 
-        if three_line_strike_bearish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0.005):
+        if three_line_strike_bearish(c_open=c_open, c_high=c_high, c_close=c_close, tolerance=0):
             self.data.loc[candles.name, 'three_line_strike_bearish'] = True
             if recom:
                 self._set_recommendation(pattern_name='three_line_strike_bearish', index=candles.name)
@@ -393,7 +393,7 @@ class Patterns:
             if recom:
                 self._set_recommendation(pattern_name='evening_star', index=candles.name)
 
-        if three_stars_in_the_south(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0.005):
+        if three_stars_in_the_south(c_open=c_open, c_high=c_high, c_close=c_close, c_low=c_low, tolerance=0):
             self.data.loc[candles.name, 'three_stars_in_the_south'] = True
             if recom:
                 self._set_recommendation(pattern_name='three_stars_in_the_south', index=candles.name)
