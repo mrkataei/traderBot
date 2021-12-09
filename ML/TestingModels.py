@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
+
 import seaborn as sns
 import pandas_datareader as web
 import datetime as dt
 import pandas_ta as ta
-
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.layers import Dense, Dropout, LSTM, GRU
@@ -147,6 +147,9 @@ print(X_test_f.shape, y_test_f.shape)
 
 #%%
 
+import time
+start_time = time.time()
+print(start_time)
 
 model = Sequential()
 model.add(Input(shape=((X_train_f.shape[1], X_train_f.shape[2]))))
@@ -166,8 +169,11 @@ model.summary()
 
 
 
-hist = model.fit(X_train_f, y_train_f, batch_size = 64, epochs = 1000, shuffle=False)
+hist = model.fit(X_train_f, y_train_f, batch_size = 64, epochs = 1000, shuffle=False, verbose = 2, validation_data=)
 
+end_time = time.time()
+
+print(end_time - start_time)
 #%%
 y_pred = model.predict(X_test_f)
 
@@ -194,7 +200,49 @@ print(results)
 
 
 #%%
-model.save_weights('E:\Work\\5571.h5')
-df_final.to_csv('E:\Work\\5571.csv')
+model.save_weights('E:\Work\\5158.h5')
+df_final.to_csv('E:\Work\\5158.csv')
 print(np.shape(y_test_inv))
 print(np.shape(y_pred_inv))
+
+
+
+#%%
+
+import pandas as pd
+
+data = pd.read_csv('E:\Work\\5158.csv')
+
+data.head()
+data_value=(data[['actual', 'predicted']]).values
+saeid=[]
+
+for i in range(1,len(data_value)):
+    if data_value[i,1] - data_value[i-1,0] > 0 :
+        saeid.append('buy')
+    elif data_value[i,1] - data_value[i-1,0] < 0 :
+        saeid.append('sell')
+    else:
+        saeid.append('nan')
+saeid.append('nan')
+data['rec'] =  saeid
+data.to_csv('rec.csv')
+
+#%%
+import tensorflow as tf
+
+if tf.test.gpu_device_name():
+
+    print('Default GPU Device:{}'.format(tf.test.gpu_device_name()))
+
+else:
+
+   print("Please install GPU version of TF")
+
+#%%
+import tensorflow as tf
+print(tf.version.VERSION)
+
+#%%
+for i in range(1000000):
+    print(i)
