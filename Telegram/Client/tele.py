@@ -16,6 +16,8 @@ from Analysis.diamond import Diamond
 from Analysis.ruby import Ruby
 from Libraries.data_collector import get_candle_binance as candles
 from Test.strategy_tester import StrategyTaster
+from binance import Client
+Client(api_key='',api_secret='').get_klines()
 
 apihelper.ENABLE_MIDDLEWARE = True
 
@@ -418,18 +420,19 @@ class ClientBot(Telegram):
 
         def reg_step_1(message, phone: str):
             user = self.user_dict[message.chat.id]
+            username = str(message.text).lower()
             try:
-                if message.content_types != 'text':
+                if message.content_type != 'text':
                     self.bot.send_message(message.chat.id, '⛔️ Invalid username!\nTry again!')
                     self.bot.register_next_step_handler(message=message, callback=reg_step_1,
                                                         phone=phone)
-                if functions.check_username_exist(username=message.text):
+                if functions.check_username_exist(username=username):
                     self.bot.send_message(message.chat.id, '⛔️ Username already exist!\nTry again!')
                     self.bot.register_next_step_handler(message=message, callback=reg_step_1,
                                                         phone=phone)
                 else:
-                    user.username = message.text
-                    error, detail = register(username=user.username, chat_id=user.chat_id, phone=phone)
+                    user.username = username
+                    error, detail = register(username=username, chat_id=user.chat_id, phone=phone)
                     if error:
                         self.bot.reply_to(message, '⛔️ Try again')
                     else:

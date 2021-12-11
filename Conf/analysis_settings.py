@@ -81,6 +81,3 @@ def get_analysis_setting(coin_id: int, timeframe_id: int, analysis_id: int):
         return analysis_con['analysis'][analysis_id]['coins'][coin_id]['timeframes'][timeframe_id]
     else:
         return False
-
-
-print(get_analysis_setting(2, 3, 2))

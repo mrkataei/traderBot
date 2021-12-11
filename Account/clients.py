@@ -96,11 +96,15 @@ class BitfinexClient(Exchange):
         result = self.submit_market_order(symbol=symbol, amount=str(amount))
         return result
 
-    def sell_market(self, symbol: str, percent: float):
-        amount = self.get_balance_available(symbol=symbol, direction=-1)
-        amount = amount * percent
-        result = self.submit_market_order(symbol=symbol, amount=str(amount))
-        return result
+    async def sell_market(self, symbol: str, amount: float):
+        available_amount = await self.get_balance_available(symbol=symbol, direction=-1)
+        error = False
+        if amount > available_amount:
+            error = True
+            amount = available_amount
+
+        result = await self.submit_market_order(symbol=symbol, amount=str(-amount))
+        return error, result
 
     def order_history(self, symbol: str, limit: int):
         # Amount of order (positive for buy, negative for sell)

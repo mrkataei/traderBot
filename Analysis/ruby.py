@@ -116,7 +116,7 @@ class Ruby:
         temp = temp.dropna()
         # add crossover of histogram and hist_line  column to datafram
         temp["crossover"] = ta.cross(series_a=temp["histogram"], series_b=pd.Series(self.hist_line, index=temp.index))
-        self.data = temp
+        self.data = temp.reset_index()
 
     def get_old_position(self):
         """

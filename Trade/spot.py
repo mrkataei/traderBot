@@ -24,8 +24,7 @@ def submit_order(coin_id: int, analysis_id: int, time_receive_signal, position: 
         client = get_exchange_class(exchange_id=order[3], public=order[1], secret=order[2])
         print(client)
         if position == 'buy':
-            # result = client.buy_market(symbol=symbols_bitfinix[order[4]], percent=order[5])
-            result = None
+            result = client.buy_market(symbol=symbols_bitfinix[order[4]], percent=order[5])
             if result is not None:
                 order_detail = result[4][0]
                 functions.set_trade_history(user_setting_id=order[0], coin=order[4], analysis_id=analysis_id,
@@ -36,7 +35,7 @@ def submit_order(coin_id: int, analysis_id: int, time_receive_signal, position: 
                 print(functions.set_trade_history(user_setting_id=order[0], coin=order[4], analysis_id=analysis_id,
                                                   position='buy', signal_time=time_receive_signal, status='failed'))
         else:
-            result = client.sell_market(symbol=symbols_bitfinix[order[4]], percent=order[5])
+            result = client.sell_market(symbol=symbols_bitfinix[order[4]], amount=order[5])
             if result is not None:
                 order_detail = result[4][0]
                 functions.set_trade_history(user_setting_id=order[0], coin=order[4], analysis_id=analysis_id,
