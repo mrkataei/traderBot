@@ -138,7 +138,9 @@ def get_user(chat_id: str):
     :param chat_id:
     :return:
     """
-    query = "SELECT * from users WHERE chat_id='{chat_id}'".format(chat_id=chat_id)
+    query = "SELECT username, chat_id, role, email, phone, signup_time, last_login, is_online," \
+            " is_use_freemium, valid_time_plan, plan_id, timeframe from users " \
+            "WHERE chat_id='{chat_id}'".format(chat_id=chat_id)
     record = execute_query(query=query)
     if record:
         return record
@@ -175,7 +177,7 @@ def get_tutorials_categories():
     """
     :return:
     """
-    query = "SELECT * from tutorials_category"
+    query = "SELECT id, name from tutorials_category"
     return execute_query(query=query)
 
 
@@ -263,7 +265,7 @@ def get_timeframes(timeframe_id: int = -1):
     :rtype: List of timeframes
     """
     if timeframe_id < 0:
-        query = 'SELECT * from timeframes'
+        query = 'SELECT id, timeframe from timeframes'
     else:
         query = "SELECT timeframe from timeframes WHERE id={timeframe_id}".format(timeframe_id=timeframe_id)
     return execute_query(query=query)
@@ -277,9 +279,9 @@ def get_analysis(analysis_id: int = -1):
     :rtype: List of analysis
     """
     if analysis_id < 0:
-        query = "SELECT * from analysis"
+        query = "SELECT id, name, description from analysis"
     else:
-        query = "SELECT * from analysis WHERE id={analysis_id}".format(analysis_id=analysis_id)
+        query = "SELECT id, name, description from analysis WHERE id={analysis_id}".format(analysis_id=analysis_id)
     return execute_query(query=query)
 
 
@@ -291,9 +293,10 @@ def get_plans(plan_id: int = -1):
     :rtype: List of plans
     """
     if plan_id < 0:
-        query = "SELECT * from plans"
+        query = "SELECT id, plan, cost, duration, description, strategy_number, account_number from plans"
     else:
-        query = "SELECT * from plans WHERE id={plan_id}".format(plan_id=plan_id)
+        query = "SELECT id, plan, cost, duration, description, strategy_number, account_number" \
+                " from plans WHERE id={plan_id}".format(plan_id=plan_id)
     return execute_query(query=query)
 
 
@@ -344,9 +347,9 @@ def get_exchanges(exchange_id: int = -1):
     :return:
     """
     if exchange_id < 0:
-        query = "SELECT * from exchanges"
+        query = "SELECT id, exchange from exchanges"
     else:
-        query = "SELECT * from exchanges WHERE id={exchange_id}".format(exchange_id=exchange_id)
+        query = "SELECT id, exchange from exchanges WHERE id={exchange_id}".format(exchange_id=exchange_id)
     return execute_query(query=query)
 
 
@@ -355,7 +358,8 @@ def get_user_watchlist(username: str):
     :param username:
     :return:
     """
-    query = "SELECT * from watchlist WHERE username='{username}'".format(username=username)
+    query = "SELECT id, user_setting_id, coin_id, username," \
+            " analysis_id, amount, sell_amount from watchlist WHERE username='{username}'".format(username=username)
     return execute_query(query=query)
 
 
@@ -395,7 +399,9 @@ def is_admin(chat_id: str):
     :param chat_id:
     :return:
     """
-    query = "SELECT * from users WHERE role='admin' AND chat_id='{chat_id}'".format(chat_id=chat_id)
+    query = "SELECT username, chat_id, role, email, phone, signup_time, last_login, is_online, is_use_freemium," \
+            " valid_time_plan, plan_id, timeframe from users " \
+            "WHERE role='admin' AND chat_id='{chat_id}'".format(chat_id=chat_id)
     if execute_query(query=query):
         return True
     else:
@@ -434,10 +440,12 @@ def get_last_recommendations(analysis_id: int, coin_id: int, timeframe_id: int =
     :return:
     """
     if timeframe_id is None:
-        query = "SELECT * FROM recommendations WHERE coin_id={coin_id} AND  analysis_id={analysis_id}" \
+        query = "SELECT id, analysis_id, coin_id, timeframe_id, position, price, risk, timestamp " \
+                "FROM recommendations WHERE coin_id={coin_id} AND  analysis_id={analysis_id}" \
                 " order by timestamp DESC LIMIT 1".format(coin_id=coin_id, analysis_id=analysis_id)
     else:
-        query = "SELECT * FROM recommendations WHERE coin_id={coin_id} AND analysis_id={analysis_id} AND" \
+        query = "SELECT id, analysis_id, coin_id, timeframe_id, position, price, risk, timestamp " \
+                "FROM recommendations WHERE coin_id={coin_id} AND analysis_id={analysis_id} AND" \
                 " timeframe_id={timeframe_id} order by timestamp DESC LIMIT 1".format(coin_id=coin_id,
                                                                                       analysis_id=analysis_id,
                                                                                       timeframe_id=timeframe_id)
@@ -454,7 +462,7 @@ def get_coins(coin_id: int = -1):
     :rtype: List of coins
     """
     if coin_id < 0:
-        query = 'SELECT * from coins'
+        query = 'SELECT id, coin from coins'
     else:
         query = "SELECT coin from coins WHERE id={coin_id}".format(coin_id=coin_id)
     return execute_query(query=query)
@@ -551,7 +559,7 @@ def set_trade_history(user_setting_id: int, coin: str, analysis_id, position: st
     """
     if order_submit_time and amount and order_status and price:
         query = "INSERT INTO trade (user_setting_id, coin, analysis_id, price, position, order_status, status," \
-            " amount, order_submit_time, signal_time) VALUES (%s, %s , %s ,%s , %s, %s , %s ,%s , %s ,%s)"
+                " amount, order_submit_time, signal_time) VALUES (%s, %s , %s ,%s , %s, %s , %s ,%s , %s ,%s)"
         val = (user_setting_id, coin, analysis_id, price, position, order_status, status, amount, order_submit_time,
                signal_time)
     else:
@@ -569,7 +577,9 @@ def get_users_submit_order_detail(analysis_id: int, coin_id: int):
     :return:user_setting_id , public, secret, exchange_id, symbol, percent
     """
     query = "SELECT watchlist.user_setting_id, user_settings.public, user_settings.secret," \
-            "user_settings.exchange_id, coins.coin, watchlist.amount FROM watchlist " \
+            "user_settings.exchange_id, coins.coin, watchlist.amount, watchlist.sell_amount, watchlist.username," \
+            "watchlist.coin_id" \
+            " FROM watchlist " \
             "inner join user_settings on watchlist.user_setting_id = user_settings.id " \
             "inner join coins on watchlist.coin_id = coins.id " \
             "WHERE watchlist.coin_id={coin_id} and watchlist.analysis_id={analysis_id}".format(coin_id=coin_id,
@@ -577,24 +587,39 @@ def get_users_submit_order_detail(analysis_id: int, coin_id: int):
     return execute_query(query=query)
 
 
+def update_sell_amount(user_setting_id: int, coin_id: int, username: str, analysis_id: int, sell_amount: float):
+    query = "UPDATE watchlist SET sell_amount={sell_amount} WHERE username='{username}' " \
+            "and user_setting_id ={user_setting_id} and coin_id={coin_id} " \
+            "and analysis_id={analysis_id}".format(user_setting_id=user_setting_id, username=username,
+                                                   sell_amount=sell_amount, coin_id=coin_id, analysis_id=analysis_id)
+    update_and_delete_query(query)
+
+
 def get_demo_account_assets(chat_id: str):
     query = "SELECT BTC, ETH, BCH, ETC, ADA, DOGE, USDT FROM demo_account, users " \
             "WHERE users.username=demo_account.username and users.chat_id='{chat_id}'".format(chat_id=chat_id)
-    return execute_query(query=query)[0]
+    return execute_query(query=query)
 
 
 def create_demo_account(username: str):
     query = "INSERT INTO demo_account (username) VALUES (%s)"
-    val = (username, )
+    val = (username,)
     error, result = insert_query(query=query, values=val)
     return error, result
 
 
-# r = ['MTS', 'TYPE', 'MESSAGE_ID', 'ID' ,'GID']
-# result = [1567590617.442, "on-req", None, None,
-#            [[30630788061, None, 1567590617439, "tBTCUSD", 1567590617439, 1567590617439,
-#              0.001, 0.001, "LIMIT", None, None, None, 0, "ACTIVE", None, None, 15, 0, 0, 0, None,
-#              None, None, 0, None, None, None, None, "API>BFX", None, None, None],
-#             None, "SUCCESS", "Submitting 1 orders."]]
-#
-# print(result[4][2])
+def get_users_validation_date():
+    query = "SELECT username, valid_time_plan, chat_id FROM users WHERE is_valid=1 "
+    return execute_query(query=query)
+
+
+def delete_all_user_strategies(username: str):
+    query = "DELETE FROM watchlist WHERE username ='{username}'".format(username=username)
+    update_and_delete_query(query=query)
+
+
+def set_is_valid_user(username: str, is_valid: bool = False):
+    is_valid = 1 if is_valid else 0
+    query = "UPDATE users SET is_valid={is_valid} WHERE username='{username}'".format(is_valid=is_valid,
+                                                                                      username=username)
+    return update_and_delete_query(query)

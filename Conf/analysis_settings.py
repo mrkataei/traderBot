@@ -42,35 +42,23 @@ diamond_dogeusdt_30m = {
                            'MACD': {'slow': 18, 'signal': 20, 'fast': 13, 'source': 'ohlc4', 'matype': 'ema'}}
 }
 
-ruby_ethusdt_4h = {
-    'analysis_setting': {'delay': 12, 'safe_line': -8603, 'hist_line': 0},
-    'indicators_setting': {
-        'MACD': {'slow': 17, 'signal': 9, 'fast': 4, 'source': 'hlc3', 'matype': 'sma'}}
-}
 
 diamond_conf = {
     'coins':
         {
             1: {'timeframes': {3: diamond_btcusdt_4h}},
             2: {'timeframes': {3: diamond_ethusdt_4h}},
-            3: {'timeframes': {3: diamond_ethusdt_4h}},
-            4: {'timeframes': {1: diamond_ethusdt_4h}},
-            5: {'timeframes': {3: diamond_ethusdt_4h}},
-            6: {'timeframes': {3: diamond_ethusdt_4h}}
+            3: {'timeframes': {3: diamond_adausdt_4h}},
+            6: {'timeframes': {1: diamond_dogeusdt_30m}},
+            5: {'timeframes': {3: diamond_bchusdt_4h}},
+            4: {'timeframes': {3: diamond_etcusdt_4h}}
         }
 }
 
-ruby_conf = {
-    'coins':
-        {
-            2: {'timeframes': {3: ruby_ethusdt_4h}}
-        }
-}
 analysis_con = {
     'analysis':
         {
-            3: diamond_conf,
-            2: ruby_conf
+            3: diamond_conf
         }
 }
 

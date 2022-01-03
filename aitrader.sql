@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 02, 2021 at 08:49 AM
+-- Generation Time: Dec 19, 2021 at 12:25 PM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 8.0.10
 
@@ -123,8 +123,8 @@ CREATE TABLE `plans` (
 --
 
 INSERT INTO `plans` (`id`, `plan`, `cost`, `duration`, `description`, `strategy_number`, `account_number`) VALUES
-(1, 'freemium', 0, 30, 'for test', 1, 1),
-(2, 'beginner', 10000000, 30, 'first plan', 0, 0);
+(1, 'freemium', 0, 30, 'its free to use - you have demo, one strategy and one exchange , have fun', 1, 1),
+(2, 'beginner', 10000000, 30, 'beginner plan its our economics class plan.\r\nyou have demo, 2 strategies and 2 exchange at same time.', 2, 2);
 
 -- --------------------------------------------------------
 
@@ -177,7 +177,8 @@ INSERT INTO `timeframes` (`id`, `timeframe`) VALUES
 (2, '1hour'),
 (3, '4hour'),
 (4, '1day'),
-(5, '1min');
+(5, '1min'),
+(6, '15min');
 
 -- --------------------------------------------------------
 
@@ -246,12 +247,15 @@ CREATE TABLE `users` (
   `role` char(10) NOT NULL DEFAULT 'user',
   `email` varchar(30) DEFAULT NULL,
   `phone` char(13) NOT NULL,
+  `password` text NOT NULL,
+  `salt` int(8) NOT NULL,
   `signup_time` timestamp NOT NULL DEFAULT current_timestamp(),
   `last_login` timestamp NULL DEFAULT NULL,
   `is_online` tinyint(1) NOT NULL DEFAULT 0,
   `is_use_freemium` tinyint(1) NOT NULL DEFAULT 1,
   `valid_time_plan` timestamp NULL DEFAULT NULL,
   `plan_id` int(5) NOT NULL DEFAULT 1,
+  `is_valid` tinyint(1) NOT NULL DEFAULT 1,
   `timeframe` int(5) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -259,9 +263,8 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `timeframe`) VALUES
-('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '2021-11-20 15:13:22', '2021-12-02 07:05:49', 1, 1, '2021-12-20 15:13:22', 1, 1),
-('kouroshnew', '1978824576', 'user', NULL, '+17076562131', '2021-11-26 19:20:47', '2021-11-26 19:30:39', 1, 1, '2021-12-26 19:20:47', 1, 1);
+INSERT INTO `users` (`username`, `chat_id`, `role`, `email`, `phone`, `password`, `salt`, `signup_time`, `last_login`, `is_online`, `is_use_freemium`, `valid_time_plan`, `plan_id`, `is_valid`, `timeframe`) VALUES
+('kouroshataei', '1210507821', 'admin', NULL, '+989036928421', '67492dd527003598750ada5e3f794e61f8cf179ec2edb7a10b66250bdd0449133f2d774bd218e4d23e3bbf79546f316d1c4701bba8ff5712194ef7de8a58d0fc', 51082, '2021-12-19 11:24:47', '2021-12-19 11:24:47', 1, 1, '2022-01-18 11:24:47', 1, 1, 1);
 
 -- --------------------------------------------------------
 

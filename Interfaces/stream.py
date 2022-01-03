@@ -15,6 +15,9 @@ class Stream:
     def stream_1min_candle(self):
         raise Exception("NotImplementedException")
 
+    def stream_15min_candle(self):
+        raise Exception("NotImplementedException")
+
     def stream_30min_candle(self):
         raise Exception("NotImplementedException")
 
@@ -29,11 +32,13 @@ class Stream:
 
     def stream(self):
         stream_1m_candle = threading.Thread(target=self.stream_1min_candle)
+        stream_15m_candle = threading.Thread(target=self.stream_15min_candle)
         stream_30min_candle = threading.Thread(target=self.stream_30min_candle)
         stream_1hour_candle = threading.Thread(target=self.stream_1hour_candle)
         stream_4hour_candle = threading.Thread(target=self.stream_4hour_candle)
         stream_1day_candle = threading.Thread(target=self.stream_1day_candle)
         stream_1m_candle.start()
+        stream_15m_candle.start()
         stream_30min_candle.start()
         stream_1hour_candle.start()
         stream_4hour_candle.start()

@@ -16,13 +16,12 @@ from Analysis.diamond import Diamond
 from Analysis.ruby import Ruby
 from Libraries.data_collector import get_candle_binance as candles
 from Test.strategy_tester import StrategyTaster
-from binance import Client
-Client(api_key='',api_secret='').get_klines()
+
 
 apihelper.ENABLE_MIDDLEWARE = True
 
 # @testkourosh2bot -> address // use this bot for test your code
-API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+# API_KEY = '2123917023:AAFPy9xoaJLt0BxqQJgC3J3F9km8F7ozdn8'
 
 timeframe_binance_dictionary = {
     '30min': ['30m', 1],
@@ -30,6 +29,7 @@ timeframe_binance_dictionary = {
     '4hour': ['4h', 3],
     '1day': ['1d', 4],
     '1min': ['1m', 5],
+    '15min': ['15m', 6]
 }
 
 
@@ -54,16 +54,14 @@ def get_analysis_class(analysis: str, symbol: str, timeframe_id: int, timeframe:
             return None
 
     if analysis == 'ruby':
-        setting = analysis_settings.get_analysis_setting(coin_id=coin_id, timeframe_id=timeframe_id, analysis_id=2)
-        if setting:
-            data = candles(symbol=symbol, timeframe=timeframe, limit=400)
-            if data[0]:
-                return Ruby(data=data[1], coin_id=coin_id, timeframe_id=timeframe_id,
-                            bot_ins=1, setting=setting).get_recommendations()
-            else:
-                return None
+        data = candles(symbol=symbol, timeframe=timeframe, limit=400)
+        if data[0]:
+            return Ruby(data=data[1], coin_id=coin_id, timeframe_id=timeframe_id,
+                        bot_ins=1).get_recommendations()
         else:
             return None
+    else:
+        return None
 
 
 def get_exchange_class(exchange_id: int, public: str, secret: str, chat_id: str = None):
@@ -76,7 +74,7 @@ def get_exchange_class(exchange_id: int, public: str, secret: str, chat_id: str 
 
 
 def start_keyboard():
-    key_markup = types.ReplyKeyboardMarkup(row_width=1)
+    key_markup = types.ReplyKeyboardMarkup(row_width=2)
     key_add_account = types.KeyboardButton('🏛 add exchange')
     key_add_strategy = types.KeyboardButton('📊 add strategy')
     key_tutorials = types.KeyboardButton('📚 tutorials')
@@ -85,8 +83,8 @@ def start_keyboard():
     key_back_test = types.KeyboardButton('🧭 back test')
     key_social = types.KeyboardButton('📬 social media')
     key_help = types.KeyboardButton('🤔 help')
-    key_markup.add(key_add_account, key_add_strategy, key_tutorials,
-                   key_plans, key_profile, key_back_test, key_social, key_help)
+    key_markup.add(key_profile, key_help, key_add_account, key_add_strategy, key_back_test, key_tutorials,
+                   key_plans, key_social)
     return key_markup
 
 
@@ -144,10 +142,12 @@ def social_keyboard():
     :return:
     """
     keyboard = types.InlineKeyboardMarkup(row_width=4)
-    keyboard.add(types.InlineKeyboardButton(text='instagram', url='instagram.com'),
-                 types.InlineKeyboardButton(text='telegram', url='telegram.com'),
-                 types.InlineKeyboardButton(text='twitter', url='twitter.com'),
-                 types.InlineKeyboardButton(text='linkedin', url='linkedin.com'), )
+    keyboard.add(types.InlineKeyboardButton(text='instagram',
+                                            url='https://instagram.com/aitrdbot?utm_medium=copy_link'),
+                 types.InlineKeyboardButton(text='telegram',
+                                            url='https://t.me/aitrdrbot'),
+                 types.InlineKeyboardButton(text='twitter',
+                                            url='https://twitter.com/aitrdbot?s=21'))
     return keyboard
 
 
@@ -207,7 +207,7 @@ def generate_profile_show_message(chat_id: str):
 
 class ClientBot(Telegram):
     def __init__(self):
-        Telegram.__init__(self, API_KEY=API_KEY)
+        Telegram.__init__(self)
         self.exchanges = np.array(functions.get_exchanges())
         self.coins = np.array(functions.get_coins())
         self.analysis = np.array(functions.get_analysis())
@@ -242,7 +242,7 @@ class ClientBot(Telegram):
             return False
 
     def check_add_command(self, message):
-        if message.text == '📊 add strategy':
+        if message.text == '📊 add strategy' or message.text == '/strategy':
             if self.is_valid_command(message=message):
                 user = self.user_dict[message.chat.id]
                 user.update_user_plan_limit()
@@ -258,7 +258,7 @@ class ClientBot(Telegram):
             return False
 
     def check_setup_command(self, message):
-        if message.text == '🏛 add exchange':
+        if message.text == '🏛 add exchange' or message.text == '/exchange':
             if self.is_valid_command(message=message):
                 user = self.user_dict[message.chat.id]
                 user.update_user_plan_limit()
@@ -274,7 +274,7 @@ class ClientBot(Telegram):
             return False
 
     def tutorial_command(self, message):
-        if message.text == '📚 tutorials':
+        if message.text == '📚 tutorials' or message.text == '/tutorial':
             if self.is_valid_command(message=message):
                 return True
             else:
@@ -283,7 +283,7 @@ class ClientBot(Telegram):
             return False
 
     def profile_command(self, message):
-        if message.text == '🙍🏻‍♂️profile':
+        if message.text == '🙍🏻‍♂️profile' or message.text == '/profile':
             if self.is_valid_command(message=message):
                 return True
             else:
@@ -292,7 +292,7 @@ class ClientBot(Telegram):
             return False
 
     def back_test_command(self, message):
-        if message.text == '🧭 back test':
+        if message.text == '🧭 back test' or message.text == '/test':
             if self.is_valid_command(message=message):
                 return True
             else:
@@ -301,7 +301,7 @@ class ClientBot(Telegram):
             return False
 
     def plan_command(self, message):
-        if message.text == '💳 plans':
+        if message.text == '💳 plans' or message.text == '/plans':
             if self.is_valid_command(message=message):
                 return True
             else:
@@ -310,7 +310,7 @@ class ClientBot(Telegram):
             return False
 
     def bot_actions(self):
-        @self.bot.callback_query_handler(func=lambda call: True)
+        @self.bot.callback_query_handler(func=lambda call: self.is_valid_command(call.message))
         def query_handler(call):
 
             if call.data == "profile_edit_strategies":
@@ -383,7 +383,7 @@ class ClientBot(Telegram):
                 query = str(call.data).split('_')
                 add_exchange(message=call.message, user_setting_id=int(query[0]))
 
-            self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+            # self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
         @self.bot.message_handler(commands=['start'], func=self.can_start_bot)
         def welcome(message):
@@ -471,12 +471,27 @@ class ClientBot(Telegram):
                     if error:
                         self.bot.send_message(message.chat.id, '😥 You already have demo', reply_markup=markup)
                     else:
-                        self.bot.send_message(message.chat.id, 'your exchange demo account successfully created\n'
+                        self.bot.send_message(message.chat.id, 'your exchange demo account successfully '
+                                                               'updated/created\n'
                                                                'and you can watch your assets in your profile',
                                               reply_markup=markup)
                 else:
-                    self.bot.send_message(message.chat.id, '✅ success',
-                                          reply_markup=markup)
+                    if functions.get_demo_account_assets(chat_id=message.chat.id) is not None:
+                        functions.create_demo_account(str(user.username))
+                    result = functions.update_user_exchange(user_setting_id=int(user_setting_id),
+                                                            exchange_id=2,
+                                                            public='public', secret='secret')
+
+                    self.bot.delete_message(message.chat.id, message.message_id)
+                    if result is None:
+                        self.bot.send_message(message.chat.id,
+                                              '✅ success\n your exchange demo account successfully created\n'
+                                              'and you can watch your assets in your profile', reply_markup=markup)
+                    else:
+                        self.bot.send_message(message.chat.id, '😥 You cant have same exchange account! ',
+                                              markup)
+                    # self.bot.send_message(message.chat.id, '✅ success',
+                    #                       reply_markup=markup)
 
             else:
                 try:
@@ -605,41 +620,46 @@ class ClientBot(Telegram):
                                                     analysis=analysis, coin=coin)
 
         def back_test_step_4(message, analysis: str, coin: str, timeframe: str):
-            # try:
-            amount = float(message.text)
-            if not 0 < amount:
+            try:
+                amount = float(message.text)
+                if not 0 < amount:
+                    self.bot.send_message(message.chat.id, '⚠️ Amount must be greater than 0')
+                    self.bot.register_next_step_handler(message=message, callback=back_test_step_4,
+                                                        analysis=analysis, coin=coin,
+                                                        timeframe=timeframe)
+                else:
+                    timeframe_data = timeframe_binance_dictionary[timeframe]
+                    timeframe_id = timeframe_data[1]
+                    timeframe = timeframe_data[0]
+                    self.bot.send_message(message.chat.id, 'just a moment,processing ...')
+                    try:
+                        recommendation = get_analysis_class(analysis=analysis, symbol=coin,
+                                                            timeframe_id=timeframe_id, timeframe=timeframe)
+                    except Exception as e:
+                        recommendation = None
+                    markup = start_keyboard()
+                    if recommendation is None:
+                        result = '⛔️This strategy doesnt work with this timeframe and coin'
+                    else:
+                        try:
+                            result = StrategyTaster(name='telegram', symbol=coin, timeframe=timeframe,
+                                                    intial_value=int(amount), dataframe=recommendation).result.values[0]
+                            result = f'🪙 *{result[1]}*\n⏰ *{result[2]}*\n⏲Start time: *{result[3]}*\n' \
+                                     f'⏲End time: *{result[4]}*\n' \
+                                     f'🟢Positive trades: *{result[5]}*\n' \
+                                     f'🟢total trades: *{result[6]}*\n' \
+                                     f'✅Total trade accuracy percent: *{result[7]}*%\n' \
+                                     f'✅Net profit percent: *{result[8]}*%\n✅Average trade profit: *{result[9]}*%\n' \
+                                     f'✅Profit per coin percent: *{result[10]}*%'
+                        except Exception as e:
+                            result = 'Something wrong'
+                    self.bot.send_message(message.chat.id, result, reply_markup=markup, parse_mode='Markdown')
+
+            except (ValueError, TypeError):
                 self.bot.send_message(message.chat.id, '⚠️ Amount must be greater than 0')
                 self.bot.register_next_step_handler(message=message, callback=back_test_step_4,
                                                     analysis=analysis, coin=coin,
                                                     timeframe=timeframe)
-            else:
-                timeframe_data = timeframe_binance_dictionary[timeframe]
-                timeframe_id = timeframe_data[1]
-                timeframe = timeframe_data[0]
-                self.bot.send_message(message.chat.id, 'just a moment,processing ...')
-                recommendation = get_analysis_class(analysis=analysis, symbol=coin,
-                                                    timeframe_id=timeframe_id, timeframe=timeframe)
-                markup = start_keyboard()
-                if recommendation is None:
-                    result = '⛔️This strategy doesnt work with this timeframe and coin'
-                else:
-                    recommendation.to_csv('test.csv')
-                    result = StrategyTaster(name='telegram', symbol=coin, timeframe=timeframe,
-                                            intial_value=int(amount), dataframe=recommendation).result.values[0]
-                    result = f'🪙 *{result[1]}*\n⏰ *{result[2]}*\n⏲Start time: *{result[3]}*\n' \
-                             f'⏲End time: *{result[4]}*\n' \
-                             f'🟢Positive trades: *{result[5]}*\n' \
-                             f'🟢total trades: *{result[6]}*\n' \
-                             f'✅Total trade accuracy percent: *{result[7]}*%\n' \
-                             f'✅Net profit percent: *{result[8]}*%\n✅Average trade profit: *{result[9]}*%\n' \
-                             f'✅Profit per coin percent: *{result[10]}*%'
-                self.bot.send_message(message.chat.id, result, reply_markup=markup, parse_mode='Markdown')
-
-            # except (ValueError, TypeError):
-            #     self.bot.send_message(message.chat.id, '⚠️ Amount must be greater than 0')
-            #     self.bot.register_next_step_handler(message=message, callback=back_test_step_4,
-            #                                         analysis=analysis, coin=coin,
-            #                                         timeframe=timeframe)
 
         @self.bot.message_handler(func=self.check_add_command)
         def add_strategy(message, watchlist_id: int = 0):
@@ -691,7 +711,7 @@ class ClientBot(Telegram):
             try:
                 coin_id = np.where(self.coins[:, 1] == message.text)[0][0]
                 key_markup = types.ReplyKeyboardRemove(selective=False)
-                self.bot.send_message(message.chat.id, '💰 Please enter percent of coin \n'
+                self.bot.send_message(message.chat.id, '💰 Please enter percent of USDT \n'
                                                        'You want to trade (⚠️ between 0 - 100)',
                                       reply_markup=key_markup)
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_4,
@@ -806,10 +826,25 @@ class ClientBot(Telegram):
                 self.bot.reply_to(message, '⛔️ Try again')
                 print(e)
 
-        @self.bot.message_handler(func=lambda message: message.text == '🤔 help')
+        @self.bot.message_handler(func=lambda message: message.text == '🤔 help' or message.text == '/help')
         def help_me(message):
             try:
-                self.bot.reply_to(message, 'Some help')
+                self.bot.reply_to(message, '🤦🏻‍♂️Step 1 :\n you need *exchange* to use our strategies.\n'
+                                           'so first (🏛 add /exchange)\n'
+                                           '(if you just want use our signals choose *demo* in exchange category)\n'
+                                           '\n'
+                                           '🤨 Step 2 :\n you need strategy to set on your exchange account.\n'
+                                           'after set exchange then (📊 add /strategy) to complete mission.\n'
+                                           '🤓 *you can also run (🧭 back /test) before choose*\n'
+                                           '\n'
+                                           '🥵Ops! Did you make the wrong choice?\n Dont worry!'
+                                           'you can edit/delete strategies or exchange on your profile '
+                                           'with ( 🙍🏻‍♂️ /profile) also watch your plan, strategies and exchanges!\n\n'
+                                           '⛔️Remember you can not delete your exchange !change it to demo!\n'
+                                           '🥺 if you dont need me anymore , invoke your API key in your exchange!\n'
+                                           '\n\n'
+                                           'You are worried again😒! watch our all free (📚 tutorials) !\n'
+                                           'Enjoy 🤠', parse_mode='Markdown')
 
             except Exception as e:
                 self.bot.reply_to(message, '⛔️ Try again')

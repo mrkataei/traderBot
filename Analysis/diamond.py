@@ -21,10 +21,11 @@ and get chat_id for notify them with this query :
 all of this in Telegram/message just use broadcast method
 
 """
-
+from datetime import datetime
 import pandas as pd
+import numpy as np
 import pandas_ta as ta
-
+from Trade.spot import submit_order
 from Inc.functions import get_last_recommendations, set_recommendation, record_dictionary
 from Libraries.macd import macd_indicator
 from Libraries.tools import get_source
@@ -77,6 +78,7 @@ class Diamond:
      signal():
          check last row recommendations to generate new signal
      """
+
     def __init__(self, data: pd.DataFrame, coin_id: int, timeframe_id: int, bot_ins, setting: dict):
         """
          parameters
@@ -106,6 +108,8 @@ class Diamond:
         self.coin_id = coin_id
         self.timeframe_id = timeframe_id
         self.bot = bot_ins
+        self.time = datetime.now()
+
         self.setting = setting
         self.macd_setting = setting['indicators_setting']['MACD']
         self.rsi_setting = setting['indicators_setting']['RSI']
@@ -119,7 +123,7 @@ class Diamond:
         self.stoch_rsi_k_oversell = statics_setting['stoch_rsi_k_oversell']
         self.rsi_oversell = statics_setting['rsi_oversell']
         self.rsi_overbuy = statics_setting['rsi_overbuy']
-
+        self.position_avg_price = 0
         self.preprocess()
 
     def preprocess(self):
@@ -167,7 +171,8 @@ class Diamond:
         # add cross over and cross under dataframe
         temp["crossover"] = ta.cross(series_a=temp["stochrsi_k"], series_b=temp["stochrsi_d"])
         temp["crossunder"] = ta.cross(series_a=temp["stochrsi_k"], series_b=temp["stochrsi_d"], above=False)
-
+        temp['risk'] = np.nan
+        temp['recommendation'] = np.nan
         self.data = temp
 
     #
@@ -248,7 +253,7 @@ class Diamond:
         macd1 = row["macd1"]
         crossover = row["crossover"]
         crossunder = row["crossunder"]
-
+        close = row['close']
         buy_counter = 0
         sell_counter = 0
 
@@ -265,7 +270,8 @@ class Diamond:
         if macd1 < macd < 0:
             buy_counter += 1
         # buy signal operation
-        if buy_counter > 3:
+        if buy_counter > 3 and self.position_avg_price == 0:
+            self.position_avg_price = close
             if buy_counter == 4:
                 self._set_recommendation(position="buy", risk="high", index=row.name)
             else:
@@ -275,7 +281,7 @@ class Diamond:
         if stoch_k > self.stoch_k_overbuy and stochrsi_k > self.stoch_rsi_k_overbuy:
             sell_counter += 2
         # check rsi < rsi_overbuy
-        if rsi < self.rsi_overbuy:
+        if rsi > self.rsi_overbuy:
             sell_counter += 1
         # check crossunder
         if crossunder == 1:
@@ -283,7 +289,8 @@ class Diamond:
         # macd > 0 and macd < macd[1]
         if 0 < macd < macd1:
             sell_counter += 1
-        if sell_counter > 3:
+        if sell_counter > 3 and self.position_avg_price < close:
+            self.position_avg_price = 0
             if sell_counter == 4:
                 self._set_recommendation(position="sell", risk='high', index=row.name)
             else:
@@ -296,45 +303,59 @@ class Diamond:
         """
         check last row of processed dataframe to generate signal
         """
-        print('salam')
         last_row_diamond_detector = self.get_recommendations().tail(1)
-        print(last_row_diamond_detector)
         position = last_row_diamond_detector['recommendation'].values[0]
         old_position = self.get_old_position()
         old_price = self.get_old_price()
-        # if old_position != position:
-        close = float(last_row_diamond_detector['close'].values[0])
-        # if position == 'buy':
-        self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
-        self.insert_database(position=position, current_price=close,
-                             risk=last_row_diamond_detector['risk'].values[0])
-            # elif position == 'sell' and old_price < close:
-            #     self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
-            #     self.insert_database(position=position, current_price=close,
-            #                          risk=last_row_diamond_detector['risk'].values[0])
+        if old_position != position:
+            close = float(last_row_diamond_detector['close'].values[0])
+            if position == 'buy':
+                submit_order(coin_id=self.coin_id, analysis_id=3, position='sell',
+                             time_receive_signal=self.time)
+                self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
+                self.insert_database(position=position, current_price=close,
+                                     risk=last_row_diamond_detector['risk'].values[0])
 
-# test case:
-# df = pd.read_csv(r"C:\Users\Asus\Downloads\bitcoin-pattern-reco-1min.csv")
+            elif position == 'sell' and old_price < close:
+                submit_order(coin_id=self.coin_id, analysis_id=3, position='sell',
+                             time_receive_signal=self.time)
+                self.broadcast(position=position, current_price=close, risk=last_row_diamond_detector['risk'].values[0])
+                self.insert_database(position=position, current_price=close,
+                                     risk=last_row_diamond_detector['risk'].values[0])
+
+    # test case:
+
+
+# df = pd.read_csv(r"E:\Job\arantrading bot\ETHUSDT4h.csv")
 # df = df[['date', 'open', 'high', 'close', 'low', "volume"]]
-# df = df.tail(10000)
+# df = df[7382:]
 # print(df)
-# settings = {'analysis_setting': {'stoch_k_oversell': 29, 'stoch_k_overbuy': 86, 'stoch_rsi_k_oversell': 16,
-#                                  'stoch_rsi_k_overbuy': 86, 'rsi_oversell': 39, 'rsi_overbuy': 64},
-#             'indicators_setting': {'RSI': {'length': 4, 'source': 'close'}, 'stoch': {'k': 22, 'd': 3, 'smooth': 3},
-#                                    'stochrsi': {'k': 3, 'd': 3, 'rsi_length': 22, 'length': 11, 'source': 'ohlc4'},
-#                                    'MACD': {'slow': 26, 'signal': 20, 'fast': 10, 'source': 'low', 'matype': 'ema'}}}
-# # df = df.iloc[::-1]
-# # # df = df.drop(columns=["tradecount"])
-# # df = df.reset_index(drop=True)
-# # print(df)
+# # print(df.ta.hlc3())
+# diamond_ethusdt_4h = {
+#     'analysis_setting': {'stoch_k_oversell': 28, 'stoch_k_overbuy': 86, 'stoch_rsi_k_oversell': 16,
+#                          'stoch_rsi_k_overbuy': 86, 'rsi_oversell': 39, 'rsi_overbuy': 73},
+#     'indicators_setting': {'RSI': {'length': 4, 'source': 'close'}, 'stoch': {'k': 22, 'd': 3, 'smooth': 3},
+#                            'stochrsi': {'k': 3, 'd': 3, 'rsi_length': 22, 'length': 11, 'source': 'ohlc4'},
+#                            'MACD': {'slow': 26, 'signal': 20, 'fast': 10, 'source': 'low', 'matype': 'ema'}}
+# }
+# #
+# # # # df = df.iloc[::-1]
+# # # # # df = df.drop(columns=["tradecount"])
+# # # # df = df.reset_index(drop=True)
+# # # # print(df)
 # pd.set_option('display.max_columns', None)
-# a = Diamond(data=df, coin_id=5, timeframe_id=4, gain=1, bot_ins=1, setting=settings, cost=1)
-# print(a.get_old_position())
-# print(a.get_old_price())
-# # a.preprocess()
-# #
-# # a.signal_detector()
-# #
-# # df = a.get_recommendations()
-# #
+# a = Diamond(data=df, coin_id=5, timeframe_id=4, setting=diamond_ethusdt_4h,bot_ins=1)
+# # # print(a.get_old_position())
+# # # print(a.get_old_price())
+# # # # a.preprocess()
+# # # #
+# # # # a.signal_detector()
+# # # #
+# # df = a.data
+# # # #
+# # df.to_csv(r"E:\Job\arantrading bot\arman_gol.csv")
+# df = a.get_recommendations()
+# b = strategy_tester.StrategyTaster(dataframe=df,name="s",timeframe='4h' ,intial_value=100 , symbol="e")
+# print(b.result)
+# # b.show()
 # # print(df)

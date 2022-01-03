@@ -1,11 +1,11 @@
-# traderBot
-<b/>Aran trader bot</b> <br>
-This is a telegram bot for buy/sell signal position and in future <br>
+# AI - Trader
+This is smart auto trade system <br>
 auto trade for users with signals base on machine learning analysis<br>
 
-<b/>install </b> 
-<br>
-
-cd traderbot <br>
+# Install
+cd ai-trader <br>
 pip install -r requirements.txt <br>
-python main.py
+python main.py (for signals)
+python main_client (for run telegram bot)<br>
+
+<b>Attention </b> <br>change API Bot for test 

@@ -6,6 +6,7 @@ and exchanges account implement here
 import hashlib
 import hmac
 import json
+import sys
 import time
 import requests
 from Interfaces.exchange import Exchange
@@ -85,58 +86,65 @@ class BitfinexClient(Exchange):
         response = self.req('v2/auth/w/order/submit',
                             params={'type': 'EXCHANGE MARKET', 'symbol': symbol, 'amount': amount})
         if response.status_code == 200:
-            return response.json()
+            return False, response.json()
         else:
-            print('error, status_code = ', response.status_code)
-            return None
+            return True, 'error, status_code = ' + str(response.status_code)
 
     def buy_market(self, symbol: str, percent: float):
-        amount = self.get_balance_available(symbol=symbol, direction=1)
-        amount = amount * percent
-        result = self.submit_market_order(symbol=symbol, amount=str(amount))
-        return result
+        error, amount = self.get_balance_available(symbol=symbol, direction=1)
+        if not error:
+            amount = amount * percent/100
+            error, result = self.submit_market_order(symbol=symbol, amount=str(amount))
+            if not error:
+                result = {'amount': result[4][0][7], 'order_status': result[4][0][13],
+                          'order_submit_time': result[4][0][4], 'price': result[4][0][16],
+                          'status': result[6]}
+            return error, result
+        else:
+            return error, amount
 
-    async def sell_market(self, symbol: str, amount: float):
-        available_amount = await self.get_balance_available(symbol=symbol, direction=-1)
-        error = False
-        if amount > available_amount:
-            error = True
-            amount = available_amount
+    def sell_market(self, symbol: str, amount: float = sys.float_info.max):
+        error, available_amount = self.get_balance_available(symbol=symbol, direction=-1)
+        amount = - amount
+        if not error:
+            # sell all available amount if perv amount save db not available
+            if amount < available_amount:
+                amount = available_amount
 
-        result = await self.submit_market_order(symbol=symbol, amount=str(-amount))
-        return error, result
+            amount = amount * 0.999999
+            error, result = self.submit_market_order(symbol=symbol, amount=str(amount))
+            if not error:
+                result = {'amount': result[4][0][7], 'order_status': result[4][0][13],
+                          'order_submit_time': result[4][0][4], 'price': result[4][0][16],
+                          'status': result[6]}
+            return error, result
+        else:
+            return error, available_amount
 
     def order_history(self, symbol: str, limit: int):
         # Amount of order (positive for buy, negative for sell)
         response = self.req(f'v2/auth/r/orders/{symbol}/hist', params={'limit': limit})
         if response.status_code == 200:
-            return response.json()
+            return False, response.json()
         else:
-            print('error, status_code = ', response.status_code)
-            return ''
+            return True, 'error, status_code = ' + str(response.status_code) + str(response.json)
 
     def get_balance_available(self, symbol: str, direction: int):
-        if direction == -1:
-            rate = '1'
-        else:
-            try:
-                symbol_ticker = symbol[1:]
-                r = requests.get(f'https://api.bitfinex.com/v1/pubticker/{symbol_ticker}')
-                data = r.json()
-                rate = data['last_price']
-            except Exception as e:
-                print(e)
-                return
+        try:
+            symbol_ticker = symbol[1:]
+            r = requests.get(f'https://api.bitfinex.com/v1/pubticker/{symbol_ticker}')
+            data = r.json()
+            rate = data['last_price']
+        except Exception as e:
+            return True, e
         # dir -> Direction of the order (1 for by, -1 for sell)
-        # rate-> rate is price you wanna buy or sell symbol , for sell is 1
+        # rate-> rate is price you wanna buy or sell symbol
         response = self.req('v2/auth/calc/order/avail',
                             params={'symbol': symbol, 'dir': direction, 'rate': rate, 'type': 'EXCHANGE'})
         if response.status_code == 200:
-            return response.json()[0]
+            return False, response.json()[0]
         else:
-            print('error, status_code = ', response.status_code)
-            print(response.text)
-            return ''
+            return True, 'error = ' + response.text + ',status_code = ' + str(response.status_code)
 
     def get_assets(self):
         """
@@ -182,7 +190,34 @@ class DemoClient(Exchange):
 
     def get_assets(self):
         assets = functions.get_demo_account_assets(chat_id=self.chat_id)
-        assets = [['exchange', 'BTC', assets[0]], ['exchange', 'ETH', assets[1]], ['exchange', 'BCH', assets[2]],
-                  ['exchange', 'ETC', assets[3]], ['exchange', 'ADA', assets[4]], ['exchange', 'DOGE', assets[5]],
-                  ['exchange', 'USDT', assets[5]]]
+        if assets is not None:
+            assets = assets[0]
+            assets = [['exchange', 'BTC', assets[0]], ['exchange', 'ETH', assets[1]], ['exchange', 'BCH', assets[2]],
+                      ['exchange', 'ETC', assets[3]], ['exchange', 'ADA', assets[4]], ['exchange', 'DOGE', assets[5]],
+                      ['exchange', 'USDT', assets[5]]]
+
         return assets
+
+
+class Nobitex(Exchange):
+    def __init__(self, public: str, secret: str):
+        Exchange.__init__(self, public=public, secret=secret)
+
+    def submit_market_order(self, symbol: str, amount: str):
+        print()
+
+    def get_balance_available(self, symbol: str, direction: int):
+        print()
+
+    def buy_market(self, symbol: str, percent: float):
+        print()
+
+    def sell_market(self, symbol: str, percent: float):
+        print()
+
+    def get_assets(self):
+        print()
+
+
+
+

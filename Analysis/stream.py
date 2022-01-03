@@ -22,11 +22,13 @@ from Analysis.diamond import Diamond
 from Analysis.ruby import Ruby
 from Interfaces.stream import Stream
 from Libraries.data_collector import get_candle_binance as candles
+from Libraries.check_validation_users import check_validate_stream
 
-# master bot already run on vps dont use this @algowatchbot -> address
-# API_KEY = '1987308624:AAHEYHcAYaeqiii2REcHMrSefohBSedWIxA'
+# master bot already run on vps dont use this @aitrdbot -> address
+API_KEY = '2123917023:AAFPy9xoaJLt0BxqQJgC3J3F9km8F7ozdn8'
 # @testkourosh2bot -> address // use this bot for test your code
-API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+# API_KEY = '1978536410:AAE_RMk3-4r_cLnt_nRcEnZHaSp-vIk9oVo'
+
 _bot_ins = telebot.TeleBot(API_KEY)
 
 
@@ -40,14 +42,21 @@ class StreamIStrategies(Stream):
             if data[0]:
                 emerald = Emerald(data=data[1], coin_id=self.coin_id, timeframe_id=5, bot_ins=_bot_ins)
                 emerald.signal()
-            sleep(10)
+            sleep(60)
+
+    def stream_15min_candle(self):
+        while True:
+            data = candles(symbol=self.symbol, timeframe='15m', limit=400)
+            if data[0]:
+                ruby = Ruby(data=data[1], coin_id=self.coin_id, timeframe_id=6, bot_ins=_bot_ins)
+                ruby.signal()
+            sleep(900)
 
     def stream_30min_candle(self):
         while True:
-            # data = candles(symbol=self.symbol, timeframe='30m', limit=200)
+            # data = candles(symbol=self.symbol, timeframe='30m', limit=400)
             # if data[0]:
             #     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
-            #     print(setting_diamond)
             #     if setting_diamond:
             #         Diamond(data=data[1], coin_id=self.coin_id, timeframe_id=1, setting=setting_diamond,
             #                 bot_ins=_bot_ins)
@@ -60,17 +69,13 @@ class StreamIStrategies(Stream):
 
     def stream_4hour_candle(self):
         while True:
-            data = candles(symbol=self.symbol, timeframe='4h', limit=200)
-            if data[0]:
-                # setting_ruby = self.get_setting_analysis(analysis_id=2, timeframe_id=3)
-                # if setting_ruby:
-                #     Ruby(data=data, coin_id=self.coin_id, timeframe_id=3, setting=setting_ruby, bot_ins=_bot_ins)
-                setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
-                print(setting_diamond)
-                if setting_diamond:
-                    diamond = Diamond(data=data[1], coin_id=self.coin_id, timeframe_id=3,
-                                      setting=setting_diamond, bot_ins=_bot_ins)
-                    diamond.signal()
+            # data = candles(symbol=self.symbol, timeframe='4h', limit=400)
+            # if data[0]:
+            #     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
+            #     if setting_diamond:
+            #         diamond = Diamond(data=data[1], coin_id=self.coin_id, timeframe_id=3,
+            #                           setting=setting_diamond, bot_ins=_bot_ins)
+            #         diamond.signal()
 
             sleep(14400)
 
@@ -88,6 +93,7 @@ class StrategiesThreads:
             self.threads.append(threading.Thread(target=StreamIStrategies(symbol=symbol).run))
 
     def start_threads(self):
+        threading.Thread(target=check_validate_stream).start()
         for thread in self.threads:
             thread.daemon = True
             thread.start()
