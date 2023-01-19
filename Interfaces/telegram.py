@@ -6,7 +6,7 @@ from time import sleep
 
 
 class Telegram:
-    def __init__(self, API_KEY: str = '2123917023:AAFPy9xoaJLt0BxqQJgC3J3F9km8F7ozdn8'):
+    def __init__(self, API_KEY: str = '5987702945:AAHjEwnwW8NaHAxv2C-lEUIJXFacNnkQIUk'):
         self.API_KEY = API_KEY
         self.bot = None
         self.user_dict = {}
