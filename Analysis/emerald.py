@@ -4,7 +4,8 @@ Mr.Kataei 11/12/2021
     you need to handled it for your usage - in pattern class handled it in preprocess all candles we need shifted in
     new column and attach in dataframe and in check_patterns the candle in parameter is on row we get from dataframe.
     in check_patterns first mange row wit _get_ohcl and get us series of c_open c_high , c_close and c_low
-    and start use candle  stick patterns function already define in Libraries.patterns.py  at end patterns_detector with apply
+    and start use candle  stick patterns function already define in Libraries.patterns.py  at end patterns_detector with
+     apply
     function apply check_patterns for all rows
     
 """
@@ -366,4 +367,3 @@ class Emerald(Strategy):
         self.signal_detector()
         self._clean_dataframe()
         return self.data
-

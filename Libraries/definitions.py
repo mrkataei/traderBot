@@ -7,7 +7,7 @@
                     'la' : 'lka kdsa '  <------ new
                     },
 """
-_lang = 'en'
+_lang = 'fa'
 
 
 def activate(lang):
@@ -19,364 +19,33 @@ def get_lang():
     return _lang
 
 
+"""
+'': {
+        'en': '',
+        'fa': ''
+    }
+"""
+
 TRANSLATIONS = {
     'C_please_start': {
         'en': 'Please /start bot again',
-        'fa': 'لطفا دوباره بات را استارت کنید /start'
+        'fa': 'لطفا بات را استارت کنید /start'
     },
-    'C_help': {
-        'en': '/start - login or Create account\n'
-              '/new - Create new watchlist \n'
-              '/add - Add coins in your selected watchlist \n'
-              '/frame - Change your timeframe \n'
-              '/analysis - Add analysis  candle \n'
-              '/candle - show your coins details \n'
-              '/recommendation - show you indicators recommendations \n'
-              '/show - Show all details \n'
-              '/last - get all last recommendation \n'
-              '/remove - Remove coins ,watchlist or analysis \n'
-              '/logout  - Logout from account\n',
-        'fa': '/start - ورود یا ایجاد حساب کاربری'
-              '\n/new - ایجاد واچلیست جدید '
-              '\n/add - اضافه کردن رمزارز به واچلیست  '
-              '\n/frame - عوض کردن تایم فریم  '
-              '\n/candle - نمایش اطلاعات رمزارزها'
-              '\n/recommendation - نمایش پیشنهادات خرید و فروش اندیکاتورها'
-              '\n/analysis - اضافه کردن آنالیز'
-              '\n/show - نمایش اطلاعات حساب'
-              '\n/last - نمایش تمام آخرین پیشنهادات'
-              '\n/remove - حذف رمزارز ، واچلیست یا آنالیز '
-              '\n/logout  - خروج از حساب کاربری',
-    },
-    'C_guide': {
-        'en': '1-First you need an account sign up now!\n'
-              '2-Create watchlist with /new\n'
-              '3-/add your fav coins\n'
-              '4-Select your /analysis to our signals sends to you\n'
-              '5-change default timeframe(30min) /frame\n'
-              '6-Enjoy 😃',
-        'fa': '1-اول نیاز به یک حساب کاربری داری همین الان ثبتنام کن!'
-              '\n2-واچلیست خودتو بساز /new '
-              '\n3-رمزارزهای خودتو اضافه کن /add '
-              '\n4-آنالیز خوتو انتخاب کند تا برات سیگنالهامون ارسال شن /analysis '
-              '\n5-تایم فریم خودتو تغییر بده (تایم فریم پیشفرض 30 دقیقه) /frame '
-              '\n6-حالشو ببر 😃 '
-    },
-    'C_add_keyboard': {
-        'en': '➕ add coin',
-        'fa': '➕ اضافه کردن رمزارز'
-    },
-    'C_last_keyboard': {
-        'en': '🤔 last recom',
-        'fa': '🤔 آخرین پیشنهادات'
-    },
-    'C_new_keyboard': {
-        'en': '🆕 new watchlist',
-        'fa': '🆕 واچلیست جدید'
-    },
-    'C_analysis_keyboard': {
-        'en': '📊 add analysis',
-        'fa': '📊 اضافه کردن آنالیز'
-    },
-    'C_candle_keyboard': {
-        'en': '🕯 show candle',
-        'fa': '🕯 نمایش کندل'
-    },
-    'C_show_keyboard': {
-        'en': '📺 show profile',
-        'fa': '📺 نمایش حساب کاربری'
-    },
-    'C_recommendation_keyboard': {
-        'en': '🧐 show recomm',
-        'fa': '🧐 نمایش پیشنهادات'
-    },
-    'C_remove_keyboard': {
-        'en': '❌ delete option',
-        'fa': '❌ حذف آپشن ها'
-    },
-    'C_logout_keyboard': {
-        'en': '👋🏽 logout account',
-        'fa': '👋🏽 خروج از حساب کاربری'
-    },
-    'C_frame_keyboard': {
-        'en': '⏱ change timeframe',
-        'fa': '⏱ عوض کردن تایم فریم'
-    },
-    'C_help_keyboard': {
-        'en': '🙏🏽 help me',
-        'fa': '🙏🏽 کمکم کن'
-    },
-    'C_please_login': {
-        'en': 'Please login to bot /start',
-        'fa': 'لطفا وارد شودید /start'
-    },
-    'C_full_watchlist': {
-        'en': 'your watchlist is full!😓',
-        'fa': 'واچلیست شما پر است! 😓'
-    },
-    'C_welcome': {
-        'en': 'I am Algowatch, your trade assistance \n /help show commands',
-        'fa': 'من الگوواچ هستم ، دستیار خرید و فروش شما \n  نمایش دستورات بات /help '
+    'C_exchanges': {
+        'en': '🏛 exchanges',
+        'fa': '🏛 صرافی ها'
     },
     'C_hello': {
         'en': 'Hey!',
         'fa': 'سلام!'
     },
-    'C_login': {
-        'en': '🔑Login',
-        'fa': '🔑ورود'
-    },
-    'C_login_chat_id': {
-        'en': '😈 Easy login',
-        'fa': '😈 ورود آسان'
-    },
-    'C_register': {
-        'en': '🤩Sign up',
-        'fa': '🤩ثبت نام'
-    },
-    'C_forget_password': {
-        'en': '🔏Forget password',
-        'fa': '🔏فراموشی رمز عبور'
-    },
-    'C_any_account': {
-        'en': 'Have not any account?\nSign up now!',
-        'fa': 'حساب کاربری ندارید؟\n همین الان ثبت نام کنید!'
-    },
-    'C_enter_username': {
-        'en': '🔑Enter your username',
-        'fa': '🔑نام کاربری را وارد کنید'
-    },
-    'C_already_have_account': {
-        'en': 'You already have an account :',
-        'fa': 'شما قبلا حساب کاربری ساخته اید :'
-    },
-    'C_enter_answer': {
-        'en': 'Enter your answer',
-        'fa': 'جواب خود را وارد کنید'
-    },
-    'C_select_coin': {
-        'en': 'Select your coin',
-        'fa': 'رمز ارز خود را انتخاب کنید'
-    },
-    'C_coin_already_exist': {
-        'en': 'Coin already in watchlist /add',
-        'fa': 'رمزارز قبلا در واچلیست وارد شده است /add'
-    },
-    'C_show_watchlist': {
-        'en': '/show to show your watchlist  For change /frame',
-        'fa': 'نمایش واچلیست /show'
-    },
-    'C_done': {
-        'en': 'Done!',
-        'fa': 'انجام شد!'
-    },
-    'C_default_timeframe': {
-        'en': 'Default time frame is 30min!',
-        'fa': 'تایم فریم پیش فرض 30 دقیقه است!'
-    },
-    'C_change_timeframe': {
-        'en': 'For change /frame',
-        'fa': 'تغیر تایم فریم با /frame'
-    },
-    'C_timeframe_changed': {
-        'en': 'timeframe change to',
-        'fa': 'تایم فریم تغیر کرد به'
+    'M_new_signal': {
+        'en': 'New received from ',
+        'fa': 'سیگنال جدیدی رسید از '
     },
     'C_now': {
         'en': 'Now',
         'fa': 'الان'
-    },
-    'C_working_for_you': {
-        'en': ' is working for you',
-        'fa': 'برای تو کار میکند'
-    },
-    'C_select_watchlist': {
-        'en': 'Select your watchlist',
-        'fa': 'واچلیست خود را انتخاب کنید'
-    },
-    'C_null_watchlist': {
-        'en': 'You don\'t have any watchlist! /new',
-        'fa': 'شما واچلیستی ندارید!ایجاد /new'
-    },
-    'C_create_watchlist': {
-        'en': 'For create /new',
-        'fa': 'برای ایجاد /new'
-    },
-    'C_null_coin': {
-        'en': 'No coins in your watchlist!/add😓',
-        'fa': 'رمزارزی در واچلیست شما نیست!😓 ایجاد/add'
-    },
-    'C_create_watchlist_first': {
-        'en': 'Create watchlist first! /new',
-        'fa': 'ابتدا واچلیست را بسازید! /new'
-    },
-    'C_add_coins': {
-        'en': '/add coins now!',
-        'fa': 'رمزارز خود را اضافه کنید /add'
-    },
-    'C_enter_password': {
-        'en': '🔒Enter your password',
-        'fa': '🔒رمز خود را وارد کنید'
-    },
-    'C_password_instruction': {
-        'en': '\n\n🔹your password must be at least 8 characters',
-        'fa': '\n\nپسورد شما باید حداقل شامل 8 کارکتر باشد🔹'
-    },
-    'C_again': {
-        'en': ' again',
-        'fa': ' دوباره'
-    },
-    'C_select_security_question': {
-        'en': 'Select your security question',
-        'fa': 'سوال امنیتی خود را انتخاب کنید'
-    },
-    'C_username_exist': {
-        'en': '😞Username not exists',
-        'fa': '😞نام کاربری موجود نیست'
-    },
-    'C_new_password': {
-        'en': '🔓Enter your new password',
-        'fa': '🔓رمز عبور جدید خود را وارد کنید'
-    },
-    'C_enter_watchlist_name': {
-        'en': 'Enter your watchlist name',
-        'fa': 'نام واچلیست خود را وارد کنید'
-    },
-    'C_already_have_watchlist': {
-        'en': '😅 You have already one watchlist /show',
-        'fa': '😅 شما در حال حاضر یک واچلیست دارید /show'
-    },
-    'C_good': {
-        'en': 'Good!👀',
-        'fa': 'ایول!👀'
-    },
-    'C_logged_out': {
-        'en': '😪You are logged out',
-        'fa': '😪شما خارج شده اید'
-    },
-    'C_buy': {
-        'en': 'Buy',
-        'fa': 'خرید'
-    },
-    'C_sell': {
-        'en': 'Sell',
-        'fa': 'فروش'
-    },
-    'C_neutral': {
-        'en': 'Neutral',
-        'fa': 'خنثی'
-    },
-    'C_recommendation': {
-        'en': 'Recommendation',
-        'fa': 'پیشنهاد'
-    },
-    'C_Compute': {
-        'en': 'Compute',
-        'fa': 'محاسبه شده'
-    },
-    'C_moving_averages': {
-        'en': 'Moving averages',
-        'fa': 'میانگین متحرک ها'
-    },
-    'C_oscillators': {
-        'en': 'Oscillators',
-        'fa': 'اسیلاتورها'
-    },
-    'C_select_timeframe': {
-        'en': 'Select your timeframe',
-        'fa': 'تایم فریم خود را وارد کنید'
-    },
-    'C_select_analysis': {
-        'en': '📊️Select your analysis',
-        'fa': '📊️آنالیز خود را انتخاب کنید'
-    },
-    'C_already_have_analysis': {
-        'en': '😏You already have analysis: ',
-        'fa': '😏شما درحال حاضر آنالیز دارید'
-    },
-    'C_set_analysis_first': {
-        'en': 'you dont have analysis\nSelect analysis first /analysis',
-        'fa': 'شما آنالیزی ندارید\n لطفا ابتدا آنالیز خود را انتخاب کنید /analysis'
-    },
-    'C_analysis': {
-        'en': 'analysis',
-        'fa': 'آنالیز'
-    },
-    'C_select_option_delete': {
-        'en': 'select option you want to delete',
-        'fa': 'موردی که میخواهید پاک کنید انتخاب کنید'
-    },
-    'C_watchlist': {
-        'en': 'Watchlist',
-        'fa': 'واچلیست'
-    },
-    'C_coin': {
-        'en': 'Coins',
-        'fa': 'رمزارزها'
-    },
-    'C_unsuccessful_logout': {
-        'en': 'logout unsuccessful',
-        'fa': 'خروج ناموفق'
-    },
-    'C_goodbye': {
-        'en': '👋🏼Goodbye!',
-        'fa': '👋🏼خدانگهدار'
-    },
-    'C_login_again': {
-        'en': 'For login /start bot ',
-        'fa': 'برای ورود بات را استارت کنید /start'
-    },
-    'C_start': {
-        'en': 'Please /start bot',
-        'fa': 'لطفا بات را استارت کنید /start'
-    },
-    'C_what_can_i_do': {
-        'en': 'What can i do for you?',
-        'fa': 'چه کاری میتونم برات بکنم؟'
-    },
-    'C_unsuccessful_operation': {
-        'en': 'Operation unsuccessful!',
-        'fa': 'عملیات ناموفق'
-    },
-    'C_timeframe': {
-        'en': 'Timeframe',
-        'fa': 'تایم فریم'
-    },
-    'C_assets': {
-        'en': 'Assets',
-        'fa': 'دارایی ها'
-    },
-    'C_open_time': {
-        'en': 'Open time : ',
-        'fa': 'زمان بازگشایی : '
-    },
-    'C_open': {
-        'en': 'Open : ',
-        'fa': 'بازگشایی : '
-    },
-    'C_high': {
-        'en': 'High : ',
-        'fa': 'بالاترین : '
-    },
-    'C_low': {
-        'en': 'Low : ',
-        'fa': 'کمترین : '
-    },
-    'C_close': {
-        'en': 'Close : ',
-        'fa': 'پایانی : '
-    },
-    'C_volume': {
-        'en': 'Volume : ',
-        'fa': 'حجم : '
-    },
-    'C_number_trades': {
-        'en': 'Number of trades : ',
-        'fa': 'تعداد معاملات : '
-    },
-    'M_new_signal': {
-        'en': 'New received from ',
-        'fa': 'سیگنال جدیدی رسید از '
     },
     'M_in': {
         'en': ' in',
@@ -390,46 +59,427 @@ TRANSLATIONS = {
         'en': 'Current price',
         'fa': 'قیمت حاضر'
     },
-    'M_target_price': {
-        'en': 'Target price',
-        'fa': 'قیمت هدف'
-    },
     'M_risk': {
         'en': 'Risk',
         'fa': 'ریسک'
     },
-    'L_successful_login': {
-        'en': 'You are logged in🤩',
-        'fa': 'شما وارد شدید 🤩'
+    'C_timeframe': {
+        'en': 'Timeframe',
+        'fa': 'تایم فریم'
     },
-    'L_invalid_login': {
-        'en': 'Your username or password is incorrect🥵',
-        'fa': 'نام کاربری یا رمزعبور شما صحیح نمیباشد'
+    'C_sorry_signup': {
+        'en': 'Sorry\n😥You should signup first',
+        'fa': 'ببخشید\n 😥شما باید اول ثبت نام کنید'
     },
-    'L_something_wrong': {
-        'en': 'Something are going wrong!Try with simple login /start',
-        'fa': 'مشکلی بجوود آمده ! لطفا، ورود با نام کاربری را امتحان کنید /start'
+    'C_add_strategy': {
+        'en': '📊 add strategy',
+        'fa': '📊 استراتژی اضافه کن'
     },
-    'R_username_exist': {
-        'en': 'username already exist',
-        'fa': 'نام کابری موجود میباشد'
+    'C_add_exchange': {
+        'en': '🏛 add exchange',
+        'fa': '🏛 صرافی اضافه کن'
     },
-    'R_welcome': {
-        'en': 'welcome',
-        'fa': 'خوش آمدید'
+    'C_tutorials': {
+        'en': '📚 tutorials',
+        'fa': '📚 آموزش ها'
     },
-    'R_wrong_answer': {
-        'en': 'answer is wrong ',
-        'fa': 'پاسخ غلط است'
+    'C_plans': {
+        'en': '💳 plans',
+        'fa': '💳 اشتراک ها'
     },
-    'R_success': {
-        'en': 'success',
-        'fa': 'موفقیت آمیز'
+    'C_profile': {
+        'en': '🙍🏻‍♂️profile',
+        'fa': '🙍🏻‍♂️پروفایل'
     },
-    'R_try_again': {
-        'en': 'try again',
-        'fa': 'دوباره تلاش کنید'
+    'C_back_test': {
+        'en': '🧭 back test',
+        'fa': '🧭 بک تست'
     },
+    'C_social_medias': {
+        'en': '📬 social medias',
+        'fa': '📬 شبکه های اجتماعی'
+    },
+    'C_help': {
+        'en': '🤔 help me',
+        'fa': '🤔 کمکم کن'
+    },
+    'C_lang': {
+        'en': '🌏 change language',
+        'fa': '🌏 تغییر زبان'
+    },
+    'C_coin': {
+        'en': '🪙Coin',
+        'fa': '🪙رمزارز'
+    },
+    'C_analysis': {
+        'en': '📊Strategy',
+        'fa': '📊استراتژی'
+    },
+    'C_percent_usd': {
+        'en': '💰Percent usd',
+        'fa': '💰درصد دلاری'
+    },
+    'C_exchange': {
+        'en': '🏛Exchange',
+        'fa': '🏛صرافی'
+    },
+    'C_expire_plan': {
+        'en': 'Your plan is expire!😪\n Recharge your plan please.',
+        'fa': 'اشتراکت تموم شده!😪 \n لطفا اشتراکتو را تمدید کن.'
+    },
+    'C_full_strategies': {
+        'en': '❌ Your strategies is full\n 🤓 Upgrade your /plan or edit it in your /profile',
+        'fa': '❌ استراتژی هات به سقفش رسیده. \n 🤓 اشتراکتو ارتقا بده یا اونو تو پروفایلت تغییر بده'
+    },
+    'C_full_exchanges': {
+        'en': '❌ Your exchange accounts is full\n 🤓 Upgrade your /plan or edit it in your /profile',
+        'fa': '❌ اکانتای صرافیت به سقفش رسیده. \n 🤓 اشتراکتو ارتقا بده یا اونو تو پروفایلت تغییر بده'
+    },
+    'C_edit': {
+        'en': 'edit',
+        'fa': 'ویرایش کن'
+    },
+    'C_delete': {
+        'en': 'delete',
+        'fa': 'پاک کن'
+    },
+    'C_assets': {
+        'en': '💰Your assets',
+        'fa': '💰دارایی هات'
+    },
+    'C_trade_history': {
+        'en': '🔹Your last 10 trade history\n\n',
+        'fa': '🔹10 معامله آخرت \n\n'
+    },
+    'C_date': {
+        'en': 'Date',
+        'fa': 'تاریخ'
+    },
+    'C_price': {
+        'en': '💵Price',
+        'fa': '💵قیمت'
+    },
+    'C_position': {
+        'en': '🔑Position',
+        'fa': '🔑موقعیت'
+    },
+    'C_order_status': {
+        'en': '☢️Order status',
+        'fa': '☢️وضیعت سفارش'
+    },
+    'C_status': {
+        'en': '☢️Status',
+        'fa': '☢️وضیعت'
+    },
+    'C_submit_order_time': {
+        'en': '⏰Submit order time',
+        'fa': '⏰زمان ارسال سفارش'
+    },
+    'C_receive_signal_time': {
+        'en': '⏰Signal receive time',
+        'fa': '⏰زمان رسیدن سیگنال'
+    },
+    'C_done': {
+        'en': '✅ Done',
+        'fa': '✅ انجام شد'
+    },
+    'C_hey': {
+        'en': '🙋🏽‍♂️ Hey ',
+        'fa': '🙋🏽‍♂️ سلام'
+    },
+    'C_welcome': {
+        'en': 'I am AI Trader, your trade assistance\n /help to show what can i do for you😎',
+        'fa': 'من AI Trader ام، دستیار هوشمند معامله گرت'
+              '\n /help بهت نشون میدم چکارایی میتونم برات انجام بدم 😎'
+    },
+    'C_share_contact': {
+        'en': '📞 Share your phone number',
+        'fa': '📞 شمارتو برام بفرست'
+    },
+    'C_reg_with_phone': {
+        'en': 'You should sign up with your phone number 🙄',
+        'fa': 'باید شمارتو برای ثبت نام داشته باشم🙄'
+    },
+    'C_can_i_help': {
+        'en': '🤓 How can i help you?',
+        'fa': '🤓 چطور میتونم کمکت کنم؟'
+    },
+    'C_enter_username': {
+        'en': '🙍🏻‍♂️ Please enter your username',
+        'fa': '🙍🏻‍♂️ لطفا نام کاربری خودتو وارد کن'
+    },
+    'C_invalid_username': {
+        'en': '⛔️ Invalid username!at least 4 english char\nTry again!',
+        'fa': '⛔️ نام کاربریت اشتباهه!حداقل باید 4 حرف انگلیسی باشه و با عدد یا علایمی شروع نشده باشه'
+              '\nدوباره سعی کن!'
+    },
+    'C_exist_username': {
+        'en': '⛔️ Username already exist!\nTry again!',
+        'fa': '⛔️ نام کاربریت قبلا ثبت شده!\n دوباره سعی کن!'
+    },
+    'C_try_again': {
+        'en': '⛔️ Try again',
+        'fa': '⛔️ دوباره سعی کن'
+    },
+    'C_account_created': {
+        'en': '🥳 Welcome!\n Your account created!\n⚠️ Free plan is available for 30 day\n Enjoy!',
+        'fa': '🥳 خوش اومدی!\n حساب کاربریتساخته شد! \n ⚠️ اشتراک رایگانت تا 30 روز دیگر معتبره\nلذت ببرید!'
+    },
+    'C_choose_exchange': {
+        'en': '🏛  Please Select your exchange account',
+        'fa': '🏛  لطفا صرافیتو انتخاب کن'
+    },
+    'C_error': {
+        'en': '⛔️ Error',
+        'fa': '⛔️ خطا'
+    },
+    'C_coming_soon': {
+        'en': '🤓 Our tutorials coming soon!',
+        'fa': '🤓 آموزش ها بزودی بارگذاری میشه!یکم صبر کن'
+    },
+    'C_demo_exist': {
+        'en': '😥 You already have demo',
+        'fa': '😥 اکانت دمو شما موجود است!'
+    },
+    'C_demo_created': {
+        'en': '✅ your exchange demo account successfully updated/created\nand you can watch your assets in your profile',
+        'fa': '✅ اکانت دمو شما با موفقعیت ایجاد/بروزرسانی شد'
+    },
+    'C_same_exchange': {
+        'en': '😥 You cant have same exchange account! ',
+        'fa': '😥  نمیتونی دو اکانت از یک صرافی داشته باشی'
+    },
+    'C_enter_public_key': {
+        'en': '🔐 Enter your public API',
+        'fa': '🔐 کلید عمومی خودتو وارد کن'
+    },
+    'C_wrong_exchange': {
+        'en': '⛔️ wrong exchange',
+        'fa': '⛔️ صرافیت معتبر نیست'
+    },
+    'C_enter_secret_key': {
+        'en': '🔐 Enter your secret API',
+        'fa': '🔐 کلید خصوصی خودتو وارد کن'
+    },
+    'C_wrong_API': {
+        'en': '⛔️ wrong APIs/Token.\nTry again!',
+        'fa': '⛔️ یکی از کلید ها/توکن اشتباهه.\n دوباره تلاش کن'
+    },
+    'C_something_wrong': {
+        'en': '😥 Something is wrong\n Try again! ',
+        'fa': '😥 اشتباهی پیش اومده.\n لطفا دوباره تلاش کن!'
+    },
+    'C_success': {
+        'en': '✅ success',
+        'fa': '✅ ایول'
+    },
+    'C_unsupported_exchange': {
+        'en': '⛔️ unfortunately this exchange not supported for now',
+        'fa': '⛔️ متاسفانه این صرافی درحال حاضر پشتبانی نمیشه!'
+    },
+    'C_choose_analysis': {
+        'en': '📊 Please Select Strategy',
+        'fa': '📊 استراتژی خودتو انتخاب کن'
+    },
+    'C_choose_coin': {
+        'en': '🪙 Choose Coin',
+        'fa': '🪙 رمزارز خودتو انتخاب کن'
+    },
+    'C_wrong_analysis': {
+        'en': '⛔️ wrong Strategy',
+        'fa': '⛔️ استراتژیت معتبر نیست'
+    },
+    'C_choose_timeframe': {
+        'en': '⏱ Choose timeframe',
+        'fa': '⏱ تایم فریم خودتو انتخاب کن'
+    },
+    'C_wrong_coin': {
+        'en': '⛔️ wrong coin',
+        'fa': '⛔️ رمزارزت معتبر نیست'
+    },
+    'C_initial_value_back_test': {
+        'en': '💰 Please enter amount of founds initially available for the strategies for trade(⚠️ greater than 0)',
+        'fa': '💰 با چند دلار میخوای معامله رو شروع کنی؟(⚠️ باید از 0 بزرگتر باشه)'
+    },
+    'C_wrong_timeframe': {
+        'en': '⛔️ wrong timeframe',
+        'fa': '⛔️ تایم فریمت معتبر نیست'
+    },
+    'C_warning_amount_back_test': {
+        'en': '⚠️ Amount must be greater than 0',
+        'fa': '⚠️ مقدار دلار باید بیشتر از 0 باشه '
+    },
+    'C_processing': {
+        'en': 'Just a moment, processing ...',
+        'fa': 'شکیبا باشید، در حال پردازش ...'
+    },
+    'C_wrong_setting_back_test': {
+        'en': '⛔️This strategy doesnt work with this timeframe and coin\n',
+        'fa': '⛔️این استراتژی با این تایم فریم یا این رمزارز کار نمیکنه.'
+    },
+    'C_start_time': {
+        'en': '⏲Start time',
+        'fa': '⏲تاریخ شروع'
+    },
+    'C_end_time': {
+        'en': '⏲End time',
+        'fa': '⏲تاریخ پایان'
+    },
+    'C_positive': {
+        'en': '🟢Positive trades',
+        'fa': '🟢معاملات موفق'
+    },
+    'C_total_trades': {
+        'en': '🟢total trades',
+        'fa': '🟢تعداد معاملات'
+    },
+    'C_total_trade_accuracy': {
+        'en': '✅Total trade accuracy percent',
+        'fa': '✅ درصد موفقیت تمامی معاملات'
+    },
+    'C_net_profit_percent': {
+        'en': '✅Net profit percent',
+        'fa': '✅درصد سود'
+    },
+    'C_average_trade_profit': {
+        'en': '✅Average trade profit',
+        'fa': '✅میانگین سود هر معامله'
+    },
+    'C_profit_per_coin': {
+        'en': '✅Profit per coin percent',
+        'fa': '✅درصد سود برحسب رمزارز'
+    },
+    'C_warning_set_exchange_first': {
+        'en': '⛔️ Please set your exchange account first',
+        'fa': '⛔️ اول صرافی خودتو وارد کن'
+    },
+    'C_enter_percent_usd': {
+        'en': '💰 Please enter percent of USD \n You want to trade (⚠️ between 0 - 100)',
+        'fa': '💰 چند درصد از حسابت وارد معامله بشه؟(⚠️ بین 0 تا 100 )'
+    },
+    'C_warning_percent_usd': {
+        'en': '⚠️ Percent must be between 0 - 100',
+        'fa': '⚠️ درصدت باید بین 0 تا 100 باشه'
+    },
+    'C_exist_strategy': {
+        'en': '😥You already have this strategy with selected coin and strategy',
+        'fa': '😥  قبلا این استراتژی رو با این مشخصات انتخاب کردی'
+    },
+    'C_strategies': {
+        'en': '📊 strategies',
+        'fa': '📊 استراتژی ها'
+    },
+    'C_trades_history': {
+        'en': 'trade history',
+        'fa': 'سوابق معاملات'
+    },
+    'C_plan': {
+        'en': '💳 Plan',
+        'fa': '💳 اشتراک'
+    },
+    'C_valid_date': {
+        'en': '⏱ Valid date',
+        'fa': '⏱ تاریخ اعتبار'
+    },
+    'C_follow_us': {
+        'en': '📬 Follow us on social media',
+        'fa': '📬 ما را در شبکه های اجتماعی دنبال کن'
+    },
+    'C_charge_plan': {
+        'en': 'contact admin to upgrade your plan',
+        'fa': 'برای تمدید یا ارتقا اشتراکت با ادمین تماس بگیر'
+    },
+    'C_choose_language': {
+        'en': '🌏 select your language',
+        'fa': '🌏 زبان خودتو انتخاب کن'
+    },
+    'C_was_selected': {
+        'en': 'was selected.',
+        'fa': 'انتخاب شد.'
+    },
+    'C_instagram': {
+        'en': 'instagram',
+        'fa': 'اینستاگرام'
+    },
+    'C_telegram': {
+        'en': 'telegram',
+        'fa': 'تلگرام'
+    },
+    'C_twitter': {
+        'en': 'twitter',
+        'fa': 'توییتر'
+    },
+    'C_dont_understand': {
+        'en': 'sorry speak louder 😅, dont understand.'
+              '\nre/start bot or change your /lang'
+              '\nmore /help',
+        'fa': 'ببخشید بلندتر صحبت کن 😅، نمیفهممت.\n'
+              'ربات رو دوباره استارت کن./start یا زبونتو عوض کن./lang \n'
+              'کمک بیشتر /help'
+    },
+    'C_help_message': {
+        'en': '🤦🏻‍♂️Step 1 :\n you need *exchange* to use our strategies.\n'
+              'so first (🏛 add /exchange)\n'
+              '(if you just want use our signals choose *demo* in exchange category)\n'
+              '\n'
+              '🤨 Step 2 :\n'
+              'after set exchange then (📊 add /strategy).\n'
+              '🤓 *you can also run (🧭 back /test) before select strategy or exchange*\n'
+              '\n'
+              '🥵Ops! Did you make the wrong choice?\n Dont worry!'
+              'you can edit/delete strategies or exchange on your profile '
+              'with ( 🙍🏻‍♂️ /profile) also watch your plan, strategies and exchanges!\n\n'
+              '⛔️Remember you can not delete your exchange !change it to demo!\n'
+              '🥺 if you dont need me anymore , invoke your API key in your exchange!\n'
+              '\n\n'
+              'watch our all free (📚 tutorials) !\n'
+              'Enjoy 🤠',
+        'fa': '🤦🏻‍♂️گام اول :\n به یک اکانت *صرافی* برای استفاده از استراتژی ها نیاز داری.\n'
+              'پس اول 🏛 صرافی اضافه کن یا از دستور /exchange استفاده کن\n'
+              '(اگر فقط میخوای از سیگنالامون استفاده کنی تو اضافه کردن صرافی گزینه *demo* رو انتخاب کن.)\n'
+              '\n'
+              '🤨 گام دوم:\n'
+              'بعد از تنظیم صرافی گزینه 📊استراتژی اضافه کن یا دستور /strategy رو انتخاب کن\n'
+              '🤓 * میتونی برای بررسی عملکرد ربات درگذشته با گزینه 🧭 بک تست یا دستور'
+              ' /test از عملکرد اون خروجی بگیری*\n'
+              '\n'
+              '🥵ای وای!اگه تو انتخاب استراتژی یا صرافی اشتباه کردی؟ اصلا نگران نباش!'
+              'میتونی استراتژی یا صرافی در 🙍🏻‍♂ پروفایل ویرایش یا پاک کنی.\n\n'
+              ' برای کمک بیشتر از 📚 آموزش ها کمک بگیر!\n'
+              'حالشو ببر 🤠'
+    },
+    'C_any_strategies': {
+        'en': 'Don have any strategies🙄',
+        'fa': 'استراتژی نداری خب🙄'
+    },
+    'C_any_exchanges': {
+        'en': 'Dont have any exchanges🙄',
+        'fa': 'صرافی نداری خب🙄'
+    },
+    'C_any_trades': {
+        'en': 'Dont have any trades🙄',
+        'fa': 'معامله ای انجام نشده🙄'
+    },
+    'C_final_amount': {
+        'en': '✅Your final amount',
+        'fa': '✅دارایی نهایی شما'
+    },
+    'C_enter_token': {
+        'en': '🔐 Enter your token',
+        'fa': '🔐 توکن خودرا وارد کنید'
+    },
+    'C_assets_exchange': {
+        'en': '💰 assets',
+        'fa': '💰 دارایی ها'
+    },
+    'C_invoke': {
+        'en': 'invoke',
+        'fa': 'غیرفعال'
+    },
+    'C_active': {
+        'en': '🥶 Your API/Token is invoked,please active it with edit',
+        'fa': '🥶 توکن/API  شما غیرفعال شده است،لطفا اونو با ویرایش دوباره تنظیمش کن'
+    }
 
 }
 

@@ -3,7 +3,6 @@
 
 """
 from datetime import datetime
-import numpy as np
 import pandas as pd
 from Inc.functions import get_last_recommendations, set_recommendation, record_dictionary
 from Trade.spot import submit_order
@@ -26,8 +25,10 @@ class Strategy:
         self.analysis_id = analysis_id
         self.bot = bot_ins
         self.time = datetime.now()
-        self.data['recommendation'] = np.nan
-        self.data['risk'] = np.nan
+        self.data['recommendation'] = None
+        self.data['risk'] = None
+        self.last_position = self.get_last_position()
+        self.last_price = self.get_last_price()
 
     def get_source(self, source: str = 'close'):
         """
@@ -74,8 +75,8 @@ class Strategy:
         return last_price
 
     def insert_database(self, position: str, current_price: float, risk: str):
-        set_recommendation(analysis_id=1, coin_id=self.coin_id, timeframe_id=self.timeframe_id, position=position,
-                           risk=risk, price=current_price)
+        set_recommendation(analysis_id=self.analysis_id, coin_id=self.coin_id, timeframe_id=self.timeframe_id,
+                           position=position, risk=risk, price=current_price)
 
     def broadcast(self, position: str, current_price: float, risk: str):
         broadcast_messages(coin_id=self.coin_id, analysis_id=self.analysis_id, timeframe_id=self.timeframe_id,
@@ -88,6 +89,12 @@ class Strategy:
     def sell(self):
         submit_order(coin_id=self.coin_id, analysis_id=self.analysis_id, position='sell',
                      time_receive_signal=self.time)
+
+    def order(self, position: str):
+        if position == 'buy':
+            self.buy()
+        elif position == 'sell':
+            self.sell()
 
     def _set_recommendation(self, position: str, risk: str, index):
         # set recommendation and risk in dataframe
@@ -123,20 +130,11 @@ class Strategy:
         """
         last_row_detector = self.get_recommendations().tail(1)
         position = last_row_detector['recommendation'].values[0]
-        last_position = self.get_last_position()
-        if last_position != position:
+        if self.last_position != position and position is not None:
             close = float(last_row_detector['close'].values[0])
-            if position == 'buy':
-                submit_order(coin_id=self.coin_id, analysis_id=self.analysis_id, position='buy',
-                             time_receive_signal=self.time)
-                self.broadcast(position=position, current_price=close, risk=last_row_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close,
-                                     risk=last_row_detector['risk'].values[0])
 
-            elif position == 'sell':
-                submit_order(coin_id=self.coin_id, analysis_id=self.analysis_id, position='sell',
-                             time_receive_signal=self.time)
-                self.broadcast(position=position, current_price=close, risk=last_row_detector['risk'].values[0])
-                self.insert_database(position=position, current_price=close,
-                                     risk=last_row_detector['risk'].values[0])
+            self.broadcast(position=position, current_price=close, risk=last_row_detector['risk'].values[0])
+            self.insert_database(position=position, current_price=close,
+                                 risk=last_row_detector['risk'].values[0])
+            self.order(position=position)
 

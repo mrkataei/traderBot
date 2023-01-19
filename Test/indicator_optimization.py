@@ -71,7 +71,7 @@ def process_macd_setting(obj, data):
     data["recommendation"] = data.apply(lambda row: set_rec(row), axis=1)
     # print(dataframe)
     try:
-        test = StrategyTaster(name=f'test{obj}', symbol="ETHUSDT", timeframe="4hr", dataframe=data, intial_value=100)
+        test = StrategyTaster(name=f'test{obj}', symbol="ETHUSDT", timeframe="4hr", dataframe=data, initial_value=100)
         # data.drop(columns=["buy" , "sell" , "recommendation"])
         return test.results()
     except:
@@ -84,7 +84,7 @@ def process_stochrsi_setting(obj, data):
 
     data["recommendation"] = stoch['stochrsi_k'].apply(lambda row: set_rec_stoch(row, overbuy=obj[5], oversell=obj[6]))
     try:
-        test = StrategyTaster(name=f'test{obj}', symbol="ETHUSDT", timeframe="4hr", dataframe=data, intial_value=100)
+        test = StrategyTaster(name=f'test{obj}', symbol="ETHUSDT", timeframe="4hr", dataframe=data, initial_value=100)
         print(1)
         # data.drop(columns=["buy" , "sell" , "recommendation"])
         return test.results()

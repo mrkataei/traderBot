@@ -27,4 +27,3 @@ def tradingview_recommendations(symbol: str, timeframe: str, *option: str):
                        'OSI': _ta.get_analysis().oscillators
                     }.get(opt, _ta.get_analysis().summary))
     return res
-

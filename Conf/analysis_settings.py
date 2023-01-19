@@ -42,7 +42,6 @@ diamond_dogeusdt_30m = {
                            'MACD': {'slow': 18, 'signal': 20, 'fast': 13, 'source': 'ohlc4', 'matype': 'ema'}}
 }
 
-
 diamond_conf = {
     'coins':
         {
@@ -55,10 +54,32 @@ diamond_conf = {
         }
 }
 
+palladium_ethusdt_1h = {
+    'analysis_setting': {'basisType': "DEMA", 'len': 2, 'offSig': 6, 'offsetALMA': 0.85, 'useRes': True,
+                         'numberTimeFrame': 1, 'unitTimeFrame': "h", 'strares': 4}
+}
+nobitest_setting = {
+    'analysis_setting': {'basisType': "DEMA", 'len': 3, 'offSig': 6, 'offsetALMA': 0.85, 'useRes': True,
+                         'strares': 24}
+}
+palladium_conf = {
+    'coins':
+        {
+            2: {'timeframes': {2: palladium_ethusdt_1h}}
+        }
+}
+nobitex_conf = {
+    'coins':
+        {
+            2: {'timeframes': {2: nobitest_setting}}
+        }
+}
 analysis_con = {
     'analysis':
         {
-            3: diamond_conf
+            3: diamond_conf,
+            4: palladium_conf,
+            5: nobitex_conf
         }
 }
 

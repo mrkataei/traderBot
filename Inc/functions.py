@@ -68,7 +68,7 @@ def record_dictionary(record, table: str):
         return {'username': record[0], 'chat_id': record[1],
                 'role': record[2], 'email': record[3], 'phone': record[4], 'signup_time': record[5],
                 'last_login': record[6], 'is_online': record[7], 'is_use_freemium': record[8],
-                'valid_time_plan': record[9], 'plan_id': record[10], 'timeframe_id': record[11]}
+                'valid_time_plan': record[9], 'plan_id': record[10], 'timeframe_id': record[11], 'is_valid': record[12]}
 
     elif table == 'analysis':
         return {'id': record[0], 'name': record[1], 'description': record[2]}
@@ -139,7 +139,7 @@ def get_user(chat_id: str):
     :return:
     """
     query = "SELECT username, chat_id, role, email, phone, signup_time, last_login, is_online," \
-            " is_use_freemium, valid_time_plan, plan_id, timeframe from users " \
+            " is_use_freemium, valid_time_plan, plan_id, timeframe, is_valid from users " \
             "WHERE chat_id='{chat_id}'".format(chat_id=chat_id)
     record = execute_query(query=query)
     if record:
@@ -167,7 +167,7 @@ def check_expire_plan(chat_id: str):
     """
     user = record_dictionary(record=get_user(chat_id=chat_id)[0], table='users')
     now_time = datetime.now()
-    if now_time <= user['valid_time_plan']:
+    if now_time <= user['valid_time_plan'] and user['is_valid']:
         return False
     else:
         return True
@@ -514,10 +514,15 @@ def delete_strategy(strategy_id: int):
     update_and_delete_query(query=query)
 
 
-def update_user_exchange(user_setting_id: int, exchange_id: int, public: str, secret: str):
-    query = "UPDATE user_settings SET exchange_id='{exchange_id}', public='{public}', secret='{secret}' " \
-            "WHERE id='{user_setting_id}'".format(exchange_id=exchange_id, public=public, secret=secret,
-                                                  user_setting_id=user_setting_id)
+def update_user_exchange(user_setting_id: int, public: str, secret: str, exchange_id: int = None):
+    if exchange_id is not None:
+        query = "UPDATE user_settings SET exchange_id='{exchange_id}', public='{public}', secret='{secret}' " \
+                "WHERE id='{user_setting_id}'".format(exchange_id=exchange_id, public=public, secret=secret,
+                                                      user_setting_id=user_setting_id)
+    else:
+        query = "UPDATE user_settings SET public='{public}', secret='{secret}' " \
+                "WHERE id='{user_setting_id}'".format(public=public, secret=secret,
+                                                      user_setting_id=user_setting_id)
     return update_and_delete_query(query)
 
 
@@ -557,7 +562,7 @@ def set_trade_history(user_setting_id: int, coin: str, analysis_id, position: st
     :param signal_time:
     :return:
     """
-    if order_submit_time and amount and order_status and price:
+    if order_submit_time is not None and amount is not None and order_status is not None and price is not None:
         query = "INSERT INTO trade (user_setting_id, coin, analysis_id, price, position, order_status, status," \
                 " amount, order_submit_time, signal_time) VALUES (%s, %s , %s ,%s , %s, %s , %s ,%s , %s ,%s)"
         val = (user_setting_id, coin, analysis_id, price, position, order_status, status, amount, order_submit_time,

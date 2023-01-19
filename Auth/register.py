@@ -28,4 +28,3 @@ def register(username: str, chat_id: str, phone: str):
     val = (username, chat_id, phone, valid_time_plan, passwd, salt)
     error, detail = functions.insert_query(query=query, values=val)
     return error, detail
-

@@ -45,7 +45,7 @@ def window(dataframe, starttime: str, endtime=None, timezone=None):
     try:
         indices = index[condition]
         indices = indices[0]
-    except Exception as E:
+    except Exception:
         indices = 0
     if endtime is None:
         return dataframe[indices::].reset_index(drop=True)
@@ -64,9 +64,28 @@ def window(dataframe, starttime: str, endtime=None, timezone=None):
             return dataframe[indices::].reset_index(drop=True)
 
 
+def trades_table(dataframe):
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(dataframe.columns),
+                    fill_color='paleturquoise',
+                    align='left'),
+        cells=dict(values=[dataframe["date"], dataframe["position"], dataframe["close-$"], dataframe["risk"],
+                           dataframe["amount-%"], dataframe["value-$"], dataframe["profit-$"],
+                           dataframe["profit-%"], dataframe['low price-%']],
+
+                   fill=dict(color=['rgb(245, 245, 245)',  # unique color for the first column
+                                    ['rgba(0,250, 0, 0.8)' if type(
+                                        profit) is float and profit >= 0 else 'red' if type(
+                                        profit) is float and profit < 0 else "Lavender" for profit in
+                                     dataframe["profit-%"]]]),
+                   align='left'))
+    ])
+
+    fig.show()
+
+
 class StrategyTaster:
-    def __init__(self, name: str, symbol: str, timeframe: str, dataframe,
-                 intial_value: int):
+    def __init__(self, name: str, symbol: str, timeframe: str, dataframe, initial_value: int):
         self.symbol = symbol
         self.name = name
         self.timeframe = timeframe
@@ -74,8 +93,8 @@ class StrategyTaster:
         self.starttime = self.dataframe["date"][0]
         self.endtime = self.dataframe["date"].tail(1).item()
 
-        self.intial_value = intial_value
-        self.current_value = intial_value
+        self.initial_value = initial_value
+        self.current_value = initial_value
         self.old_price = 0
         self.old_position = "sell"
         self.low_price = sys.float_info.min
@@ -84,7 +103,7 @@ class StrategyTaster:
         self.result = self.results()
 
     def reset(self):
-        self.current_value = self.intial_value
+        self.current_value = self.initial_value
         self.old_price = 0
         self.old_position = "sell"
         self.low_price = sys.float_info.min
@@ -131,74 +150,57 @@ class StrategyTaster:
         fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='LightPink')
         fig.show()
 
-    def trades_table(self, dataframe):
-        fig = go.Figure(data=[go.Table(
-            header=dict(values=list(dataframe.columns),
-                        fill_color='paleturquoise',
-                        align='left'),
-            cells=dict(values=[dataframe["date"], dataframe["position"], dataframe["close-$"], dataframe["risk"],
-                               dataframe["amount-%"], dataframe["value-$"], dataframe["profit-$"],
-                               dataframe["profit-%"], dataframe['low price-%']],
-
-                       fill=dict(color=['rgb(245, 245, 245)',  # unique color for the first column
-                                        ['rgba(0,250, 0, 0.8)' if type(
-                                            profit) is float and profit >= 0 else 'red' if type(
-                                            profit) is float and profit < 0 else "Lavender" for profit in
-                                         dataframe["profit-%"]]]),
-                       align='left'))
-        ])
-
-        fig.show()
-
     def strategy(self, row):
 
         date = row["date"]
         close = row["close"]
-        recomendation = row["recommendation"]
+        recommendation = row["recommendation"]
 
         if close <= self.low_price:
             self.low_price = close
-        if self.old_position == "sell" and recomendation == "buy":
+        if self.old_position == "sell" and recommendation == "buy":
 
             self.old_position = "buy"
             self.old_price = close
             self.low_price = close
             return date, "buy", close, "medium", self.current_value / close, self.current_value, "----", "----", "----"
-        elif self.old_position == "buy" and recomendation == "sell":
+        elif self.old_position == "buy" and recommendation == "sell":
             self.old_position = "sell"
             self.current_value = self.current_value * (close / self.old_price)
             low = self.low_price
             self.low_price = sys.float_info.min
-            return date, "sell", close, "medium", self.current_value / close, self.current_value, close - self.old_price, \
+            return date, "sell", close, "medium",\
+                   self.current_value / close, self.current_value, close - self.old_price, \
                    round((close / self.old_price) * 100 - 100, 4), ((low - self.old_price) / self.old_price) * 100
 
     def results(self, result_df=None):
         try:
             starter_amount = self.trades_list["amount-%"][0]
             dataframe = self.trades_list.drop(self.trades_list[self.trades_list["position"] == "buy"].index)
-            net_profit = (np.array(dataframe["value-$"].tail(1))[0] - self.intial_value) / self.intial_value
+            net_profit = (np.array(dataframe["value-$"].tail(1))[0] - self.initial_value) / self.initial_value
             positive_trades = dataframe[dataframe["profit-%"] >= 0].count()
             total_trades = int(len(dataframe))
-            acurracy = positive_trades.date / total_trades
+            accuracy = positive_trades.date / total_trades
             average_trade_profit = net_profit / total_trades
             profitpercoin = (dataframe["amount-%"].tail(1).item() - starter_amount) / starter_amount
             result = self.name, self.symbol, self.timeframe, self.starttime, self.endtime, round(
-                positive_trades.date), round(total_trades), round(acurracy * 100, 2), round(net_profit * 100, 4), round(
-                average_trade_profit * 100, 4), round(profitpercoin * 100, 4)
-        except:
-            result = self.name, self.symbol, self.timeframe, self.starttime, self.endtime, 0, 0, 0, 0, 0, 0
+                positive_trades.date), round(total_trades), round(accuracy * 100, 2), round(net_profit * 100, 4), round(
+                average_trade_profit * 100, 4), round(profitpercoin * 100, 4),\
+                     round(dataframe["value-$"].tail(1).item(), 4)
+        except Exception:
+            result = self.name, self.symbol, self.timeframe, self.starttime, self.endtime, 0, 0, 0, 0, 0, 0, 0
 
         try:
-            return result_df.append(pd.DataFrame(np.asarray(result).reshape(1, 11),
-                                                 columns=['strategy', 'symbol', 'timefarme', 'starttime', 'endtime',
-                                                          "positive_trades", "total_trades", "acurracy-%",
+            return result_df.append(pd.DataFrame(np.asarray(result).reshape(1, 12),
+                                                 columns=['strategy', 'symbol', 'timeframe', 'starttime', 'endtime',
+                                                          "positive_trades", "total_trades", "accuracy-%",
                                                           "net_profit-%", "average_trade_profit-%",
-                                                          'profit_per_coin-%']))
-        except:
-            return pd.DataFrame(np.asarray(result).reshape(1, 11),
-                                columns=['strategy', 'symbol', 'timefarme', 'starttime', 'endtime',
-                                         "positive_trades", "total_trades", "acurracy-%", "net_profit-%",
-                                         "average_trade_profit-%", 'profit_per_coin-%'])
+                                                          'profit_per_coin-%', "final_amount"]))
+        except Exception:
+            return pd.DataFrame(np.asarray(result).reshape(1, 12),
+                                columns=['strategy', 'symbol', 'timeframe', 'starttime', 'endtime',
+                                         "positive_trades", "total_trades", "accuracy-%", "net_profit-%",
+                                         "average_trade_profit-%", 'profit_per_coin-%', "final_amount"])
 
     # def change_date_type(self, date: str, time_zone=None):
     #     datetime_object = parser.parse(date)
@@ -231,7 +233,7 @@ class StrategyTaster:
 
     def show(self):
         # trades = self.taster(self.dataframe , self.strategy)
-        self.trades_table(self.trades_list)
+        trades_table(self.trades_list)
         self.candlestick_plot()
         fig = px.line(self.trades_list[self.trades_list["position"] == "sell"], x="date", y="value-$",
                       title='current value')

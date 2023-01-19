@@ -40,7 +40,8 @@ CREATE TABLE `analysis` (
 INSERT INTO `analysis` (`id`, `name`, `description`) VALUES
 (1, 'emerald', 'This analysis optimized for 1min timeframe and work for all coins'),
 (2, 'ruby', 'This analysis optimized for 4hour timeframe and work just for ETHUSDT coin'),
-(3, 'diamond', 'This analysis optimized just for 4hour timeframe and work with BTCUSDT, ETHUSDT, ADAUSDT, BCHUSDT, ETCUDT');
+(3, 'diamond', 'This analysis optimized just for 4hour timeframe and work with BTCUSDT, ETHUSDT, ADAUSDT, BCHUSDT, ETCUDT'),
+(4, 'palladium', 'this analysis was optimized for 1hour timeframe and ETHUSDT ');
 
 -- --------------------------------------------------------
 
@@ -100,7 +101,8 @@ CREATE TABLE `exchanges` (
 
 INSERT INTO `exchanges` (`id`, `exchange`) VALUES
 (1, 'bitfinex'),
-(2, 'demo');
+(2, 'demo'),
+(3, 'nobitex');
 
 -- --------------------------------------------------------
 

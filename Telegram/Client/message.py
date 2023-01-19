@@ -6,8 +6,8 @@ from Inc.functions import get_user_strategy, get_timeframes
 from Libraries.definitions import *
 
 
-def broadcast_messages(coin_id: int, analysis_id: int, timeframe_id: int, position: str
-                       , current_price: float, risk: str, bot_ins):
+def broadcast_messages(coin_id: int, analysis_id: int, timeframe_id: int, position: str,
+                       current_price: float, risk: str, bot_ins):
     users = get_user_strategy(coin_id=coin_id, analysis_id=analysis_id)
     # return {'username', 'chat_id', 'coin_id', 'analysis'}
     timeframe = get_timeframes(timeframe_id)

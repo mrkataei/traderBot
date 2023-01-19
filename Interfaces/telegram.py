@@ -30,4 +30,3 @@ class Telegram:
 
     def bot_actions(self):
         raise Exception("NotImplementedException")
-

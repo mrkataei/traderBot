@@ -4,20 +4,20 @@ updated at 9/16/2021
 this StreamIStrategies class is inheritance  from stream and implement those functions and some
  additional function work with StrategiesThreads that run on thread for each coin that every coin have many thread size
  of timeframe already supported
-
 for broadcast signals we need API telebot that on bot for our signals
 /*for test code change the API First*/
-
 database configure :
         coin_id -> 1=BTCUSDT , 2=ETHUSDT , 3=
         timeframe_id -> 1=30min , 2=1hour ,3=4hour ,4=1day, 1=1min
         analysis_id -> 1=emerald , 2=ruby , 3= diamond
-
 """
 import threading
-from time import sleep
+from time import sleep, time
+from datetime import datetime
+from time import process_time
 import telebot
-from Analysis.emerald import Emerald
+# from Analysis.emerald import Emerald
+from Analysis.palladium import Palladium
 from Analysis.diamond import Diamond
 from Analysis.ruby import Ruby
 from Interfaces.stream import Stream
@@ -38,46 +38,64 @@ class StreamIStrategies(Stream):
 
     def stream_1min_candle(self):
         while True:
-            data = candles(symbol=self.symbol, timeframe='1m', limit=10)
-            if data[0]:
-                emerald = Emerald(data=data[1], coin_id=self.coin_id, timeframe_id=5, bot_ins=_bot_ins)
-                emerald.signal()
+            # delay = 59
+            # if 1 <= round(time()) % 60 <= 3:
+            #     print('1min', datetime.fromtimestamp(time()))
+            #     data = candles(symbol=self.symbol, number=1, unit='m', limit=10)
+            #     if data[0]:
+            #         emerald = Emerald(data=data[1], coin_id=self.coin_id, timeframe_id=5, bot_ins=_bot_ins)
+            #         emerald.signal()
+            #     delay = process_time()
+            # sleep(abs(60 - delay))
             sleep(60)
 
     def stream_15min_candle(self):
         while True:
-            data = candles(symbol=self.symbol, timeframe='15m', limit=400)
-            if data[0]:
-                ruby = Ruby(data=data[1], coin_id=self.coin_id, timeframe_id=6, bot_ins=_bot_ins)
-                ruby.signal()
-            sleep(900)
+            delay = 899
+            if 1 <= round(time()) % 900 <= 3:
+                print('15min', datetime.fromtimestamp(time()))
+                data = candles(symbol=self.symbol, number=15, unit='m', limit=400)
+                if data[0]:
+                    ruby = Ruby(data=data[1], coin_id=self.coin_id, timeframe_id=6, bot_ins=_bot_ins)
+                    ruby.signal()
+                delay = process_time()
+            sleep(abs(900 - delay))
 
     def stream_30min_candle(self):
         while True:
-            # data = candles(symbol=self.symbol, timeframe='30m', limit=400)
-            # if data[0]:
-            #     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=1)
-            #     if setting_diamond:
-            #         Diamond(data=data[1], coin_id=self.coin_id, timeframe_id=1, setting=setting_diamond,
-            #                 bot_ins=_bot_ins)
+            # 30 min strategies implement here
             sleep(1800)
 
     def stream_1hour_candle(self):
         while True:
-            # 1 hour strategies implement here
-            sleep(3600)
+            # 60 min strategies implement here
+            delay = 3599
+            if 1 <= round(time()) % 3600 <= 3:
+                print('1hour', datetime.fromtimestamp(time()))
+                data = candles(symbol=self.symbol, number=1, unit='h', limit=1000)
+                if data[0]:
+                    setting_palladium = self.get_setting_analysis(analysis_id=4, timeframe_id=2)
+                    if setting_palladium:
+                        palladium = Palladium(data=data[1], coin_id=self.coin_id, timeframe_id=2,
+                                              setting=setting_palladium, bot_ins=_bot_ins)
+                        palladium.signal()
+                delay = process_time()
+            sleep(abs(3600 - delay))
 
     def stream_4hour_candle(self):
         while True:
-            # data = candles(symbol=self.symbol, timeframe='4h', limit=400)
-            # if data[0]:
-            #     setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
-            #     if setting_diamond:
-            #         diamond = Diamond(data=data[1], coin_id=self.coin_id, timeframe_id=3,
-            #                           setting=setting_diamond, bot_ins=_bot_ins)
-            #         diamond.signal()
-
-            sleep(14400)
+            delay = 14399
+            if 1 <= round(time()) % 14400 <= 3:
+                print('4hour', datetime.fromtimestamp(time()))
+                data = candles(symbol=self.symbol, number=4, unit='h', limit=1000)
+                if data[0]:
+                    setting_diamond = self.get_setting_analysis(analysis_id=3, timeframe_id=3)
+                    if setting_diamond:
+                        diamond = Diamond(data=data[1], coin_id=self.coin_id, timeframe_id=3,
+                                          setting=setting_diamond, bot_ins=_bot_ins)
+                        diamond.signal()
+                delay = process_time()
+            sleep(abs(14400 - delay))
 
     def stream_1day_candle(self):
         while True:

@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
 from pandas import concat, DataFrame
-from pandas_ta import Imports
 from pandas_ta.overlap import ema, sma
 from pandas_ta.utils import get_offset, verify_series, signals
-
 
 
 def macd_indicator(close, fast=None, slow=None, signal=None, talib=None, offset=None, matype=None, **kwargs):
@@ -39,7 +36,7 @@ def macd_indicator(close, fast=None, slow=None, signal=None, talib=None, offset=
         signalma = sma(close=macd.loc[macd.first_valid_index():, ], length=signal)
         histogram = macd - signalma
 
-    if as_mode :
+    if as_mode:
         if matype == "ema" or matype is None:
             macd = macd - signalma
             signalma = ema(close=macd.loc[macd.first_valid_index():, ], length=signal)
