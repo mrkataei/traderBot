@@ -23,7 +23,7 @@ from Libraries.definitions import *
 
 
 from crud.user import CRUDUser
-user = CRUDUser.get_by_chat_id(chat_id=message.chat.id)
+
 apihelper.ENABLE_MIDDLEWARE = True
 
 # @testkourosh2bot -> address // use this bot for test your code
@@ -264,8 +264,8 @@ class ClientBot(Telegram):
         # self.tut_cat = np.array(functions.get_tutorials_categories())
 
     def is_valid_user(self, message):
-        user = functions.get_user(message.chat.id)
-        
+        user = CRUDUser.get_by_chat_id(chat_id=message.chat.id)
+        # user = functions.get_user(message.chat.id)
         if not user:
             self.bot.send_message(message.chat.id, trans('C_sorry_signup'))
             return False
@@ -503,7 +503,7 @@ class ClientBot(Telegram):
                 self.bot.send_message(message.chat.id, trans('C_hey') + message.chat.first_name + "!\n" +
                                       trans('C_welcome'), reply_markup=markup)
                 # if user deleted telegram account need develop
-                keyboard = types.ReplyKeyboardMarkup()
+                keyboard = types.ReplyKeyboardMarkup()sdasds
                 reg_button = types.KeyboardButton(text=trans("C_share_contact"), request_contact=True)
                 keyboard.add(reg_button)
                 self.bot.send_message(message.chat.id, trans("C_reg_with_phone"),

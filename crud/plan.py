@@ -1,23 +1,11 @@
 from typing import Any, Dict, Optional, Union
-
 from sqlalchemy.orm import Session
-
 from crud.base import CRUDBase
-from models.user import User
-from schema.user import UserCreate, UserUpdate
-from passlib.context import CryptContext
+from models.plan import Plan
+from schema.plan import PlanBase
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
-
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
+class CRUDPlan(CRUDBase[Plan, PlanBase]):
     def get_by_chat_id(self, db: Session, *, chat_id: str) -> Optional[User]:
         return db.query(User).filter(User.chat_id == chat_id).first()
 

@@ -14,7 +14,6 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     phone: str
-    email: str
     is_use_freemium: bool = True
 
 # Properties to receive via API on update
