@@ -1,5 +1,6 @@
 python-binance
 pandas
+sqlalchemy
 pandas-ta
 numpy
 mysql-connector-python

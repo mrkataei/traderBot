@@ -106,3 +106,5 @@ modules.xml
 scripts
 Lib
 pyvenv.cfg
+__pycache__
+*.pyc

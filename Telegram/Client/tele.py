@@ -21,6 +21,9 @@ from Libraries.data_collector import get_candle_binance as candles
 from Test.strategy_tester import StrategyTaster
 from Libraries.definitions import *
 
+
+from crud.user import CRUDUser
+user = CRUDUser.get_by_chat_id(chat_id=message.chat.id)
 apihelper.ENABLE_MIDDLEWARE = True
 
 # @testkourosh2bot -> address // use this bot for test your code
@@ -262,6 +265,7 @@ class ClientBot(Telegram):
 
     def is_valid_user(self, message):
         user = functions.get_user(message.chat.id)
+        
         if not user:
             self.bot.send_message(message.chat.id, trans('C_sorry_signup'))
             return False
