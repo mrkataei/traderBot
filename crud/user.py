@@ -37,7 +37,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             username= obj_in.username,
             password= get_password_hash(obj_in.password),
             phone= obj_in.phone,
-            chat_id = obj_in.chat_id
+            chat_id = obj_in.chat_id,
+            is_superuser = obj_in.is_superuser
             )
             
         db.add(db_obj)
