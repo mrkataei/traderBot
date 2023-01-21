@@ -9,6 +9,5 @@ class Plan(Base):
     name = Column(String(15), index=True)
     cost = Column(String(15), index=True)
     duration = Column(Integer, index=True)
-    sterategy_number =  Column(Integer, index=True)
-    account_number =  Column(Integer, index=True)
+    watchlist_number = Column(Integer, index=True)
     description = Column(Text, index=True)

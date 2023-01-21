@@ -1,6 +1,6 @@
 from Libraries.definitions import *
 from telebot import types
-
+from util.module import get_exchanges
 
 def start_keyboard():
     key_markup = types.ReplyKeyboardMarkup(row_width=2)
@@ -19,10 +19,9 @@ def start_keyboard():
     return key_markup
 
 def exchange_keyboard():
+    exchanges = get_exchanges()
     key_markup = types.ReplyKeyboardMarkup(row_width=1)
-    key_binance = types.KeyboardButton("binance")
-    key_kocoin = types.KeyboardButton("kocoin")
-    key_bitfinex = types.KeyboardButton("bitfinex")
-    key_markup.add(key_binance, key_kocoin, key_bitfinex)
-    
+    for exchange in exchanges:
+        key_markup.add( types.KeyboardButton(exchange[0]))
     return key_markup
+

@@ -5,7 +5,7 @@ from db.session import SessionLocal
 from schema.user import UserCreate
 from Libraries.definitions import *
 from .keybords import start_keyboard, exchange_keyboard
-from .utils import is_valid_user
+from util.module import get_exchanges, get_exchange
 from time import sleep
 
 session = SessionLocal()
@@ -64,7 +64,7 @@ class TempBot(Telegram):
                 self.bot.reply_to(message, e)
 
         @self.bot.message_handler(func=self.is_valid_user)
-        def add_exchange(message):
+        def add_watchlist(message):
             try:
                 self.bot.send_message(message.chat.id, trans("C_choose_exchange"),
                                       reply_markup=exchange_keyboard())

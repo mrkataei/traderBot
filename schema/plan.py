@@ -6,8 +6,7 @@ class PlanBase(BaseModel):
     name: str
     cost: str
     duration: int = 30
-    sterategy_number: int = 1
-    account_number: int = 1
+    watchlist_number: int = 1
     description : Optional[str] = None
 
 
@@ -19,5 +18,4 @@ class PlanCreate(PlanBase):
 # Properties to receive via API on update
 class PlanUpdate(PlanBase):
     description : Optional[str] = None
-    sterategy_number: int = 1
-    account_number: int = 1
+    watchlist_number: int = 1

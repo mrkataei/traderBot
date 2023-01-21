@@ -1,4 +1,5 @@
 from .base import Exchange
+import sys
 
 def _nonce():
     # Returns a nonce

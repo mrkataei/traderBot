@@ -10,8 +10,7 @@ class CRUDPlan(CRUDBase[Plan, PlanCreate, PlanUpdate]):
             name=obj_in.name,
             cost=obj_in.cost,
             duration=obj_in.duration,
-            sterategy_number=obj_in.sterategy_number,
-            account_number=obj_in.account_number,
+            watchlist_number=obj_in.watchlist_number,
             description=obj_in.description
             )
             

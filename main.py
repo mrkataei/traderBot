@@ -8,10 +8,20 @@
 #     while True:
 #         print("Running...")
 #         sleep(2000000)
-from db.session import SessionLocal
 
-from db.init_db import init_db
+import pkgutil
+import importlib
+import inspect
 
-session = SessionLocal()
 
-init_db(db=session)
+# print(base.)
+# packages = pkgutil.walk_packages(['./exchanges/'])
+# for pack in packages:
+#     print(pack.name)
+
+# print(importlib.import_module('models'))
+import importlib, inspect
+exchanges =  inspect.getmembers(importlib.import_module("exchanges"), inspect.isclass)
+print(exchanges[0][1](public='',secret='').symbols)
+for name, cls in inspect.getmembers(importlib.import_module("exchanges"), inspect.isclass):
+    print(cls)

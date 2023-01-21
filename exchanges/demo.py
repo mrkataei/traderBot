@@ -1,7 +1,7 @@
 from .base import Exchange
 
 
-class DemoClient(Exchange):
+class Demo(Exchange):
     def __init__(self, chat_id: str):
         Exchange.__init__(self, public='public', secret='secret')
         self.chat_id = chat_id
