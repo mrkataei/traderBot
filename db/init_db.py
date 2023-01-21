@@ -14,6 +14,10 @@ FIRST_SUPERUSER_PHONE = '+98903692842'
 
 def init_db(db: Session) -> None:
     try:
+        freemium = crudPlan.get_by_name(db=db, name='freemium')
+        if not freemium:
+            crudPlan.create(db=db, obj_in=PlanCreate(name='freemium', cost='0',
+                    duration=30, sterategy_number=1, account_number=1, description='free'))
         user = curdUser.get_by_username(db=db, username=FIRST_SUPERUSER)
         if not user:
             user_in = UserCreate(
@@ -25,10 +29,6 @@ def init_db(db: Session) -> None:
             )
 
             user = curdUser.create(db, obj_in=user_in)
-        freemium = crudPlan.get_by_name(db=db, name='freemium')
-        if not freemium:
-            crudPlan.create(db=db, obj_in=PlanCreate(name='freemium', cost='0',
-                    duration=30, sterategy_number=1, account_number=1, description='free'))
     except OperationalError as e:
         pass
 

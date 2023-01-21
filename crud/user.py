@@ -3,10 +3,11 @@ from typing import Any, Dict, Optional, Union
 from sqlalchemy.orm import Session
 
 from crud.base import CRUDBase
+from crud.plan import plan as crudPlan
 from models.user import User
 from schema.user import UserCreate, UserUpdate
 from passlib.context import CryptContext
-from datetime import datetime
+from datetime import datetime, timedelta
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -33,12 +34,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             return False
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
+        freemium = crudPlan.get_by_name(db=db, name='freemium')
         db_obj = User(
             username= obj_in.username,
             password= get_password_hash(obj_in.password),
             phone= obj_in.phone,
             chat_id = obj_in.chat_id,
-            is_superuser = obj_in.is_superuser
+            is_superuser = obj_in.is_superuser,
+            plan_id = freemium.id,
+            valid_time_plan = datetime.now() + timedelta(days=freemium.duration)
             )
             
         db.add(db_obj)
