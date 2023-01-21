@@ -9,3 +9,7 @@ python main.py (for signals)
 python main_client (for run telegram bot)<br>
 
 <b>Attention </b> <br>change API Bot for test 
+
+alembic init migrations
+alembic revision --autogenerate -m "create usermodel"
+alembic upgrade heads

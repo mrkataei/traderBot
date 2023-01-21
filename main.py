@@ -8,11 +8,10 @@
 #     while True:
 #         print("Running...")
 #         sleep(2000000)
-from crud.user import CRUDUser
 from db.session import SessionLocal
-from schema.user import UserCreate
-from models.user import User
-session = SessionLocal()
-c_user = UserCreate(username='dasfs', password='sdsd', chat_id='sdfdsf', email='dsfdfs@dfdf.com', phone='0231513')
 
-user = CRUDUser(model=User).create(db=session, obj_in=c_user)
+from db.init_db import init_db
+
+session = SessionLocal()
+
+init_db(db=session)

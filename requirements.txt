@@ -14,3 +14,8 @@ asyncio
 pytz
 python-dateutil
 matplotlib
+alembic
+bcrypt
+mysqlclient
+snowflake-sqlalchemy
+passlib

@@ -9,3 +9,15 @@ class PlanBase(BaseModel):
     sterategy_number: int = 1
     account_number: int = 1
     description : Optional[str] = None
+
+
+
+# Properties to receive via API on creation
+class PlanCreate(PlanBase):
+    pass
+
+# Properties to receive via API on update
+class PlanUpdate(PlanBase):
+    description : Optional[str] = None
+    sterategy_number: int = 1
+    account_number: int = 1
