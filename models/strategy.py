@@ -6,7 +6,6 @@ from db.base_class import Base
 class Strategy(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(15), index=True)
-    exchange = Column(String(15), index=True)
     description = Column(Text, index=True)
     created =Column(DateTime(timezone=True), server_default=func.now())
 
