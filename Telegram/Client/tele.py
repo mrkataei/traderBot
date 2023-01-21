@@ -10,7 +10,7 @@ from telebot import apihelper
 from Auth.register import register
 from Inc import functions
 from Account.clients import User, BitfinexClient, DemoClient, Nobitex
-from Interfaces.telegram import Telegram
+from Telegram.base import Telegram
 import numpy as np
 from Conf import analysis_settings
 from Analysis.emerald import Emerald
@@ -492,7 +492,7 @@ class ClientBot(Telegram):
         @self.bot.message_handler(commands=['start'], func=self.can_start_bot)
         def welcome(message):
             user = functions.get_user(message.chat.id)
-            # activate_language('', message)
+            activate_language('', message)
             markup = start_keyboard()
             self.user_dict[message.chat.id] = User(message=message)  # create object for register user session
             if not user:

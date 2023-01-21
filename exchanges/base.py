@@ -1,3 +1,4 @@
+
 class Exchange:
     def __init__(self, public: str, secret: str):
         self.KEY = public

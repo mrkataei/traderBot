@@ -6,7 +6,7 @@ from crud.base import CRUDBase
 from models.user import User
 from schema.user import UserCreate, UserUpdate
 from passlib.context import CryptContext
-
+from datetime import datetime
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -23,6 +23,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
         return db.query(User).filter(User.username == username).first()
+
+    def check_expire(self, db: Session, *, chat_id: str) -> bool:
+        user = db.query(User).filter(User.chat_id == chat_id).first()
+        now_time = datetime.now()
+        if now_time <= user.valid_time_plan:
+            return True
+        else:
+            return False
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(

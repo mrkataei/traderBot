@@ -3,8 +3,12 @@
 """
 import telebot
 from time import sleep
+from crud.user import user as crud
+from db.session import SessionLocal
+from Libraries.definitions import *
 
 
+session = SessionLocal()
 class Telegram:
     def __init__(self, API_KEY: str = '5987702945:AAHjEwnwW8NaHAxv2C-lEUIJXFacNnkQIUk'):
         self.API_KEY = API_KEY
@@ -27,6 +31,19 @@ class Telegram:
                 self.bot.stop_polling()
             print("Bot polling loop finished")
             break  # End loop
+
+    def is_valid_user(self, message) -> bool:
+        user = crud.get_by_chat_id(db=session, chat_id=message.chat.id)
+        if not user:
+            self.bot.send_message(message.chat.id, trans('C_sorry_signup'))
+            return False
+        else:
+            result = crud.check_expire(db=session, chat_id=message.chat.id)
+            if result:
+                return result
+            else:
+                self.bot.send_message(message.chat.id, trans('C_expire_plan'))
+                return False
 
     def bot_actions(self):
         raise Exception("NotImplementedException")
