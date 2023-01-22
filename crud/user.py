@@ -30,7 +30,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         user = db.query(User).filter(User.chat_id == chat_id).first()
         plan = crudPlan.get(db=db, id=user.plan_id)
         return {'name': plan.name, 'valid_date': str(user.valid_time_plan)}
-        
+
     def check_expire(self, db: Session, *, chat_id: str) -> bool:
         user = db.query(User).filter(User.chat_id == chat_id).first()
         now_time = datetime.now()
@@ -49,15 +49,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             is_superuser = obj_in.is_superuser,
             plan_id = freemium.id,
             valid_time_plan = datetime.now() + timedelta(days=freemium.duration)
-            )
-            
+        )
+
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
         return db_obj
 
     def update(
-        self, db: Session, *, db_obj: User, obj_in: Union[UserUpdate, Dict[str, Any]]
+            self, db: Session, *, db_obj: User, obj_in: Union[UserUpdate, Dict[str, Any]]
     ) -> User:
         if isinstance(obj_in, dict):
             update_data = obj_in

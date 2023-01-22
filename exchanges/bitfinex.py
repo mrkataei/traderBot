@@ -9,7 +9,7 @@ def _nonce():
 
 class Bitfinex(Exchange):
     BASE_URL = "https://api.bitfinex.com/"
-    
+
     def __init__(self, public: str, secret: str):
         Exchange.__init__(self, public=public, secret=secret)
         self.fee = 0.003

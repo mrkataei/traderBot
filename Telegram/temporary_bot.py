@@ -13,7 +13,7 @@ session = SessionLocal()
 class TempBot(Telegram):
     def __init__(self):
         Telegram.__init__(self)
-    
+
     def bot_actions(self):
         super().bot_actions()
         @self.bot.message_handler(commands=['start'])
@@ -35,7 +35,7 @@ class TempBot(Telegram):
                                       reply_markup=keyboard)
             else:
                 self.bot.send_message(message.chat.id, trans("C_can_i_help"), reply_markup=start_keyboard())
-            
+
         @self.bot.message_handler(content_types=['contact'])
         def register_handler(message):
             markup = types.ReplyKeyboardRemove(selective=False)

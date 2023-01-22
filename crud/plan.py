@@ -12,8 +12,8 @@ class CRUDPlan(CRUDBase[Plan, PlanCreate, PlanUpdate]):
             duration=obj_in.duration,
             watchlist_number=obj_in.watchlist_number,
             description=obj_in.description
-            )
-            
+        )
+
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

@@ -6,7 +6,7 @@ from telebot import types
 from time import sleep
 from crud.user import user as crudUser
 from crud.watchlist import watchlist as crudWatchlist
-from crud.sterategy import strategy as crudStrategy 
+from crud.sterategy import strategy as crudStrategy
 from db.session import SessionLocal
 from Libraries.definitions import *
 from .keybords import start_keyboard, social_keyboard
@@ -71,7 +71,7 @@ class Telegram:
             return True
         else:
             return False
-    
+
     def tutorial_command(self, message) -> bool:
         if message.text == trans('C_tutorials') or message.text == '/tutorial':
             return True
@@ -96,13 +96,13 @@ class Telegram:
         def profile(message):
             profile_option = types.InlineKeyboardMarkup(row_width=2)
             profile_option.add(
-                                types.InlineKeyboardButton(trans("C_edit_watchlists"),
-                                                            callback_data="profile_edit_strategies"),
-                                types.InlineKeyboardButton(trans('C_assets_exchange'),
-                                                            callback_data="profile_show_assets"),
-                                types.InlineKeyboardButton(trans("C_trades_history"),
-                                                            callback_data="profile_show_history")
-                                )
+                types.InlineKeyboardButton(trans("C_edit_watchlists"),
+                                           callback_data="profile_edit_strategies"),
+                types.InlineKeyboardButton(trans('C_assets_exchange'),
+                                           callback_data="profile_show_assets"),
+                types.InlineKeyboardButton(trans("C_trades_history"),
+                                           callback_data="profile_show_history")
+            )
 
             plan = crudUser.get_plan_by_chat_id(db=session, chat_id=message.chat.id)
             plan_text = trans('C_plans') + '\n' + plan['name'] + '\n' + plan['valid_date'] + '\n\n'
@@ -111,12 +111,12 @@ class Telegram:
             for watchlist in watchlists:
                 sterategy = crudStrategy.get(db=session, id=watchlist.strategy_id)
                 watchlist_text +=  watchlist.name + "\n" + trans('C_coin') + "\t"+ \
-                watchlist.asset + '\n' + trans('C_exchange') + "\t" + watchlist.exchange + '\n' + \
-                    trans('C_strategy')+ "\t" + sterategy.name +  '\n' +trans('c_created_at') + "\t"+ str(watchlist.created)
-            
+                                   watchlist.asset + '\n' + trans('C_exchange') + "\t" + watchlist.exchange + '\n' + \
+                                   trans('C_strategy')+ "\t" + sterategy.name +  '\n' +trans('c_created_at') + "\t"+ str(watchlist.created)
+
             self.bot.send_message(chat_id=message.chat.id, text=plan_text + watchlist_text,
-                                    reply_markup=profile_option)
-        
+                                  reply_markup=profile_option)
+
         @self.bot.message_handler(func=lambda message: message.text == trans('C_help') or message.text == '/help')
         def help_me(message):
             try:
@@ -177,34 +177,34 @@ class Telegram:
                 activate('fa')
             self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
             self.bot.send_message(chat_id=call.message.chat.id, text=f'{trans("C_done")}\n'
-                                                                         f' {call.data} {trans("C_was_selected")}',
-                                      reply_markup=start_keyboard())
+                                                                     f' {call.data} {trans("C_was_selected")}',
+                                  reply_markup=start_keyboard())
 
         @self.bot.callback_query_handler(func=lambda call: 'profile_edit' in call.data)
         def profile_edit_handler(call):
             watchlists = crudWatchlist.get_by_chat_id(db=session, chat_id=call.message.chat.id)
             for watchlist in watchlists:
-                        strategy = crudStrategy.get(db=session, id=watchlist.strategy_id)
-                        strategies_option = types.InlineKeyboardMarkup(row_width=2)
-                        strategies_option.add(types.InlineKeyboardButton(trans('C_edit'),
-                                                                         callback_data=str(watchlist.id) +
-                                                                                       "_edit_watchlist"),
-                                              types.InlineKeyboardButton(trans('C_delete'),
-                                                                         callback_data=str(watchlist.id) +
-                                                                                       "_delete_watchlist")
-                                              )
-                        self.bot.send_message(chat_id=call.message.chat.id,
-                                              text=f'{trans("C_coin")}: {watchlist.asset}\n'
-                                                   f'{trans("C_strategy")}: {strategy.name}\n'
-                                                   f'{trans("C_exchange")}: {watchlist.exchange}\n',
-                                              reply_markup=strategies_option)
+                strategy = crudStrategy.get(db=session, id=watchlist.strategy_id)
+                strategies_option = types.InlineKeyboardMarkup(row_width=2)
+                strategies_option.add(types.InlineKeyboardButton(trans('C_edit'),
+                                                                 callback_data=str(watchlist.id) +
+                                                                               "_edit_watchlist"),
+                                      types.InlineKeyboardButton(trans('C_delete'),
+                                                                 callback_data=str(watchlist.id) +
+                                                                               "_delete_watchlist")
+                                      )
+                self.bot.send_message(chat_id=call.message.chat.id,
+                                      text=f'{trans("C_coin")}: {watchlist.asset}\n'
+                                           f'{trans("C_strategy")}: {strategy.name}\n'
+                                           f'{trans("C_exchange")}: {watchlist.exchange}\n',
+                                      reply_markup=strategies_option)
 
         @self.bot.callback_query_handler(func=lambda call: '_delete_watchlist' in call.data)
         def delete_watchlist_handler(call):
             query = str(call.data).split('_')
             crudWatchlist.remove(db=session, id=query[0])
             self.bot.send_message(chat_id=call.message.chat.id, text=trans("C_done"),
-                                    reply_markup=start_keyboard())
+                                  reply_markup=start_keyboard())
             self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
         @self.bot.callback_query_handler(func=lambda call: '_edit_watchlist' in call.data)
@@ -212,11 +212,11 @@ class Telegram:
             query = str(call.data).split('_')
             watchlist = crudWatchlist.get(db=session, id=query[0])
             watchlist_update = WatchlistUpdate(name='new_name', exchange='new_exchange',
-             public_key='public_key', secrete_key='new_secrete_key', asset='new_asset', chat_id=watchlist.chat_id,
-             strategy_id=1)
+                                               public_key='public_key', secrete_key='new_secrete_key', asset='new_asset', chat_id=watchlist.chat_id,
+                                               strategy_id=1)
             crudWatchlist.update(db=session, db_obj=watchlist, obj_in=watchlist_update)
             self.bot.send_message(chat_id=call.message.chat.id, text=trans("C_done"),
-                                    reply_markup=start_keyboard())
+                                  reply_markup=start_keyboard())
             self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
         @self.bot.callback_query_handler(func=lambda call: 'profile_show_assets' == call.data)
@@ -233,3 +233,9 @@ class Telegram:
                         self.bot.send_message(chat_id=call.message.chat.id,text=assets)
                 else:
                     self.bot.send_message(chat_id=call.message.chat.id,text=watchlist.name + 'dont have valid API Keys or valid exchange update this wallet')
+        
+        @self.bot.callback_query_handler(func=lambda call: 'profile_show_history' == call.data)
+        def show_assets_handler(call):
+            self.bot.send_message(chat_id=call.message.chat.id,text='need to develop trade table')
+            
+            
