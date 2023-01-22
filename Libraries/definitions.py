@@ -111,7 +111,7 @@ TRANSLATIONS = {
         'en': '🪙Coin',
         'fa': '🪙رمزارز'
     },
-    'C_analysis': {
+    'C_strategy': {
         'en': '📊Strategy',
         'fa': '📊استراتژی'
     },
@@ -479,10 +479,22 @@ TRANSLATIONS = {
     'C_active': {
         'en': '🥶 Your API/Token is invoked,please active it with edit',
         'fa': '🥶 توکن/API  شما غیرفعال شده است،لطفا اونو با ویرایش دوباره تنظیمش کن'
+    },
+    'C_watchlists':{
+        'en': '👀 watchlists',
+        'fa': '👀 واچلیست ها'
+    },
+    'c_created_at':{
+        'en': '⏰ created at',
+        'fa': '⏰ ایجاد شده در'
+    },
+    'C_edit_watchlists':{
+        'en': '👀 edit watchlists',
+        'fa': '👀 ویرایش واچلیست ها',
     }
 
 }
 
 
-def trans(string):
+def trans(string: str):
     return TRANSLATIONS[string][_lang]

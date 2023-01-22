@@ -158,18 +158,6 @@ def tut_medias_keyboard(category: str):
     return keyboard
 
 
-def social_keyboard():
-    """
-    :return:
-    """
-    keyboard = types.InlineKeyboardMarkup(row_width=4)
-    keyboard.add(types.InlineKeyboardButton(text=trans("C_instagram"),
-                                            url='https://instagram.com/aitrdbot?utm_medium=copy_link'),
-                 types.InlineKeyboardButton(text=trans("C_telegram"),
-                                            url='https://t.me/aitrdrbot'),
-                 types.InlineKeyboardButton(text=trans("C_twitter"),
-                                            url='https://twitter.com/aitrdbot?s=21'))
-    return keyboard
 
 
 def timeframe_keyboard():
@@ -320,23 +308,6 @@ class ClientBot(Telegram):
         else:
             return False
 
-    def tutorial_command(self, message):
-        if message.text == trans('C_tutorials') or message.text == '/tutorial':
-            if self.is_valid_command(message=message):
-                return True
-            else:
-                return False
-        else:
-            return False
-
-    def profile_command(self, message):
-        if message.text == trans('C_profile') or message.text == '/profile':
-            if self.is_valid_command(message=message):
-                return True
-            else:
-                return False
-        else:
-            return False
 
     def back_test_command(self, message):
         if message.text == trans('C_back_test') or message.text == '/test':
@@ -347,23 +318,7 @@ class ClientBot(Telegram):
         else:
             return False
 
-    def plan_command(self, message):
-        if message.text == trans('C_plans') or message.text == '/plans':
-            if self.is_valid_command(message=message):
-                return True
-            else:
-                return False
-        else:
-            return False
-
-    def lang_command(self, message):
-        if message.text == trans('C_lang') or message.text == '/lang':
-            if self.is_valid_command(message=message):
-                return True
-            else:
-                return False
-        else:
-            return False
+    
 
     def bot_actions(self):
         @self.bot.middleware_handler(update_types=['message'])
@@ -473,79 +428,9 @@ class ClientBot(Telegram):
                                       reply_markup=start_keyboard())
                 self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
-            elif "language" in call.data:
-                query = str(call.data).split('_')
-                if query[0] == 'english':
-                    self.user_dict[call.message.chat.id].lang = 'en'
-                    query[0] = 'English'
-                elif query[0] == 'persian':
-                    query[0] = 'فارسی'
-                    self.user_dict[call.message.chat.id].lang = 'fa'
-                activate_language('', call.message)
-                self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
-                self.bot.send_message(chat_id=call.message.chat.id, text=f'{trans("C_done")}\n'
-                                                                         f' {query[0]} {trans("C_was_selected")}',
-                                      reply_markup=start_keyboard())
+            
 
             # self.bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
-
-        @self.bot.message_handler(commands=['start'], func=self.can_start_bot)
-        def welcome(message):
-            user = functions.get_user(message.chat.id)
-            activate_language('', message)
-            markup = start_keyboard()
-            self.user_dict[message.chat.id] = User(message=message)  # create object for register user session
-            if not user:
-                # is typing bot ..
-                self.bot.send_chat_action(chat_id=message.chat.id, action="typing")
-                sleep(1)
-
-                self.bot.send_message(message.chat.id, trans('C_hey') + message.chat.first_name + "!\n" +
-                                      trans('C_welcome'), reply_markup=markup)
-                # if user deleted telegram account need develop
-                keyboard = types.ReplyKeyboardMarkup()sdasds
-                reg_button = types.KeyboardButton(text=trans("C_share_contact"), request_contact=True)
-                keyboard.add(reg_button)
-                self.bot.send_message(message.chat.id, trans("C_reg_with_phone"),
-                                      reply_markup=keyboard)
-            else:
-                self.user_dict[message.chat.id].username = user[0][0]
-                if self.is_valid_user(message=message):
-                    functions.update_user_online(username=user[0][0], online=True)
-                    self.bot.send_message(message.chat.id, trans("C_can_i_help"), reply_markup=markup)
-
-        @self.bot.message_handler(content_types=['contact'],
-                                  func=lambda message: functions.is_user_signup(message.chat.id))
-        def register_handler(message):
-            markup = types.ReplyKeyboardRemove(selective=False)
-            self.bot.send_message(message.chat.id, trans("C_enter_username"), reply_markup=markup)
-            self.bot.register_next_step_handler(message=message, callback=reg_step_1,
-                                                phone=message.contact.phone_number)
-
-        def reg_step_1(message, phone: str):
-            user = self.user_dict[message.chat.id]
-            username = str(message.text).lower()
-            try:
-                if functions.check_username_exist(username=username):
-                    self.bot.send_message(message.chat.id, trans('C_exist_username'))
-                    self.bot.register_next_step_handler(message=message, callback=reg_step_1,
-                                                        phone=phone)
-                elif message.content_type == 'text' and is_valid_username(username):
-                    user.username = username
-                    error, detail = register(username=username, chat_id=user.chat_id, phone=phone)
-                    if error:
-                        self.bot.reply_to(message, trans('C_try_again'))
-                    else:
-                        functions.update_user_online(username=user.username, online=True)
-                        markup = start_keyboard()
-                        self.bot.send_message(message.chat.id, trans('C_account_created'), reply_markup=markup)
-                else:
-                    self.bot.send_message(message.chat.id, trans('C_invalid_username'))
-                    self.bot.register_next_step_handler(message=message, callback=reg_step_1,
-                                                        phone=phone)
-
-            except Exception as e:
-                self.bot.reply_to(message, trans('C_try_again'))
 
         @self.bot.message_handler(func=self.check_setup_command)
         def add_exchange(message, user_setting_id: int = 0):
@@ -870,101 +755,3 @@ class ClientBot(Telegram):
                 self.bot.register_next_step_handler(message=message, callback=add_strategy_step_4,
                                                     exchange_id=exchange_id, coin_id=coin_id,
                                                     analysis_id=analysis_id, watchlist_id=watchlist_id)
-
-        @self.bot.message_handler(func=self.profile_command)
-        def profile(message):
-            profile_option = types.InlineKeyboardMarkup(row_width=2)
-            plan, valid, strategies_dict, accounts_dict = generate_profile_show_message(chat_id=message.chat.id)
-            profile_option.add(types.InlineKeyboardButton(trans("C_strategies"),
-                                                          callback_data="profile_edit_strategies"),
-                               types.InlineKeyboardButton(trans('C_assets_exchange'),
-                                                          callback_data="profile_edit_exchanges"),
-                               types.InlineKeyboardButton(trans("C_trades_history"),
-                                                          callback_data="profile_show_history")
-                               )
-            self.bot.send_message(chat_id=message.chat.id, text=f'{trans("C_plan")}:\n🔹{plan}\n'
-                                                                f'{trans("C_valid_date")}:  {valid}\n\n'
-                                                                f'{trans("C_strategies")}: \t{strategies_dict}\n'
-                                                                f'{trans("C_exchanges")}: \t{accounts_dict}',
-                                  reply_markup=profile_option)
-
-        @self.bot.message_handler(func=self.tutorial_command)
-        def tutorials(message):
-            try:
-                self.bot.send_message(message.chat.id, trans('C_coming_soon'), reply_markup=start_keyboard())
-
-                # key_markup = tut_cat_keyboard()
-                # self.bot.send_message(message.chat.id, '📚  Please Select tutorial category',
-                #                       reply_markup=key_markup)
-                # self.bot.register_next_step_handler(message=message, callback=show_tutorial_step_1)
-
-            except Exception as e:
-                self.bot.send_message(message, trans("C_error"), reply_markup=start_keyboard())
-
-        # def show_tutorial_step_1(message):
-        #     try:
-        #         category_id = np.where(self.tut_cat[:, 1] == message.text)[0][0]
-        #         key_markup = tut_medias_keyboard(category=self.tut_cat[category_id][1])
-        #         self.bot.send_message(message.chat.id, '📼  Download any tutorial you want',
-        #                               reply_markup=key_markup)
-        #         back_tut_keyboard = back_home_tut()
-        #         self.bot.send_message(message.chat.id, '🤓  Enjoy',
-        #                               reply_markup=back_tut_keyboard)
-        #         self.bot.register_next_step_handler(message=message, callback=back_tut)
-        #
-        #     except IndexError:
-        #         self.bot.send_message(message.chat.id, '⛔️ wrong category')
-        #         self.bot.register_next_step_handler(message=message, callback=show_tutorial_step_1)
-        #
-        # def back_tut(message):
-        #     if message.text == 'back home':
-        #         welcome(message=message)
-        #     elif message.text == 'categories':
-        #         self.bot.register_next_step_handler(message=message, callback=tutorials)
-        #
-        #     else:
-        #         self.bot.register_next_step_handler(message=message, callback=back_tut)
-
-        @self.bot.message_handler(func=lambda message: message.text == trans('C_social_medias'))
-        def social_media(message):
-            try:
-                key_markup = social_keyboard()
-                self.bot.send_message(message.chat.id, trans("C_follow_us"),
-                                      reply_markup=key_markup)
-
-            except Exception as e:
-                self.bot.reply_to(message, trans("C_try_again"), reply_markup=start_keyboard())
-
-        @self.bot.message_handler(func=lambda message: message.text == trans('C_help') or message.text == '/help')
-        def help_me(message):
-            try:
-                self.bot.reply_to(message, trans("C_help_message"), parse_mode='Markdown')
-
-            except Exception as e:
-                self.bot.reply_to(message, trans("C_try_again"), reply_markup=start_keyboard())
-
-        @self.bot.message_handler(func=self.plan_command)
-        def plan_charge(message):
-            try:
-                self.bot.reply_to(message, trans("C_charge_plan"))
-
-            except Exception as e:
-                self.bot.reply_to(message, trans("C_try_again"), reply_markup=start_keyboard())
-
-        @self.bot.message_handler(func=self.lang_command)
-        def plan_charge(message):
-            try:
-                lang_option = types.InlineKeyboardMarkup(row_width=2)
-                lang_option.add(types.InlineKeyboardButton('English',
-                                                           callback_data="english_language"),
-                                types.InlineKeyboardButton('فارسی',
-                                                           callback_data="persian_language")
-                                )
-                self.bot.send_message(chat_id=message.chat.id, text=trans("C_choose_language"),
-                                      reply_markup=lang_option)
-            except Exception as e:
-                self.bot.reply_to(message, trans("C_try_again"), reply_markup=start_keyboard())
-
-        @self.bot.message_handler(func=dont_understand)
-        def excuse(message):
-            self.bot.send_message(message.chat.id, trans("C_dont_understand"), reply_markup=start_keyboard())

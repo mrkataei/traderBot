@@ -11,3 +11,6 @@ class Plan(Base):
     duration = Column(Integer, index=True)
     watchlist_number = Column(Integer, index=True)
     description = Column(Text, index=True)
+
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}

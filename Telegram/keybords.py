@@ -25,3 +25,12 @@ def exchange_keyboard():
         key_markup.add( types.KeyboardButton(exchange[0]))
     return key_markup
 
+def social_keyboard():
+    keyboard = types.InlineKeyboardMarkup(row_width=4)
+    keyboard.add(types.InlineKeyboardButton(text=trans("C_instagram"),
+                                            url='https://instagram.com/mrkataei?utm_medium=copy_link'),
+                 types.InlineKeyboardButton(text=trans("C_telegram"),
+                                            url='https://t.me/mrkataei'),
+                 types.InlineKeyboardButton(text=trans("C_twitter"),
+                                            url='https://twitter.com/mrkataei?s=21'))
+    return keyboard

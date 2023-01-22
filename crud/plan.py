@@ -2,7 +2,6 @@ from crud.base import CRUDBase
 from models.plan import Plan
 from schema.plan import PlanCreate, PlanUpdate
 from sqlalchemy.orm import Session
-from typing import Optional
 
 
 class CRUDPlan(CRUDBase[Plan, PlanCreate, PlanUpdate]):
@@ -19,7 +18,7 @@ class CRUDPlan(CRUDBase[Plan, PlanCreate, PlanUpdate]):
         db.commit()
         db.refresh(db_obj)
         return db_obj
-    def get_by_name(self, db: Session, *, name: str) -> Optional[Plan]:
+    def get_by_name(self, db: Session, *, name: str) -> Plan:
         return db.query(Plan).filter(Plan.name == name).first()
 
 plan = CRUDPlan(Plan)

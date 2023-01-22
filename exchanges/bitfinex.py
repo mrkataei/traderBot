@@ -157,8 +157,8 @@ class Bitfinex(Exchange):
         try:
             response = self.req('v2/auth/r/wallets')
             if response.status_code == 200:
-                return False, response.json()
+                return response.json()
             else:
-                return True, response.status_code
+                return False
         except Exception as e:
-            return True, e
+            return False

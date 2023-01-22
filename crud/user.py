@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from crud.base import CRUDBase
 from crud.plan import plan as crudPlan
 from models.user import User
+from models.plan import Plan
 from schema.user import UserCreate, UserUpdate
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -19,12 +20,17 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    def get_by_chat_id(self, db: Session, *, chat_id: str) -> Optional[User]:
+    def get_by_chat_id(self, db: Session, *, chat_id: str) -> User:
         return db.query(User).filter(User.chat_id == chat_id).first()
 
-    def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
+    def get_by_username(self, db: Session, *, username: str) -> User:
         return db.query(User).filter(User.username == username).first()
 
+    def get_plan_by_chat_id(self, db: Session, *, chat_id: str) -> dict[str,str]:
+        user = db.query(User).filter(User.chat_id == chat_id).first()
+        plan = crudPlan.get(db=db, id=user.plan_id)
+        return {'name': plan.name, 'valid_date': str(user.valid_time_plan)}
+        
     def check_expire(self, db: Session, *, chat_id: str) -> bool:
         user = db.query(User).filter(User.chat_id == chat_id).first()
         now_time = datetime.now()
@@ -70,9 +76,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if not verify_password(password, user.hashed_password):
             return None
         return user
-
-    def is_active(self, user: User) -> bool:
-        return user.is_active
 
     def is_superuser(self, user: User) -> bool:
         return user.is_superuser

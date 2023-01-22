@@ -3,7 +3,7 @@ from typing import Optional
 
 # Shared properties
 class WatchlistBase(BaseModel):
-    username: str
+    chat_id: str
     asset: str
     exchange: str
     public_key: str

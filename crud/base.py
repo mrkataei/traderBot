@@ -2,7 +2,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
+import json
 from db.base_class import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
@@ -45,7 +45,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_obj: ModelType,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
+        obj_data = db_obj.as_dict()
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:

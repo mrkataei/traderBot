@@ -15,3 +15,5 @@ class User(Base):
     valid_time_plan = Column(DateTime(timezone=True), default=None)
     plan_id = Column(Integer, ForeignKey("plan.id"))
 
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
