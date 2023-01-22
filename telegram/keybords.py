@@ -1,4 +1,4 @@
-from Libraries.definitions import *
+from libraries.definitions import *
 from telebot import types
 from util.module import get_exchanges
 

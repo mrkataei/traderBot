@@ -1,9 +1,9 @@
-from Telegram.base import Telegram
+from telegram.base import Telegram
 from telebot import types
 from crud.user import user as crud
 from db.session import SessionLocal
 from schema.user import UserCreate
-from Libraries.definitions import *
+from libraries.definitions import *
 from .keybords import start_keyboard, social_keyboard
 from util.module import get_exchanges, get_exchange
 from time import sleep

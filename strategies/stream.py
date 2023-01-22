@@ -21,8 +21,8 @@ from Analysis.palladium import Palladium
 from Analysis.diamond import Diamond
 from Analysis.ruby import Ruby
 from Interfaces.stream import Stream
-from Libraries.data_collector import get_candle_binance as candles
-from Libraries.check_validation_users import check_validate_stream
+from libraries.data_collector import get_candle_binance as candles
+from libraries.check_validation_users import check_validate_stream
 
 # master bot already run on vps dont use this @aitrdbot -> address
 API_KEY = '2123917023:AAFPy9xoaJLt0BxqQJgC3J3F9km8F7ozdn8'

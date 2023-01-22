@@ -2,7 +2,7 @@
 Mr.Kataei
 """
 import pandas_ta as ta
-from Libraries.macd import macd_indicator
+from libraries.macd import macd_indicator
 from Interfaces.strategy import Strategy
 
 

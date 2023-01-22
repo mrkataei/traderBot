@@ -5,8 +5,8 @@
 from datetime import datetime
 import pandas as pd
 from Inc.functions import get_last_recommendations, set_recommendation, record_dictionary
-from Trade.spot import submit_order
-from Telegram.Client.message import broadcast_messages
+from trade.spot import submit_order
+from telegram.Client.message import broadcast_messages
 
 
 class Strategy:

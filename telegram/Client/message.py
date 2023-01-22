@@ -3,7 +3,7 @@ Mr.Kataei 8/15/2021
 
 """
 from Inc.functions import get_user_strategy, get_timeframes
-from Libraries.definitions import *
+from libraries.definitions import *
 
 
 def broadcast_messages(coin_id: int, analysis_id: int, timeframe_id: int, position: str,

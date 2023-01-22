@@ -8,7 +8,7 @@ from crud.user import user as crudUser
 from crud.watchlist import watchlist as crudWatchlist
 from crud.sterategy import strategy as crudStrategy
 from db.session import SessionLocal
-from Libraries.definitions import *
+from libraries.definitions import *
 from .keybords import start_keyboard, social_keyboard
 from schema.watchlist import WatchlistUpdate
 from util.module import get_exchange

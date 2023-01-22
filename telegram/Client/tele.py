@@ -10,16 +10,16 @@ from telebot import apihelper
 from Auth.register import register
 from Inc import functions
 from Account.clients import User, BitfinexClient, DemoClient, Nobitex
-from Telegram.base import Telegram
+from telegram.base import Telegram
 import numpy as np
 from Conf import analysis_settings
 from Analysis.emerald import Emerald
 from Analysis.diamond import Diamond
 from Analysis.ruby import Ruby
 from Analysis.palladium import Palladium
-from Libraries.data_collector import get_candle_binance as candles
-from Test.strategy_tester import StrategyTaster
-from Libraries.definitions import *
+from libraries.data_collector import get_candle_binance as candles
+from test.strategy_tester import StrategyTaster
+from libraries.definitions import *
 
 
 from crud.user import CRUDUser
