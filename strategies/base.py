@@ -10,20 +10,9 @@ from telegram.Client.message import broadcast_messages
 
 
 class Strategy:
-    def __init__(self, data: pd.DataFrame, coin_id: int, timeframe_id: int, analysis_id: int, bot_ins):
-        """
-            :param data: OHCL dataframe
-            :param coin_id: { 1:BTCUSDT, 2:ETHUSDT, 3:ADAUSDT, 4:ETCUSDT, 5:BCHUSDT, 6:DOGEUSDT}
-            :param timeframe_id:{ 1:30min, 2:1hour, 3:4hour, 4:1day, 5:1min}
-            :param analysis_id: { 1:emerald , 2:ruby, 3:diamond }
-            :param bot_ins: it's instance of telegram bot obj, for broadcast signals
-
-        """
-        self.data = data
-        self.coin_id = coin_id
-        self.timeframe_id = timeframe_id
-        self.analysis_id = analysis_id
-        self.bot = bot_ins
+    def __init__(self, asset: str, timeframe: str):
+        self.asset = asset
+        self.timeframe = timeframe
         self.time = datetime.now()
         self.data['recommendation'] = None
         self.data['risk'] = None
