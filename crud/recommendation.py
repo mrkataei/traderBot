@@ -11,4 +11,4 @@ class CRUDRecommendation(CRUDBase[Recommendation, RecommendationCreate, Recommen
     def get_last(self, db: Session, *, watchlist_id: id) -> Recommendation:
         return db.query(Recommendation).filter(Recommendation.watchlist_id == watchlist_id)
 
-watchlist = CRUDRecommendation(Recommendation)
+recommendation = CRUDRecommendation(Recommendation)
